@@ -89,13 +89,24 @@ extension HBTemplate {
         }
     }
     
-    func getChild(named name: String, from: Any) -> Any? {
-        if name == "." { return from }
-        if let customBox = from as? HBMustacheParent {
-            return customBox.child(named: name)
+    func getChild(named name: String, from object: Any) -> Any? {
+        func _getChild(named names: ArraySlice<String>, from object: Any) -> Any? {
+            guard let name = names.first else { return object }
+            let childObject: Any?
+            if let customBox = object as? HBMustacheParent {
+                childObject = customBox.child(named: name)
+            } else {
+                let mirror = Mirror(reflecting: object)
+                childObject = mirror.getAttribute(forKey: name)
+            }
+            guard childObject != nil else { return nil }
+            let names2 = names.dropFirst()
+            return _getChild(named: names2, from: childObject!)
         }
-        let mirror = Mirror(reflecting: from)
-        return mirror.getAttribute(forKey: name)
+
+        if name == "." { return object }
+        let nameSplit = name.split(separator: ".").map { String($0) }
+        return _getChild(named: nameSplit[...], from: object)
     }
 }
 

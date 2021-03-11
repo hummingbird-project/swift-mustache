@@ -79,4 +79,22 @@ final class TemplateRendererTests: XCTestCase {
         XCTAssertEqual(template2.render(Test(string: "string")), "test ")
         XCTAssertEqual(template2.render(Test(string: nil)), "test *")
     }
+    
+    func testDictionarySequence() throws {
+        let template = try HBTemplate("test {{#.}}{{value}}{{/.}}")
+        XCTAssert(template.render(["one": 1, "two": 2]) == "test 12" ||
+                    template.render(["one": 1, "two": 2]) == "test 21")
+    }
+    
+    func testStructureInStructure() throws {
+        struct SubTest {
+            let string: String?
+        }
+        struct Test {
+            let test: SubTest
+        }
+
+        let template = try HBTemplate("test {{test.string}}")
+        XCTAssertEqual(template.render(Test(test: .init(string: "sub"))), "test sub")
+    }
 }
