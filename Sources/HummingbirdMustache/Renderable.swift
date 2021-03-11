@@ -33,3 +33,20 @@ extension Array: HBSequence {
         return ""
     }
 }
+
+extension Dictionary: HBSequence {
+    func renderSection(with template: HBTemplate) -> String {
+        var string = ""
+        for obj in self {
+            string += template.render(obj)
+        }
+        return string
+    }
+
+    func renderInvertedSection(with template: HBTemplate) -> String {
+        if count == 0 {
+            return template.render(self)
+        }
+        return ""
+    }
+}
