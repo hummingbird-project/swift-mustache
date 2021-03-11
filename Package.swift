@@ -8,13 +8,9 @@ let package = Package(
     products: [
         .library(name: "HummingbirdMustache", targets: ["HummingbirdMustache"]),
     ],
-    dependencies: [
-        .package(url: "https://github.com/hummingbird-project/hummingbird.git", from: "0.6.0"),
-    ],
+    dependencies: [],
     targets: [
-        .target(name: "HummingbirdMustache", dependencies: [
-            .product(name: "Hummingbird", package: "hummingbird")
-        ]),
+        .target(name: "HummingbirdMustache", dependencies: []),
         .testTarget(name: "HummingbirdMustacheTests", dependencies: ["HummingbirdMustache"]),
     ]
 )
