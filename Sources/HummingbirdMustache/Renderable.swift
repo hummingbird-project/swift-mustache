@@ -13,12 +13,12 @@ extension Dictionary: HBMustacheParent where Key == String {
 }
 
 protocol HBSequence {
-    func renderSection(with template: HBTemplate) -> String
-    func renderInvertedSection(with template: HBTemplate) -> String
+    func renderSection(with template: HBMustacheTemplate) -> String
+    func renderInvertedSection(with template: HBMustacheTemplate) -> String
 }
 
 extension Array: HBSequence {
-    func renderSection(with template: HBTemplate) -> String {
+    func renderSection(with template: HBMustacheTemplate) -> String {
         var string = ""
         for obj in self {
             string += template.render(obj)
@@ -26,7 +26,7 @@ extension Array: HBSequence {
         return string
     }
 
-    func renderInvertedSection(with template: HBTemplate) -> String {
+    func renderInvertedSection(with template: HBMustacheTemplate) -> String {
         if count == 0 {
             return template.render(self)
         }
@@ -35,7 +35,7 @@ extension Array: HBSequence {
 }
 
 extension Dictionary: HBSequence {
-    func renderSection(with template: HBTemplate) -> String {
+    func renderSection(with template: HBMustacheTemplate) -> String {
         var string = ""
         for obj in self {
             string += template.render(obj)
@@ -43,7 +43,7 @@ extension Dictionary: HBSequence {
         return string
     }
 
-    func renderInvertedSection(with template: HBTemplate) -> String {
+    func renderInvertedSection(with template: HBMustacheTemplate) -> String {
         if count == 0 {
             return template.render(self)
         }

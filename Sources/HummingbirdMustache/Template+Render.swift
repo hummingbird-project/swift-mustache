@@ -1,5 +1,5 @@
 
-extension HBTemplate {
+extension HBMustacheTemplate {
     public func render(_ object: Any) -> String {
         var string = ""
         for token in tokens {
@@ -8,47 +8,31 @@ extension HBTemplate {
                 string += text
             case .variable(let variable):
                 if let child = getChild(named: variable, from: object) {
+                    string += encodedEscapedCharacters(String(describing: child))
+                }
+            case .unescapedVariable(let variable):
+                if let child = getChild(named: variable, from: object) {
                     string += String(describing: child)
                 }
             case .section(let variable, let template):
                 let child = getChild(named: variable, from: object)
-                string += renderSection(child, with: template)
+                string += renderSection(child, parent: object, with: template)
                 
             case .invertedSection(let variable, let template):
                 let child = getChild(named: variable, from: object)
-                string += renderInvertedSection(child, with: template)
+                string += renderInvertedSection(child, parent: object, with: template)
                 
             }
         }
         return string
     }
     
-    func renderSection(_ object: Any?, with template: HBTemplate) -> String {
-        switch object {
+    func renderSection(_ child: Any?, parent: Any, with template: HBMustacheTemplate) -> String {
+        switch child {
         case let array as HBSequence:
             return array.renderSection(with: template)
         case let bool as Bool:
-            return bool ? template.render(true) : ""
-        case let int as Int:
-            return int != 0 ? template.render(int) : ""
-        case let int as Int8:
-            return int != 0 ? template.render(int) : ""
-        case let int as Int16:
-            return int != 0 ? template.render(int) : ""
-        case let int as Int32:
-            return int != 0 ? template.render(int) : ""
-        case let int as Int64:
-            return int != 0 ? template.render(int) : ""
-        case let int as UInt:
-            return int != 0 ? template.render(int) : ""
-        case let int as UInt8:
-            return int != 0 ? template.render(int) : ""
-        case let int as UInt16:
-            return int != 0 ? template.render(int) : ""
-        case let int as UInt32:
-            return int != 0 ? template.render(int) : ""
-        case let int as UInt64:
-            return int != 0 ? template.render(int) : ""
+            return bool ? template.render(parent) : ""
         case .some(let value):
             return template.render(value)
         case .none:
@@ -56,36 +40,16 @@ extension HBTemplate {
         }
     }
     
-    func renderInvertedSection(_ object: Any?, with template: HBTemplate) -> String {
-        switch object {
+    func renderInvertedSection(_ child: Any?, parent: Any, with template: HBMustacheTemplate) -> String {
+        switch child {
         case let array as HBSequence:
             return array.renderInvertedSection(with: template)
         case let bool as Bool:
-            return bool ? "" : template.render(true)
-        case let int as Int:
-            return int == 0 ? template.render(int) : ""
-        case let int as Int8:
-            return int == 0 ? template.render(int) : ""
-        case let int as Int16:
-            return int == 0 ? template.render(int) : ""
-        case let int as Int32:
-            return int == 0 ? template.render(int) : ""
-        case let int as Int64:
-            return int == 0 ? template.render(int) : ""
-        case let int as UInt:
-            return int == 0 ? template.render(int) : ""
-        case let int as UInt8:
-            return int == 0 ? template.render(int) : ""
-        case let int as UInt16:
-            return int == 0 ? template.render(int) : ""
-        case let int as UInt32:
-            return int == 0 ? template.render(int) : ""
-        case let int as UInt64:
-            return int == 0 ? template.render(int) : ""
+            return bool ? "" : template.render(parent)
         case .some:
             return ""
         case .none:
-            return template.render(Void())
+            return template.render(parent)
         }
     }
     
@@ -107,6 +71,24 @@ extension HBTemplate {
         if name == "." { return object }
         let nameSplit = name.split(separator: ".").map { String($0) }
         return _getChild(named: nameSplit[...], from: object)
+    }
+
+    private static let escapedCharacters: [Character: String] = [
+        "<": "&lt;",
+        ">": "&gt;",
+        "&": "&amp;",
+    ]
+    func encodedEscapedCharacters(_ string: String) -> String {
+        var newString = ""
+        newString.reserveCapacity(string.count)
+        for c in string {
+            if let replacement = Self.escapedCharacters[c] {
+                newString += replacement
+            } else {
+                newString.append(c)
+            }
+        }
+        return newString
     }
 }
 

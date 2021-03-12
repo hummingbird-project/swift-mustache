@@ -1,5 +1,5 @@
 
-extension HBTemplate {
+extension HBMustacheTemplate {
     static func parse(_ string: String) throws -> [Token] {
         var parser = HBParser(string)
         return try parse(&parser, sectionName: nil)
@@ -17,14 +17,20 @@ extension HBTemplate {
             case "#":
                 parser.unsafeAdvance()
                 let name = try parseSectionName(&parser)
+                if parser.current() == "\n" {
+                    parser.unsafeAdvance()
+                }
                 let sectionTokens = try parse(&parser, sectionName: name)
-                tokens.append(.section(name, HBTemplate(sectionTokens)))
+                tokens.append(.section(name, HBMustacheTemplate(sectionTokens)))
 
             case "^":
                 parser.unsafeAdvance()
                 let name = try parseSectionName(&parser)
+                if parser.current() == "\n" {
+                    parser.unsafeAdvance()
+                }
                 let sectionTokens = try parse(&parser, sectionName: name)
-                tokens.append(.invertedSection(name, HBTemplate(sectionTokens)))
+                tokens.append(.invertedSection(name, HBMustacheTemplate(sectionTokens)))
 
             case "/":
                 parser.unsafeAdvance()
@@ -32,13 +38,16 @@ extension HBTemplate {
                 guard name == sectionName else {
                     throw HBMustacheError.sectionCloseNameIncorrect
                 }
+                if parser.current() == "\n" {
+                    parser.unsafeAdvance()
+                }
                 return tokens
 
             case "{":
                 parser.unsafeAdvance()
                 let name = try parseSectionName(&parser)
                 guard try parser.read("}") else { throw HBMustacheError.unfinishedSectionName }
-                tokens.append(.variable(name))
+                tokens.append(.unescapedVariable(name))
 
             case "!":
                 parser.unsafeAdvance()
@@ -67,5 +76,5 @@ extension HBTemplate {
         return text.string
     }
     
-    private static let sectionNameChars = Set<Unicode.Scalar>("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.")
+    private static let sectionNameChars = Set<Unicode.Scalar>("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ._?")
 }

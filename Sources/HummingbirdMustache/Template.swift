@@ -5,8 +5,8 @@ enum HBMustacheError: Error {
     case expectedSectionEnd
 }
 
-public class HBTemplate {
-    public init(_ string: String) throws {
+public class HBMustacheTemplate {
+    public init(string: String) throws {
         self.tokens = try Self.parse(string)
     }
 
@@ -17,8 +17,9 @@ public class HBTemplate {
     enum Token {
         case text(String)
         case variable(String)
-        case section(String, HBTemplate)
-        case invertedSection(String, HBTemplate)
+        case unescapedVariable(String)
+        case section(String, HBMustacheTemplate)
+        case invertedSection(String, HBMustacheTemplate)
     }
 
     let tokens: [Token]
