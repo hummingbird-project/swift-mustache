@@ -69,7 +69,7 @@ extension HBMustacheTemplate {
                 childObject = customBox.child(named: name)
             } else {
                 let mirror = Mirror(reflecting: object)
-                childObject = mirror.getAttribute(forKey: name)
+                childObject = mirror.getValue(forKey: name)
             }
             guard childObject != nil else { return nil }
             let names2 = names.dropFirst()
@@ -100,19 +100,37 @@ extension HBMustacheTemplate {
     }
 }
 
-func unwrap(_ any: Any) -> Any? {
-    let mirror = Mirror(reflecting: any)
-    guard mirror.displayStyle == .optional else { return any }
-    guard let first = mirror.children.first else { return nil }
-    return first.value
+protocol HBMustacheParent {
+    func child(named: String) -> Any?
 }
 
-extension Mirror {
-    func getAttribute(forKey key: String) -> Any? {
-        guard let matched = children.filter({ $0.label == key }).first else {
-            return nil
+extension HBMustacheParent {
+    // default child to nil
+    func child(named: String) -> Any? { return nil }
+}
+
+extension Dictionary: HBMustacheParent where Key == String {
+    func child(named: String) -> Any? { return self[named] }
+}
+
+protocol HBSequence {
+    func renderSection(with template: HBMustacheTemplate, library: HBMustacheLibrary?) -> String
+    func renderInvertedSection(with template: HBMustacheTemplate, library: HBMustacheLibrary?) -> String
+}
+
+extension Array: HBSequence {
+    func renderSection(with template: HBMustacheTemplate, library: HBMustacheLibrary?) -> String {
+        var string = ""
+        for obj in self {
+            string += template.render(obj, library: library)
         }
-        return unwrap(matched.value)
+        return string
+    }
+
+    func renderInvertedSection(with template: HBMustacheTemplate, library: HBMustacheLibrary?) -> String {
+        if count == 0 {
+            return template.render(self, library: library)
+        }
+        return ""
     }
 }
-

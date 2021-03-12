@@ -8,10 +8,14 @@ public class HBMustacheLibrary {
         templates[name] = template
     }
     
+    public func getTemplate(named name: String) -> HBMustacheTemplate? {
+        templates[name]
+    }
+    
     public func render(_ object: Any, withTemplateNamed name: String) -> String? {
         guard let template = templates[name] else { return nil }
         return template.render(object, library: self)
     }
     
-    var templates: [String: HBMustacheTemplate]
+    private var templates: [String: HBMustacheTemplate]
 }

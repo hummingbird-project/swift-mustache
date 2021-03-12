@@ -110,17 +110,17 @@ final class TemplateRendererTests: XCTestCase {
 
     func testMustacheManualExample2() throws {
         let template = try HBMustacheTemplate(string: """
-            * {{name}}
-            * {{age}}
-            * {{company}}
-            * {{{company}}}
+            *{{name}}
+            *{{age}}
+            *{{company}}
+            *{{{company}}}
             """)
         let object: [String: Any] = ["name": "Chris", "company": "<b>GitHub</b>"]
         XCTAssertEqual(template.render(object), """
-            * Chris
+            *Chris
             *
-            * &lt;b&gt;GitHub&lt;/b&gt;
-            * <b>GitHub</b>
+            *&lt;b&gt;GitHub&lt;/b&gt;
+            *<b>GitHub</b>
             """)
     }
 
