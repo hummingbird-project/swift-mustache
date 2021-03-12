@@ -8,7 +8,11 @@ extension HBMustacheTemplate {
                 string += text
             case .variable(let variable):
                 if let child = getChild(named: variable, from: object) {
-                    string += encodedEscapedCharacters(String(describing: child))
+                    if let template = child as? HBMustacheTemplate {
+                        string += template.render(object, library: library)
+                    } else {
+                        string += encodedEscapedCharacters(String(describing: child))
+                    }
                 }
             case .unescapedVariable(let variable):
                 if let child = getChild(named: variable, from: object) {
