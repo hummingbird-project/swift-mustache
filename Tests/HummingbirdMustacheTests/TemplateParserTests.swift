@@ -77,8 +77,8 @@ extension HBMustacheTemplate.Token: Equatable {
         switch (lhs, rhs) {
         case (.text(let lhs), .text(let rhs)):
             return lhs == rhs
-        case (.variable(let lhs), .variable(let rhs)):
-            return lhs == rhs
+        case (.variable(let lhs, let lhs2), .variable(let rhs, let rhs2)):
+            return lhs == rhs && lhs2 == rhs2
         case (.section(let lhs1, let lhs2), .section(let rhs1, let rhs2)):
             return lhs1 == rhs1 && lhs2 == rhs2
         case (.invertedSection(let lhs1, let lhs2), .invertedSection(let rhs1, let rhs2)):

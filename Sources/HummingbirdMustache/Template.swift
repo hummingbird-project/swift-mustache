@@ -10,7 +10,7 @@ public class HBMustacheTemplate {
     
     enum Token {
         case text(String)
-        case variable(String)
+        case variable(String, String? = nil)
         case unescapedVariable(String)
         case section(String, HBMustacheTemplate)
         case invertedSection(String, HBMustacheTemplate)

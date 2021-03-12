@@ -191,4 +191,32 @@ final class TemplateRendererTests: XCTestCase {
             <h1>Today.</h1>
             """)
     }
+
+    func testLowercased() throws {
+        let template = try HBMustacheTemplate(string: """
+            {{#repo}}
+              <b>{{ lowercased(name) }}</b>
+            {{/repo}}
+            """)
+        let object: [String: Any] = ["repo": [["name": "Resque"], ["name": "Hub"], ["name": "RIP"]]]
+        XCTAssertEqual(template.render(object), """
+              <b>resque</b>
+              <b>hub</b>
+              <b>rip</b>
+
+            """)
+    }
+    func testPerformance() throws {
+        let template = try HBMustacheTemplate(string: """
+            {{#repo}}
+              <b>{{name}}</b>
+            {{/repo}}
+            """)
+        let object: [String: Any] = ["repo": [["name": "resque"], ["name": "hub"], ["name": "rip"]]]
+        let date = Date()
+        for _ in 1...10000 {
+            _ = template.render(object)
+        }
+        print(-date.timeIntervalSinceNow)
+    }
 }

@@ -6,12 +6,18 @@ extension HBMustacheTemplate {
             switch token {
             case .text(let text):
                 string += text
-            case .variable(let variable):
-                if let child = getChild(named: variable, from: object) {
+            case .variable(let variable, let method):
+                if var child = getChild(named: variable, from: object) {
+                    if let method = method,
+                       let runnable = child as? HBMustacheBaseMethods {
+                        if let result = runnable.runMethod(method) {
+                            child = result
+                        }
+                    }
                     if let template = child as? HBMustacheTemplate {
                         string += template.render(object, library: library)
                     } else {
-                        string += encodedEscapedCharacters(String(describing: child))
+                        string += htmlEscape(String(describing: child))
                     }
                 }
             case .unescapedVariable(let variable):
@@ -81,16 +87,16 @@ extension HBMustacheTemplate {
         return _getChild(named: nameSplit[...], from: object)
     }
 
-    private static let escapedCharacters: [Character: String] = [
+    private static let htmlEscapedCharacters: [Character: String] = [
         "<": "&lt;",
         ">": "&gt;",
         "&": "&amp;",
     ]
-    func encodedEscapedCharacters(_ string: String) -> String {
+    func htmlEscape(_ string: String) -> String {
         var newString = ""
         newString.reserveCapacity(string.count)
         for c in string {
-            if let replacement = Self.escapedCharacters[c] {
+            if let replacement = Self.htmlEscapedCharacters[c] {
                 newString += replacement
             } else {
                 newString.append(c)
