@@ -192,20 +192,6 @@ final class TemplateRendererTests: XCTestCase {
             """)
     }
 
-    func testLowercased() throws {
-        let template = try HBMustacheTemplate(string: """
-            {{#repo}}
-              <b>{{ lowercased(name) }}</b>
-            {{/repo}}
-            """)
-        let object: [String: Any] = ["repo": [["name": "Resque"], ["name": "Hub"], ["name": "RIP"]]]
-        XCTAssertEqual(template.render(object), """
-              <b>resque</b>
-              <b>hub</b>
-              <b>rip</b>
-
-            """)
-    }
     func testPerformance() throws {
         let template = try HBMustacheTemplate(string: """
             {{#repo}}

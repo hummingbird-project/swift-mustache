@@ -9,17 +9,17 @@ final class TemplateParserTests: XCTestCase {
 
     func testVariable() throws {
         let template = try HBMustacheTemplate(string: "test {{variable}}")
-        XCTAssertEqual(template.tokens, [.text("test "), .variable("variable")])
+        XCTAssertEqual(template.tokens, [.text("test "), .variable(name: "variable")])
     }
 
     func testSection() throws {
         let template = try HBMustacheTemplate(string: "test {{#section}}text{{/section}}")
-        XCTAssertEqual(template.tokens, [.text("test "), .section("section", .init([.text("text")]))])
+        XCTAssertEqual(template.tokens, [.text("test "), .section(name: "section", template: .init([.text("text")]))])
     }
 
     func testInvertedSection() throws {
         let template = try HBMustacheTemplate(string: "test {{^section}}text{{/section}}")
-        XCTAssertEqual(template.tokens, [.text("test "), .invertedSection("section", .init([.text("text")]))])
+        XCTAssertEqual(template.tokens, [.text("test "), .invertedSection(name: "section", template: .init([.text("text")]))])
     }
 
     func testComment() throws {
@@ -29,7 +29,7 @@ final class TemplateParserTests: XCTestCase {
 
     func testWhitespace() throws {
         let template = try HBMustacheTemplate(string: "{{ section }}")
-        XCTAssertEqual(template.tokens, [.variable("section")])
+        XCTAssertEqual(template.tokens, [.variable(name: "section")])
     }
 
     func testSectionEndError() throws {
@@ -79,10 +79,12 @@ extension HBMustacheTemplate.Token: Equatable {
             return lhs == rhs
         case (.variable(let lhs, let lhs2), .variable(let rhs, let rhs2)):
             return lhs == rhs && lhs2 == rhs2
-        case (.section(let lhs1, let lhs2), .section(let rhs1, let rhs2)):
-            return lhs1 == rhs1 && lhs2 == rhs2
-        case (.invertedSection(let lhs1, let lhs2), .invertedSection(let rhs1, let rhs2)):
-            return lhs1 == rhs1 && lhs2 == rhs2
+        case (.section(let lhs1, let lhs2, let lhs3), .section(let rhs1, let rhs2, let rhs3)):
+            return lhs1 == rhs1 && lhs2 == rhs2 && lhs3 == rhs3
+        case (.invertedSection(let lhs1, let lhs2, let lhs3), .invertedSection(let rhs1, let rhs2, let rhs3)):
+            return lhs1 == rhs1 && lhs2 == rhs2 && lhs3 == rhs3
+        case (.partial(let name1), .partial(let name2)):
+            return name1 == name2
         default:
             return false
         }

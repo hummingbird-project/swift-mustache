@@ -24,21 +24,21 @@ extension HBMustacheTemplate {
             switch parser.current() {
             case "#":
                 parser.unsafeAdvance()
-                let (name, _) = try parseName(&parser)
+                let (name, method) = try parseName(&parser)
                 if parser.current() == "\n" {
                     parser.unsafeAdvance()
                 }
                 let sectionTokens = try parse(&parser, sectionName: name)
-                tokens.append(.section(name, HBMustacheTemplate(sectionTokens)))
+                tokens.append(.section(name: name, method: method, template: HBMustacheTemplate(sectionTokens)))
 
             case "^":
                 parser.unsafeAdvance()
-                let (name, _) = try parseName(&parser)
+                let (name, method) = try parseName(&parser)
                 if parser.current() == "\n" {
                     parser.unsafeAdvance()
                 }
                 let sectionTokens = try parse(&parser, sectionName: name)
-                tokens.append(.invertedSection(name, HBMustacheTemplate(sectionTokens)))
+                tokens.append(.invertedSection(name: name, method: method, template: HBMustacheTemplate(sectionTokens)))
 
             case "/":
                 parser.unsafeAdvance()
@@ -53,9 +53,9 @@ extension HBMustacheTemplate {
 
             case "{":
                 parser.unsafeAdvance()
-                let (name, _) = try parseName(&parser)
+                let (name, method) = try parseName(&parser)
                 guard try parser.read("}") else { throw Error.unfinishedName }
-                tokens.append(.unescapedVariable(name))
+                tokens.append(.unescapedVariable(name: name, method: method))
 
             case "!":
                 parser.unsafeAdvance()
@@ -68,7 +68,7 @@ extension HBMustacheTemplate {
 
             default:
                 let (name, method) = try parseName(&parser)
-                tokens.append(.variable(name, method))
+                tokens.append(.variable(name: name, method: method))
             }
         }
         // should never get here if reading section
