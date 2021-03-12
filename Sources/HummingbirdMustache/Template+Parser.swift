@@ -1,5 +1,11 @@
 
 extension HBMustacheTemplate {
+    enum Error: Swift.Error {
+        case sectionCloseNameIncorrect
+        case unfinishedName
+        case expectedSectionEnd
+    }
+
     static func parse(_ string: String) throws -> [Token] {
         var parser = HBParser(string)
         return try parse(&parser, sectionName: nil)
@@ -9,14 +15,16 @@ extension HBMustacheTemplate {
         var tokens: [Token] = []
         while !parser.reachedEnd() {
             let text = try parser.read(untilString: "{{", throwOnOverflow: false, skipToEnd: true)
-            tokens.append(.text(text.string))
+            if text.count > 0 {
+                tokens.append(.text(text.string))
+            }
             if parser.reachedEnd() {
                 break
             }
             switch parser.current() {
             case "#":
                 parser.unsafeAdvance()
-                let name = try parseSectionName(&parser)
+                let name = try parseName(&parser)
                 if parser.current() == "\n" {
                     parser.unsafeAdvance()
                 }
@@ -25,7 +33,7 @@ extension HBMustacheTemplate {
 
             case "^":
                 parser.unsafeAdvance()
-                let name = try parseSectionName(&parser)
+                let name = try parseName(&parser)
                 if parser.current() == "\n" {
                     parser.unsafeAdvance()
                 }
@@ -34,9 +42,9 @@ extension HBMustacheTemplate {
 
             case "/":
                 parser.unsafeAdvance()
-                let name = try parseSectionName(&parser)
+                let name = try parseName(&parser)
                 guard name == sectionName else {
-                    throw HBMustacheError.sectionCloseNameIncorrect
+                    throw Error.sectionCloseNameIncorrect
                 }
                 if parser.current() == "\n" {
                     parser.unsafeAdvance()
@@ -45,40 +53,40 @@ extension HBMustacheTemplate {
 
             case "{":
                 parser.unsafeAdvance()
-                let name = try parseSectionName(&parser)
-                guard try parser.read("}") else { throw HBMustacheError.unfinishedSectionName }
+                let name = try parseName(&parser)
+                guard try parser.read("}") else { throw Error.unfinishedName }
                 tokens.append(.unescapedVariable(name))
 
             case "!":
                 parser.unsafeAdvance()
-                _ = try parseSection(&parser)
+                _ = try parseComment(&parser)
 
             case ">":
                 parser.unsafeAdvance()
-                let name = try parseSectionName(&parser)
+                let name = try parseName(&parser)
                 tokens.append(.partial(name))
 
             default:
-                let name = try parseSectionName(&parser)
+                let name = try parseName(&parser)
                 tokens.append(.variable(name))
             }
         }
         // should never get here if reading section
         guard sectionName == nil else {
-            throw HBMustacheError.expectedSectionEnd
+            throw Error.expectedSectionEnd
         }
         return tokens
     }
 
-    static func parseSectionName(_ parser: inout HBParser) throws -> String {
+    static func parseName(_ parser: inout HBParser) throws -> String {
         parser.read(while: \.isWhitespace)
         let text = parser.read(while: sectionNameChars )
         parser.read(while: \.isWhitespace)
-        guard try parser.read("}"), try parser.read("}") else { throw HBMustacheError.unfinishedSectionName }
+        guard try parser.read("}"), try parser.read("}") else { throw Error.unfinishedName }
         return text.string
     }
 
-    static func parseSection(_ parser: inout HBParser) throws -> String {
+    static func parseComment(_ parser: inout HBParser) throws -> String {
         let text = try parser.read(untilString: "}}", throwOnOverflow: true, skipToEnd: true)
         return text.string
     }

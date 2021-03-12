@@ -26,6 +26,44 @@ final class TemplateParserTests: XCTestCase {
         let template = try HBMustacheTemplate(string: "test {{!section}}")
         XCTAssertEqual(template.tokens, [.text("test ")])
     }
+
+    func testWhitespace() throws {
+        let template = try HBMustacheTemplate(string: "{{ section }}")
+        XCTAssertEqual(template.tokens, [.variable("section")])
+    }
+
+    func testSectionEndError() throws {
+        XCTAssertThrowsError(_ = try HBMustacheTemplate(string: "test {{#section}}")) { error in
+            switch error {
+            case HBMustacheTemplate.Error.expectedSectionEnd:
+                break
+            default:
+                XCTFail("\(error)")
+            }
+        }
+    }
+
+    func testSectionCloseNameIncorrectError() throws {
+        XCTAssertThrowsError(_ = try HBMustacheTemplate(string: "test {{#section}}{{/error}}")) { error in
+            switch error {
+            case HBMustacheTemplate.Error.sectionCloseNameIncorrect:
+                break
+            default:
+                XCTFail("\(error)")
+            }
+        }
+    }
+
+    func testUnmatchedNameError() throws {
+        XCTAssertThrowsError(_ = try HBMustacheTemplate(string: "test {{section#}}")) { error in
+            switch error {
+            case HBMustacheTemplate.Error.unfinishedName:
+                break
+            default:
+                XCTFail("\(error)")
+            }
+        }
+    }
 }
 
 extension HBMustacheTemplate: Equatable {

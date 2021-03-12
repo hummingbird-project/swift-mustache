@@ -1,10 +1,4 @@
 
-enum HBMustacheError: Error {
-    case sectionCloseNameIncorrect
-    case unfinishedSectionName
-    case expectedSectionEnd
-}
-
 public class HBMustacheTemplate {
     public init(string: String) throws {
         self.tokens = try Self.parse(string)
