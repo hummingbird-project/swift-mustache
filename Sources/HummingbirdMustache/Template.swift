@@ -20,6 +20,7 @@ public class HBMustacheTemplate {
         case unescapedVariable(String)
         case section(String, HBMustacheTemplate)
         case invertedSection(String, HBMustacheTemplate)
+        case partial(String)
     }
 
     let tokens: [Token]

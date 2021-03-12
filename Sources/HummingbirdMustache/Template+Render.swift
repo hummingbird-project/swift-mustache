@@ -1,6 +1,6 @@
 
 extension HBMustacheTemplate {
-    public func render(_ object: Any) -> String {
+    public func render(_ object: Any, library: HBMustacheLibrary? = nil) -> String {
         var string = ""
         for token in tokens {
             switch token {
@@ -16,40 +16,44 @@ extension HBMustacheTemplate {
                 }
             case .section(let variable, let template):
                 let child = getChild(named: variable, from: object)
-                string += renderSection(child, parent: object, with: template)
+                string += renderSection(child, parent: object, with: template, library: library)
                 
             case .invertedSection(let variable, let template):
                 let child = getChild(named: variable, from: object)
-                string += renderInvertedSection(child, parent: object, with: template)
+                string += renderInvertedSection(child, parent: object, with: template, library: library)
                 
+            case .partial(let name):
+                if let text = library?.render(object, withTemplateNamed: name) {
+                    string += text
+                }
             }
         }
         return string
     }
     
-    func renderSection(_ child: Any?, parent: Any, with template: HBMustacheTemplate) -> String {
+    func renderSection(_ child: Any?, parent: Any, with template: HBMustacheTemplate, library: HBMustacheLibrary?) -> String {
         switch child {
         case let array as HBSequence:
-            return array.renderSection(with: template)
+            return array.renderSection(with: template, library: library)
         case let bool as Bool:
-            return bool ? template.render(parent) : ""
+            return bool ? template.render(parent, library: library) : ""
         case .some(let value):
-            return template.render(value)
+            return template.render(value, library: library)
         case .none:
             return ""
         }
     }
     
-    func renderInvertedSection(_ child: Any?, parent: Any, with template: HBMustacheTemplate) -> String {
+    func renderInvertedSection(_ child: Any?, parent: Any, with template: HBMustacheTemplate, library: HBMustacheLibrary?) -> String {
         switch child {
         case let array as HBSequence:
-            return array.renderInvertedSection(with: template)
+            return array.renderInvertedSection(with: template, library: library)
         case let bool as Bool:
-            return bool ? "" : template.render(parent)
+            return bool ? "" : template.render(parent, library: library)
         case .some:
             return ""
         case .none:
-            return template.render(parent)
+            return template.render(parent, library: library)
         }
     }
     

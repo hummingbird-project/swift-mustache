@@ -53,6 +53,11 @@ extension HBMustacheTemplate {
                 parser.unsafeAdvance()
                 _ = try parseSection(&parser)
 
+            case ">":
+                parser.unsafeAdvance()
+                let name = try parseSectionName(&parser)
+                tokens.append(.partial(name))
+
             default:
                 let name = try parseSectionName(&parser)
                 tokens.append(.variable(name))
@@ -66,7 +71,9 @@ extension HBMustacheTemplate {
     }
 
     static func parseSectionName(_ parser: inout HBParser) throws -> String {
+        parser.read(while: \.isWhitespace)
         let text = parser.read(while: sectionNameChars )
+        parser.read(while: \.isWhitespace)
         guard try parser.read("}"), try parser.read("}") else { throw HBMustacheError.unfinishedSectionName }
         return text.string
     }
