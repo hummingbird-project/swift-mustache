@@ -1,7 +1,12 @@
 
 public class HBMustacheLibrary {
-    init() {
+    public init() {
         self.templates = [:]
+    }
+    
+    public init(directory: String) {
+        self.templates = [:]
+        self.loadTemplates(from: directory)
     }
     
     public func register(_ template: HBMustacheTemplate, named name: String) {
