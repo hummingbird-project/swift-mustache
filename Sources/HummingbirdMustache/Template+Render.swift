@@ -1,6 +1,6 @@
 
 extension HBMustacheTemplate {
-    public func render(_ object: Any, library: HBMustacheLibrary? = nil) -> String {
+    func render(_ object: Any, library: HBMustacheLibrary? = nil, context: HBMustacheContext? = nil) -> String {
         var string = ""
         for token in tokens {
             switch token {

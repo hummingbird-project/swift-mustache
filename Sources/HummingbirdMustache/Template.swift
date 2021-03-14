@@ -8,6 +8,10 @@ public class HBMustacheTemplate {
         self.tokens = tokens
     }
     
+    public func render(_ object: Any, library: HBMustacheLibrary? = nil) -> String {
+        self.render(object, library: library, context: nil)
+    }
+    
     enum Token {
         case text(String)
         case variable(name: String, method: String? = nil)
