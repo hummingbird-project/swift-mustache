@@ -41,6 +41,8 @@ extension HBMustacheTemplate {
             return array.renderSection(with: template, library: library)
         case let bool as Bool:
             return bool ? template.render(parent, library: library) : ""
+        case let lambda as HBMustacheLambda:
+            return lambda(parent, template, library)
         case .some(let value):
             return template.render(value, library: library)
         case .none:

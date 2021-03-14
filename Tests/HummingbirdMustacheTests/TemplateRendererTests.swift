@@ -153,6 +153,19 @@ final class TemplateRendererTests: XCTestCase {
             """)
     }
     
+    func testMustacheManualExample5() throws {
+        let template = try HBMustacheTemplate(string: """
+            {{#wrapped}}{{name}} is awesome.{{/wrapped}}
+            """)
+        func wrapped(object: Any, template: HBMustacheTemplate, library: HBMustacheLibrary?) -> String {
+            return "<b>\(template.render(object, library: library))</b>"
+        }
+        let object: [String: Any] = ["name": "Willy", "wrapped": wrapped]
+        XCTAssertEqual(template.render(object), """
+            <b>Willy is awesome.</b>
+            """)
+    }
+    
     func testMustacheManualExample6() throws {
         let template = try HBMustacheTemplate(string: """
             {{#person?}}
