@@ -15,6 +15,7 @@ extension Sequence {
             string += template.render(currentObject, context: context)
             currentObject = object
             context.first = false
+            context.index += 1
         }
 
         context.last = true

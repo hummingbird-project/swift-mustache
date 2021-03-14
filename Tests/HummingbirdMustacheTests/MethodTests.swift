@@ -33,6 +33,21 @@ final class MethodTests: XCTestCase {
             """)
     }
 
+    func testIndex() throws {
+        let template = try HBMustacheTemplate(string: """
+            {{#repo}}
+            <b>{{#index()}}{{plus1(.)}}) {{/}}{{ name }}</b>
+            {{/repo}}
+            """)
+        let object: [String: Any] = ["repo": [["name": "resque"], ["name": "hub"], ["name": "rip"]]]
+        XCTAssertEqual(template.render(object), """
+            <b>1) resque</b>
+            <b>2) hub</b>
+            <b>3) rip</b>
+
+            """)
+    }
+
     func testReversed() throws {
         let template = try HBMustacheTemplate(string: """
             {{#reversed(repo)}}

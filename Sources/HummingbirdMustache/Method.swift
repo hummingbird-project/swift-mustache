@@ -39,3 +39,14 @@ extension Dictionary: HBMustacheMethods {
         }
     }
 }
+
+extension Int: HBMustacheMethods {
+    func runMethod(_ name: String) -> Any? {
+        switch name {
+        case "plus1":
+            return self + 1
+        default:
+            return nil
+        }
+    }
+}
