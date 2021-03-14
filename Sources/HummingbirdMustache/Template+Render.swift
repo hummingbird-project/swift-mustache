@@ -37,7 +37,7 @@ extension HBMustacheTemplate {
     
     func renderSection(_ child: Any?, parent: Any, with template: HBMustacheTemplate) -> String {
         switch child {
-        case let array as HBSequence:
+        case let array as HBMustacheSequence:
             return array.renderSection(with: template)
         case let bool as Bool:
             return bool ? template.render(parent) : ""
@@ -52,7 +52,7 @@ extension HBMustacheTemplate {
     
     func renderInvertedSection(_ child: Any?, parent: Any, with template: HBMustacheTemplate) -> String {
         switch child {
-        case let array as HBSequence:
+        case let array as HBMustacheSequence:
             return array.renderInvertedSection(with: template)
         case let bool as Bool:
             return bool ? "" : template.render(parent)
@@ -86,7 +86,7 @@ extension HBMustacheTemplate {
             child = _getChild(named: nameSplit[...], from: object)
         }
         if let method = method,
-           let runnable = child as? HBMustacheBaseMethods {
+           let runnable = child as? HBMustacheMethods {
             if let result = runnable.runMethod(method) {
                 return result
             }
@@ -113,71 +113,3 @@ extension HBMustacheTemplate {
     }
 }
 
-protocol HBMustacheParent {
-    func child(named: String) -> Any?
-}
-
-extension HBMustacheParent {
-    // default child to nil
-    func child(named: String) -> Any? { return nil }
-}
-
-extension Dictionary: HBMustacheParent where Key == String {
-    func child(named: String) -> Any? { return self[named] }
-}
-
-protocol HBSequence {
-    func renderSection(with template: HBMustacheTemplate) -> String
-    func renderInvertedSection(with template: HBMustacheTemplate) -> String
-}
-
-extension Array: HBSequence {
-    func renderSection(with template: HBMustacheTemplate) -> String {
-        var string = ""
-        for obj in self {
-            string += template.render(obj)
-        }
-        return string
-    }
-
-    func renderInvertedSection(with template: HBMustacheTemplate) -> String {
-        if count == 0 {
-            return template.render(self)
-        }
-        return ""
-    }
-}
-
-extension ReversedCollection: HBSequence {
-    func renderSection(with template: HBMustacheTemplate) -> String {
-        var string = ""
-        for obj in self {
-            string += template.render(obj)
-        }
-        return string
-    }
-
-    func renderInvertedSection(with template: HBMustacheTemplate) -> String {
-        if count == 0 {
-            return template.render(self)
-        }
-        return ""
-    }
-}
-
-extension EnumeratedSequence: HBSequence {
-    func renderSection(with template: HBMustacheTemplate) -> String {
-        var string = ""
-        for obj in self {
-            string += template.render(obj)
-        }
-        return string
-    }
-
-    func renderInvertedSection(with template: HBMustacheTemplate) -> String {
-        if self.underestimatedCount == 0 {
-            return template.render(self)
-        }
-        return ""
-    }
-}

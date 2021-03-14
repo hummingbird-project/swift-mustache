@@ -1,23 +1,9 @@
 
-protocol HBMustacheBaseMethods {
+protocol HBMustacheMethods {
     func runMethod(_ name: String) -> Any?
 }
-protocol HBMustacheMethods {
-    typealias Method = (Self) -> Any
-    static var methods: [String: Method] { get set }
-}
 
-extension HBMustacheMethods {
-    static func addMethod(named name: String, method: @escaping Method) {
-        Self.methods[name] = method
-    }
-    func runMethod(_ name: String) -> Any? {
-        guard let method = Self.methods[name] else { return nil }
-        return method(self)
-    }
-}
-
-extension String: HBMustacheBaseMethods {
+extension String: HBMustacheMethods {
     func runMethod(_ name: String) -> Any? {
         switch name {
         case "lowercased":
@@ -30,7 +16,7 @@ extension String: HBMustacheBaseMethods {
     }
 }
 
-extension Array: HBMustacheBaseMethods {
+extension Array: HBMustacheMethods {
     func runMethod(_ name: String) -> Any? {
         switch name {
         case "reversed":
@@ -43,7 +29,7 @@ extension Array: HBMustacheBaseMethods {
     }
 }
 
-extension Dictionary: HBMustacheBaseMethods {
+extension Dictionary: HBMustacheMethods {
     func runMethod(_ name: String) -> Any? {
         switch name {
         case "enumerated":
