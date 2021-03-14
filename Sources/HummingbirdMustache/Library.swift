@@ -10,6 +10,7 @@ public class HBMustacheLibrary {
     }
     
     public func register(_ template: HBMustacheTemplate, named name: String) {
+        template.setLibrary(self)
         templates[name] = template
     }
     
@@ -19,7 +20,7 @@ public class HBMustacheLibrary {
     
     public func render(_ object: Any, withTemplateNamed name: String) -> String? {
         guard let template = templates[name] else { return nil }
-        return template.render(object, library: self)
+        return template.render(object)
     }
     
     private var templates: [String: HBMustacheTemplate]

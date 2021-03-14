@@ -1,2 +1,2 @@
 
-public typealias HBMustacheLambda = (Any, HBMustacheTemplate, HBMustacheLibrary?) -> String
+public typealias HBMustacheLambda = (Any, HBMustacheTemplate) -> String

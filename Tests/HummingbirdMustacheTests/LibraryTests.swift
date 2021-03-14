@@ -4,7 +4,7 @@ import XCTest
 final class LibraryTests: XCTestCase {
     func testDirectoryLoad() throws {
         let fs = FileManager()
-        try fs.createDirectory(atPath: "./templates", withIntermediateDirectories: false)
+        try fs.createDirectory(atPath: "templates", withIntermediateDirectories: false)
         let mustache = "<test>{{#value}}<value>{{.}}</value>{{/value}}</test>"
         let data = Data(mustache.utf8)
         defer { XCTAssertNoThrow(try fs.removeItem(atPath: "templates")) }

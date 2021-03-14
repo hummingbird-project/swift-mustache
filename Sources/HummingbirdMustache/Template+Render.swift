@@ -1,6 +1,6 @@
 
 extension HBMustacheTemplate {
-    func render(_ object: Any, library: HBMustacheLibrary? = nil, context: HBMustacheContext? = nil) -> String {
+    func render(_ object: Any, context: HBMustacheContext? = nil) -> String {
         var string = ""
         for token in tokens {
             switch token {
@@ -9,7 +9,7 @@ extension HBMustacheTemplate {
             case .variable(let variable, let method):
                 if let child = getChild(named: variable, from: object, method: method) {
                     if let template = child as? HBMustacheTemplate {
-                        string += template.render(object, library: library)
+                        string += template.render(object)
                     } else {
                         string += htmlEscape(String(describing: child))
                     }
@@ -20,11 +20,11 @@ extension HBMustacheTemplate {
                 }
             case .section(let variable, let method, let template):
                 let child = getChild(named: variable, from: object, method: method)
-                string += renderSection(child, parent: object, with: template, library: library)
+                string += renderSection(child, parent: object, with: template)
                 
             case .invertedSection(let variable, let method, let template):
                 let child = getChild(named: variable, from: object, method: method)
-                string += renderInvertedSection(child, parent: object, with: template, library: library)
+                string += renderInvertedSection(child, parent: object, with: template)
                 
             case .partial(let name):
                 if let text = library?.render(object, withTemplateNamed: name) {
@@ -35,31 +35,31 @@ extension HBMustacheTemplate {
         return string
     }
     
-    func renderSection(_ child: Any?, parent: Any, with template: HBMustacheTemplate, library: HBMustacheLibrary?) -> String {
+    func renderSection(_ child: Any?, parent: Any, with template: HBMustacheTemplate) -> String {
         switch child {
         case let array as HBSequence:
-            return array.renderSection(with: template, library: library)
+            return array.renderSection(with: template)
         case let bool as Bool:
-            return bool ? template.render(parent, library: library) : ""
+            return bool ? template.render(parent) : ""
         case let lambda as HBMustacheLambda:
-            return lambda(parent, template, library)
+            return lambda(parent, template)
         case .some(let value):
-            return template.render(value, library: library)
+            return template.render(value)
         case .none:
             return ""
         }
     }
     
-    func renderInvertedSection(_ child: Any?, parent: Any, with template: HBMustacheTemplate, library: HBMustacheLibrary?) -> String {
+    func renderInvertedSection(_ child: Any?, parent: Any, with template: HBMustacheTemplate) -> String {
         switch child {
         case let array as HBSequence:
-            return array.renderInvertedSection(with: template, library: library)
+            return array.renderInvertedSection(with: template)
         case let bool as Bool:
-            return bool ? "" : template.render(parent, library: library)
+            return bool ? "" : template.render(parent)
         case .some:
             return ""
         case .none:
-            return template.render(parent, library: library)
+            return template.render(parent)
         }
     }
     
@@ -127,56 +127,56 @@ extension Dictionary: HBMustacheParent where Key == String {
 }
 
 protocol HBSequence {
-    func renderSection(with template: HBMustacheTemplate, library: HBMustacheLibrary?) -> String
-    func renderInvertedSection(with template: HBMustacheTemplate, library: HBMustacheLibrary?) -> String
+    func renderSection(with template: HBMustacheTemplate) -> String
+    func renderInvertedSection(with template: HBMustacheTemplate) -> String
 }
 
 extension Array: HBSequence {
-    func renderSection(with template: HBMustacheTemplate, library: HBMustacheLibrary?) -> String {
+    func renderSection(with template: HBMustacheTemplate) -> String {
         var string = ""
         for obj in self {
-            string += template.render(obj, library: library)
+            string += template.render(obj)
         }
         return string
     }
 
-    func renderInvertedSection(with template: HBMustacheTemplate, library: HBMustacheLibrary?) -> String {
+    func renderInvertedSection(with template: HBMustacheTemplate) -> String {
         if count == 0 {
-            return template.render(self, library: library)
+            return template.render(self)
         }
         return ""
     }
 }
 
 extension ReversedCollection: HBSequence {
-    func renderSection(with template: HBMustacheTemplate, library: HBMustacheLibrary?) -> String {
+    func renderSection(with template: HBMustacheTemplate) -> String {
         var string = ""
         for obj in self {
-            string += template.render(obj, library: library)
+            string += template.render(obj)
         }
         return string
     }
 
-    func renderInvertedSection(with template: HBMustacheTemplate, library: HBMustacheLibrary?) -> String {
+    func renderInvertedSection(with template: HBMustacheTemplate) -> String {
         if count == 0 {
-            return template.render(self, library: library)
+            return template.render(self)
         }
         return ""
     }
 }
 
 extension EnumeratedSequence: HBSequence {
-    func renderSection(with template: HBMustacheTemplate, library: HBMustacheLibrary?) -> String {
+    func renderSection(with template: HBMustacheTemplate) -> String {
         var string = ""
         for obj in self {
-            string += template.render(obj, library: library)
+            string += template.render(obj)
         }
         return string
     }
 
-    func renderInvertedSection(with template: HBMustacheTemplate, library: HBMustacheLibrary?) -> String {
+    func renderInvertedSection(with template: HBMustacheTemplate) -> String {
         if self.underestimatedCount == 0 {
-            return template.render(self, library: library)
+            return template.render(self)
         }
         return ""
     }

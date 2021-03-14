@@ -8,8 +8,20 @@ public class HBMustacheTemplate {
         self.tokens = tokens
     }
     
-    public func render(_ object: Any, library: HBMustacheLibrary? = nil) -> String {
-        self.render(object, library: library, context: nil)
+    public func render(_ object: Any) -> String {
+        self.render(object, context: nil)
+    }
+    
+    internal func setLibrary(_ library: HBMustacheLibrary) {
+        self.library = library
+        for token in tokens {
+            switch token {
+            case .section(_, _, let template), .invertedSection(_, _, let template):
+                template.setLibrary(library)
+            default:
+                break
+            }
+        }
     }
     
     enum Token {
@@ -22,5 +34,6 @@ public class HBMustacheTemplate {
     }
 
     let tokens: [Token]
+    var library: HBMustacheLibrary?
 }
 

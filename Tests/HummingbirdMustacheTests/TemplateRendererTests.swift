@@ -91,6 +91,7 @@ final class TemplateRendererTests: XCTestCase {
         XCTAssertEqual(template.render(Test(test: .init(string: "sub"))), "test sub")
     }
 
+    /// variables
     func testMustacheManualExample1() throws {
         let template = try HBMustacheTemplate(string: """
             Hello {{name}}
@@ -108,6 +109,7 @@ final class TemplateRendererTests: XCTestCase {
             """)
     }
 
+    /// test esacped and unescaped text
     func testMustacheManualExample2() throws {
         let template = try HBMustacheTemplate(string: """
             *{{name}}
@@ -124,6 +126,7 @@ final class TemplateRendererTests: XCTestCase {
             """)
     }
 
+    /// test boolean
     func testMustacheManualExample3() throws {
         let template = try HBMustacheTemplate(string: """
             Shown.
@@ -138,6 +141,7 @@ final class TemplateRendererTests: XCTestCase {
             """)
     }
 
+    /// test non-empty lists
     func testMustacheManualExample4() throws {
         let template = try HBMustacheTemplate(string: """
             {{#repo}}
@@ -153,12 +157,13 @@ final class TemplateRendererTests: XCTestCase {
             """)
     }
     
+    /// test lambdas
     func testMustacheManualExample5() throws {
         let template = try HBMustacheTemplate(string: """
             {{#wrapped}}{{name}} is awesome.{{/wrapped}}
             """)
-        func wrapped(object: Any, template: HBMustacheTemplate, library: HBMustacheLibrary?) -> String {
-            return "<b>\(template.render(object, library: library))</b>"
+        func wrapped(object: Any, template: HBMustacheTemplate) -> String {
+            return "<b>\(template.render(object))</b>"
         }
         let object: [String: Any] = ["name": "Willy", "wrapped": wrapped]
         XCTAssertEqual(template.render(object), """
@@ -166,6 +171,7 @@ final class TemplateRendererTests: XCTestCase {
             """)
     }
     
+    /// test setting context object
     func testMustacheManualExample6() throws {
         let template = try HBMustacheTemplate(string: """
             {{#person?}}
@@ -179,6 +185,7 @@ final class TemplateRendererTests: XCTestCase {
             """)
     }
     
+    /// test inverted sections
     func testMustacheManualExample7() throws {
         let template = try HBMustacheTemplate(string: """
             {{#repo}}
@@ -195,6 +202,7 @@ final class TemplateRendererTests: XCTestCase {
             """)
     }
     
+    /// test comments
     func testMustacheManualExample8() throws {
         let template = try HBMustacheTemplate(string: """
             <h1>Today{{! ignore me }}.</h1>
