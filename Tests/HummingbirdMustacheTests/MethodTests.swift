@@ -18,6 +18,21 @@ final class MethodTests: XCTestCase {
         XCTAssertEqual(template.render(object), "TEST")
     }
 
+    func testFirstLast() throws {
+        let template = try HBMustacheTemplate(string: """
+            {{#repo}}
+            <b>{{#first()}}first: {{/}}{{#last()}}last: {{/}}{{ name }}</b>
+            {{/repo}}
+            """)
+        let object: [String: Any] = ["repo": [["name": "resque"], ["name": "hub"], ["name": "rip"]]]
+        XCTAssertEqual(template.render(object), """
+              <b>first: resque</b>
+              <b>hub</b>
+              <b>last: rip</b>
+
+            """)
+    }
+
     func testReversed() throws {
         let template = try HBMustacheTemplate(string: """
             {{#reversed(repo)}}

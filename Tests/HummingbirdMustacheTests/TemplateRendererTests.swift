@@ -25,6 +25,7 @@ final class TemplateRendererTests: XCTestCase {
     func testArraySection() throws {
         let template = try HBMustacheTemplate(string: "test {{#value}}*{{.}}{{/value}}")
         XCTAssertEqual(template.render(["value": ["test2", "bool"]]), "test *test2*bool")
+        XCTAssertEqual(template.render(["value": ["test2"]]), "test *test2")
         XCTAssertEqual(template.render(["value": []]), "test ")
     }
 

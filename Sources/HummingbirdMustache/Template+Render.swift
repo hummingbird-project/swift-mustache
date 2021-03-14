@@ -7,7 +7,7 @@ extension HBMustacheTemplate {
             case .text(let text):
                 string += text
             case .variable(let variable, let method):
-                if let child = getChild(named: variable, from: object, method: method) {
+                if let child = getChild(named: variable, from: object, method: method, context: context) {
                     if let template = child as? HBMustacheTemplate {
                         string += template.render(object)
                     } else {
@@ -15,15 +15,15 @@ extension HBMustacheTemplate {
                     }
                 }
             case .unescapedVariable(let variable, let method):
-                if let child = getChild(named: variable, from: object, method: method) {
+                if let child = getChild(named: variable, from: object, method: method, context: context) {
                     string += String(describing: child)
                 }
             case .section(let variable, let method, let template):
-                let child = getChild(named: variable, from: object, method: method)
+                let child = getChild(named: variable, from: object, method: method, context: context)
                 string += renderSection(child, parent: object, with: template)
                 
             case .invertedSection(let variable, let method, let template):
-                let child = getChild(named: variable, from: object, method: method)
+                let child = getChild(named: variable, from: object, method: method, context: context)
                 string += renderInvertedSection(child, parent: object, with: template)
                 
             case .partial(let name):
@@ -63,7 +63,7 @@ extension HBMustacheTemplate {
         }
     }
     
-    func getChild(named name: String, from object: Any, method: String?) -> Any? {
+    func getChild(named name: String, from object: Any, method: String?, context: HBMustacheContext?) -> Any? {
         func _getChild(named names: ArraySlice<String>, from object: Any) -> Any? {
             guard let name = names.first else { return object }
             let childObject: Any?
@@ -81,6 +81,8 @@ extension HBMustacheTemplate {
         let child: Any?
         if name == "." {
             child = object
+        } else if name == "", method != nil {
+            child = context
         } else {
             let nameSplit = name.split(separator: ".").map { String($0) }
             child = _getChild(named: nameSplit[...], from: object)

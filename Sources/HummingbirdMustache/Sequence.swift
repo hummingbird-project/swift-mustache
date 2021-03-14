@@ -7,9 +7,19 @@ protocol HBMustacheSequence {
 extension Sequence {
     func renderSection(with template: HBMustacheTemplate) -> String {
         var string = ""
-        for obj in self {
-            string += template.render(obj)
+        var context = HBMustacheContext(first: true)
+        var iterator = self.makeIterator()
+        guard var currentObject = iterator.next() else { return "" }
+
+        while let object = iterator.next() {
+            string += template.render(currentObject, context: context)
+            currentObject = object
+            context.first = false
         }
+
+        context.last = true
+        string += template.render(currentObject, context: context)
+        
         return string
     }
     
