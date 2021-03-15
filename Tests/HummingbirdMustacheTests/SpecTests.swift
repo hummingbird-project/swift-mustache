@@ -112,3 +112,285 @@ final class SpecCommentsTests: XCTestCase {
         try test(object, template, expected)
     }
 }
+
+//MARK: Interpolation
+
+final class SpecInterpolationTests: XCTestCase {
+    func testNoInterpolation() throws {
+        let object = {}
+        let template = "Hello from {Mustache}!"
+        let expected = "Hello from {Mustache}!"
+        try test(object, template, expected)
+
+    }
+
+    func testBasicInterpolation() throws {
+        let object = [ "subject": "world" ]
+        let template = "Hello, {{subject}}!"
+        let expected = "Hello, world!"
+        try test(object, template, expected)
+
+    }
+
+    func testHTMLEscaping() throws {
+        let object = [ "forbidden": #"& " < >"# ]
+        let template = "These characters should be HTML escaped: {{forbidden}}"
+        let expected = #"These characters should be HTML escaped: &amp; &quot; &lt; &gt;"#
+        try test(object, template, expected)
+
+    }
+
+    func testTripleMustache() throws {
+        let object = [ "forbidden": #"& " < >"# ]
+        let template = "These characters should not be HTML escaped: {{{forbidden}}}"
+        let expected = #"These characters should not be HTML escaped: & " < >"#
+        try test(object, template, expected)
+
+    }
+
+    func testAmpersand() throws {
+        let object = [ "forbidden": #"& " < >"# ]
+        let template = "These characters should not be HTML escaped: {{&forbidden}}"
+        let expected = #"These characters should not be HTML escaped: & " < >"#
+        try test(object, template, expected)
+
+    }
+
+    func testBasicInteger() throws {
+        let object = [ "mph": 85 ]
+        let template = #""{{mph}} miles an hour!""#
+        let expected = #""85 miles an hour!""#
+        try test(object, template, expected)
+    }
+
+    func testTripleMustacheInteger() throws {
+        let object = [ "mph": 85 ]
+        let template = #""{{{mph}}} miles an hour!""#
+        let expected = #""85 miles an hour!""#
+        try test(object, template, expected)
+    }
+
+    func testBasicDecimal() throws {
+        let object = [ "power": 1.210 ]
+        let template = #""{{power}} jiggawatts!""#
+        let expected = #""1.21 jiggawatts!""#
+        try test(object, template, expected)
+    }
+
+    func testTripleMustacheDecimal() throws {
+        let object = [ "power": 1.210 ]
+        let template = #""{{{power}}} jiggawatts!""#
+        let expected = #""1.21 jiggawatts!""#
+        try test(object, template, expected)
+    }
+
+    func testAmpersandDecimal() throws {
+        let object = [ "power": 1.210 ]
+        let template = #""{{&power}} jiggawatts!""#
+        let expected = #""1.21 jiggawatts!""#
+        try test(object, template, expected)
+    }
+
+    func testContextMiss() throws {
+        let object = {}
+        let template = #"I ({{cannot}}) be seen!"#
+        let expected = #"I () be seen!"#
+        try test(object, template, expected)
+    }
+
+    func testTripleMustacheContextMiss() throws {
+        let object = {}
+        let template = #"I ({{{cannot}}}) be seen!"#
+        let expected = #"I () be seen!"#
+        try test(object, template, expected)
+    }
+
+    func testAmpersandContextMiss() throws {
+        let object = {}
+        let template = #"I ({{&cannot}}) be seen!"#
+        let expected = #"I () be seen!"#
+        try test(object, template, expected)
+    }
+
+    func testDottedName() throws {
+        let object = ["person": ["name": "Joe"]]
+        let template = #""{{person.name}}" == "{{#person}}{{name}}{{/person}}""#
+        let expected = #""Joe" == "Joe""#
+        try test(object, template, expected)
+    }
+
+    func testTripleMustacheDottedName() throws {
+        let object = ["person": ["name": "Joe"]]
+        let template = #""{{{person.name}}}" == "{{#person}}{{name}}{{/person}}""#
+        let expected = #""Joe" == "Joe""#
+        try test(object, template, expected)
+    }
+
+    func testAmpersandDottedName() throws {
+        let object = ["person": ["name": "Joe"]]
+        let template = #""{{&person.name}}" == "{{#person}}{{name}}{{/person}}""#
+        let expected = #""Joe" == "Joe""#
+        try test(object, template, expected)
+    }
+
+    func testArbituaryDepthDottedName() throws {
+        let object = ["a": ["b": ["c": ["d": ["e": ["name": "Phil"]]]]]]
+        let template = #""{{a.b.c.d.e.name}}" == "Phil""#
+        let expected = #""Phil" == "Phil""#
+        try test(object, template, expected)
+    }
+
+    func testBrokenChainDottedName() throws {
+        let object = ["a": ["b": []], "c": ["name": "Jim"]]
+        let template = #""{{a.b.c.name}}" == """#
+        let expected = "\"\" == \"\""
+        try test(object, template, expected)
+    }
+
+    func testInitialResolutionDottedName() throws {
+        let object = [
+            "a": ["b": ["c": ["d": ["e": ["name": "Phil"]]]]],
+            "b": ["c": ["d": ["e": ["name": "Wrong"]]]]
+        ]
+        let template = #""{{#a}}{{b.c.d.e.name}}{{/a}}" == "Phil""#
+        let expected = #""Phil" == "Phil""#
+        try test(object, template, expected)
+    }
+
+    func testContextPrecedenceDottedName() throws {
+        let object = [
+            "a": ["b": []],
+            "b": ["c": "Error"]
+        ]
+        let template = #"{{#a}}{{b.c}}{{/a}}"#
+        let expected = ""
+        try test(object, template, expected)
+    }
+
+    func testSurroundingWhitespace() throws {
+        let object = ["string": "---"]
+        let template = "| {{string}} |"
+        let expected = "| --- |"
+        try test(object, template, expected)
+    }
+
+    func testTripleMustacheSurroundingWhitespace() throws {
+        let object = ["string": "---"]
+        let template = "| {{{string}}} |"
+        let expected = "| --- |"
+        try test(object, template, expected)
+    }
+
+    func testAmpersandSurroundingWhitespace() throws {
+        let object = ["string": "---"]
+        let template = "| {{&string}} |"
+        let expected = "| --- |"
+        try test(object, template, expected)
+    }
+
+    func testInterpolationStandalone() throws {
+        let object = ["string": "---"]
+        let template = "  {{string}}\n"
+        let expected = "  ---\n"
+        try test(object, template, expected)
+    }
+
+    func testTripleMustacheStandalone() throws {
+        let object = ["string": "---"]
+        let template = "  {{{string}}}\n"
+        let expected = "  ---\n"
+        try test(object, template, expected)
+    }
+
+    func testAmpersandStandalone() throws {
+        let object = ["string": "---"]
+        let template = "  {{&string}}\n"
+        let expected = "  ---\n"
+        try test(object, template, expected)
+    }
+
+    func testInterpolationWithPadding() throws {
+        let object = ["string": "---"]
+        let template = "|{{ string }}|"
+        let expected = "|---|"
+        try test(object, template, expected)
+
+    }
+
+    func testTripleMustacheWithPadding() throws {
+        let object = ["string": "---"]
+        let template = "|{{{ string }}}|"
+        let expected = "|---|"
+        try test(object, template, expected)
+
+    }
+
+    func testAmpersandWithPadding() throws {
+        let object = ["string": "---"]
+        let template = "|{{& string }}|"
+        let expected = "|---|"
+        try test(object, template, expected)
+    }
+}
+
+// MARK: Inverted
+
+final class SpecInvertedTests: XCTestCase {
+    func testFalse() throws {
+        let object = ["boolean": false]
+        let template = #""{{^boolean}}This should be rendered.{{/boolean}}""#
+        let expected = #""This should be rendered.""#
+        try test(object, template, expected)
+
+    }
+
+    func testTrue() throws {
+        let object = ["boolean": true]
+        let template = #""{{^boolean}}This should not be rendered.{{/boolean}}""#
+        let expected = "\"\""
+        try test(object, template, expected)
+
+    }
+
+    func testContext() throws {
+        let object = ["context": ["name": "Joe"]]
+        let template = #""{{^context}}Hi {{name}}.{{/context}}""#
+        let expected = "\"\""
+        try test(object, template, expected)
+
+    }
+
+    func testList() throws {
+        let object = ["list": [["n": 1], ["n": 2], ["n": 3]]]
+        let template = #""{{^list}}{{n}}{{/list}}""#
+        let expected = "\"\""
+        try test(object, template, expected)
+
+    }
+
+    func testEmptyList() throws {
+        let object = ["list": []]
+        let template = #""{{^list}}Yay lists!{{/list}}""#
+        let expected = #""Yay lists!""#
+        try test(object, template, expected)
+    }
+
+    func testDoubled() throws {
+        let object: [String: Any] = ["bool": false, "two": "second"]
+        let template = """
+        {{^bool}}
+        * first
+        {{/bool}}
+        * {{two}}
+        {{^bool}}
+        * third
+        {{/bool}}
+        """
+        let expected = """
+        * first
+        * second
+        * third
+        """
+        try test(object, template, expected)
+    }
+}
