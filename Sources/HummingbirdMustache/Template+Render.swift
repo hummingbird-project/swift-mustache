@@ -1,5 +1,10 @@
 
 extension HBMustacheTemplate {
+    /// Render template using object
+    /// - Parameters:
+    ///   - object: Object
+    ///   - context: Context that render is occurring in. Contains information about position in sequence
+    /// - Returns: Rendered text
     func render(_ object: Any, context: HBMustacheContext? = nil) -> String {
         var string = ""
         for token in tokens {
@@ -11,7 +16,7 @@ extension HBMustacheTemplate {
                     if let template = child as? HBMustacheTemplate {
                         string += template.render(object)
                     } else {
-                        string += htmlEscape(String(describing: child))
+                        string += String(describing: child).htmlEscape()
                     }
                 }
             case .unescapedVariable(let variable, let method):
@@ -34,7 +39,13 @@ extension HBMustacheTemplate {
         }
         return string
     }
-    
+
+    /// Render a section
+    /// - Parameters:
+    ///   - child: Object to render section for
+    ///   - parent: Current object being rendered
+    ///   - template: Template to render with
+    /// - Returns: Rendered text
     func renderSection(_ child: Any?, parent: Any, with template: HBMustacheTemplate) -> String {
         switch child {
         case let array as HBMustacheSequence:
@@ -42,7 +53,7 @@ extension HBMustacheTemplate {
         case let bool as Bool:
             return bool ? template.render(parent) : ""
         case let lambda as HBMustacheLambda:
-            return lambda(parent, template)
+            return lambda.run(parent, template)
         case .some(let value):
             return template.render(value)
         case .none:
@@ -50,6 +61,12 @@ extension HBMustacheTemplate {
         }
     }
     
+    /// Render an inverted section
+    /// - Parameters:
+    ///   - child: Object to render section for
+    ///   - parent: Current object being rendered
+    ///   - template: Template to render with
+    /// - Returns: Rendered text
     func renderInvertedSection(_ child: Any?, parent: Any, with template: HBMustacheTemplate) -> String {
         switch child {
         case let array as HBMustacheSequence:
@@ -62,7 +79,8 @@ extension HBMustacheTemplate {
             return template.render(parent)
         }
     }
-    
+
+    /// Get child object from variable name
     func getChild(named name: String, from object: Any, method: String?, context: HBMustacheContext?) -> Any? {
         func _getChild(named names: ArraySlice<String>, from object: Any) -> Any? {
             guard let name = names.first else { return object }
@@ -78,6 +96,9 @@ extension HBMustacheTemplate {
             return _getChild(named: names2, from: childObject!)
         }
 
+        // work out which object to access. "." means the current object, if the variable name is ""
+        // and we have a method to run on the variable then we need the context object, otherwise
+        // the name is split by "." and we use mirror to get the correct child object
         let child: Any?
         if name == "." {
             child = object
@@ -87,6 +108,8 @@ extension HBMustacheTemplate {
             let nameSplit = name.split(separator: ".").map { String($0) }
             child = _getChild(named: nameSplit[...], from: object)
         }
+        // if we want to run a method and the current child can have methods applied to it then
+        // run method on the current child
         if let method = method,
            let runnable = child as? HBMustacheMethods {
             if let result = runnable.runMethod(method) {
@@ -94,24 +117,6 @@ extension HBMustacheTemplate {
             }
         }
         return child
-    }
-
-    private static let htmlEscapedCharacters: [Character: String] = [
-        "<": "&lt;",
-        ">": "&gt;",
-        "&": "&amp;",
-    ]
-    func htmlEscape(_ string: String) -> String {
-        var newString = ""
-        newString.reserveCapacity(string.count)
-        for c in string {
-            if let replacement = Self.htmlEscapedCharacters[c] {
-                newString += replacement
-            } else {
-                newString.append(c)
-            }
-        }
-        return newString
     }
 }
 

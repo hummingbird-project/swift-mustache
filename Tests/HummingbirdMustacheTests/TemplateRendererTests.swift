@@ -166,7 +166,7 @@ final class TemplateRendererTests: XCTestCase {
         func wrapped(object: Any, template: HBMustacheTemplate) -> String {
             return "<b>\(template.render(object))</b>"
         }
-        let object: [String: Any] = ["name": "Willy", "wrapped": wrapped]
+        let object: [String: Any] = ["name": "Willy", "wrapped": HBMustacheLambda(wrapped)]
         XCTAssertEqual(template.render(object), """
             <b>Willy is awesome.</b>
             """)
