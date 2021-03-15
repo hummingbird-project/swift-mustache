@@ -6,11 +6,13 @@ extension HBMustacheTemplate {
         case expectedSectionEnd
     }
 
+    /// parse mustache text to generate a list of tokens
     static func parse(_ string: String) throws -> [Token] {
         var parser = HBParser(string)
         return try parse(&parser, sectionName: nil)
     }
 
+    /// parse section in mustache text
     static func parse(_ parser: inout HBParser, sectionName: String?) throws -> [Token] {
         var tokens: [Token] = []
         while !parser.reachedEnd() {
@@ -78,6 +80,7 @@ extension HBMustacheTemplate {
         return tokens
     }
 
+    /// parse variable name
     static func parseName(_ parser: inout HBParser) throws -> (String, String?) {
         parser.read(while: \.isWhitespace)
         var text = parser.read(while: sectionNameChars )
@@ -88,6 +91,7 @@ extension HBMustacheTemplate {
         if text.reachedEnd() {
             return (text.string, nil)
         } else {
+            // parse function parameter, as we have just parsed a function name
             guard text.current() == "(" else { throw Error.unfinishedName }
             text.unsafeAdvance()
             let string2 = text.read(while: sectionNameCharsWithoutBrackets)

@@ -3,7 +3,7 @@
 // Half inspired by Reader class from John Sundell's Ink project
 // https://github.com/JohnSundell/Ink/blob/master/Sources/Ink/Internal/Reader.swift
 // with optimisation working ie removing String and doing my own UTF8 processing inspired by Fabian Fett's work in
-// https://github.com/fabianfett/pure-swift-json/blob/master/Sources/PureSwiftJSONParsing/DocumentReader.swift
+// https://github.com/swift-extras/swift-extras-json/blob/main/Sources/ExtrasJSON/Parsing/DocumentReader.swift
 //
 // This is a copy of the parser from Hummingbird. I am not using the version in Hummingbird to avoid the dependency
 import Foundation
