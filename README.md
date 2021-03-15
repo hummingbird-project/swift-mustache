@@ -8,7 +8,7 @@ Load your templates from the filesystem
 ```swift
 let library = HBMustacheLibrary("folder/my/templates/are/in")
 ```
-This will look for all the files with the extension ".mustache" and attempt to load them
+This will look for all the files with the extension ".mustache" in the specified folder and attempt to load them.
 
 Render an object with a template 
 ```swift
