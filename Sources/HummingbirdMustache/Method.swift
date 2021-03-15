@@ -80,7 +80,7 @@ extension Dictionary: HBComparableSequence where Key: Comparable {
     }
 }
 
-extension Int: HBMustacheMethods {
+extension FixedWidthInteger {
     func runMethod(_ name: String) -> Any? {
         switch name {
         case "plusone":
@@ -92,3 +92,14 @@ extension Int: HBMustacheMethods {
         }
     }
 }
+
+extension Int: HBMustacheMethods {}
+extension Int8: HBMustacheMethods {}
+extension Int16: HBMustacheMethods {}
+extension Int32: HBMustacheMethods {}
+extension Int64: HBMustacheMethods {}
+extension UInt: HBMustacheMethods {}
+extension UInt8: HBMustacheMethods {}
+extension UInt16: HBMustacheMethods {}
+extension UInt32: HBMustacheMethods {}
+extension UInt64: HBMustacheMethods {}
