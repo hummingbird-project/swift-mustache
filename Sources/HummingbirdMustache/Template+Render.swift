@@ -32,7 +32,7 @@ extension HBMustacheTemplate {
                 string += renderInvertedSection(child, parent: object, with: template)
                 
             case .partial(let name):
-                if let text = library?.render(object, withTemplateNamed: name) {
+                if let text = library?.render(object, withTemplate: name) {
                     string += text
                 }
             }

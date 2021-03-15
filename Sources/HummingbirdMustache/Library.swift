@@ -42,7 +42,7 @@ public class HBMustacheLibrary {
     ///   - object: Object to render
     ///   - name: Name of template
     /// - Returns: Rendered text
-    public func render(_ object: Any, withTemplateNamed name: String) -> String? {
+    public func render(_ object: Any, withTemplate name: String) -> String? {
         guard let template = templates[name] else { return nil }
         return template.render(object)
     }

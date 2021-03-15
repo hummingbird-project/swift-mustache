@@ -13,6 +13,6 @@ final class LibraryTests: XCTestCase {
         
         let library = HBMustacheLibrary(directory: "./templates")
         let object = ["value": ["value1", "value2"]]
-        XCTAssertEqual(library.render(object, withTemplateNamed: "test"), "<test><value>value1</value><value>value2</value></test>")
+        XCTAssertEqual(library.render(object, withTemplate: "test"), "<test><value>value1</value><value>value2</value></test>")
     }
 }

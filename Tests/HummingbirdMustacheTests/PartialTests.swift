@@ -19,7 +19,7 @@ final class PartialTests: XCTestCase {
         library.register(template2, named: "user")
         
         let object: [String: Any] = ["names": ["john", "adam", "claire"]]
-        XCTAssertEqual(library.render(object, withTemplateNamed: "base"), """
+        XCTAssertEqual(library.render(object, withTemplate: "base"), """
             <h2>Names</h2>
               <strong>john</strong>
               <strong>adam</strong>
@@ -43,7 +43,7 @@ final class PartialTests: XCTestCase {
         library.register(template, named: "base")
         
         let object: [String: Any] = ["names": ["john", "adam", "claire"], "partial": template2]
-        XCTAssertEqual(library.render(object, withTemplateNamed: "base"), """
+        XCTAssertEqual(library.render(object, withTemplate: "base"), """
             <h2>Names</h2>
               <strong>john</strong>
               <strong>adam</strong>
