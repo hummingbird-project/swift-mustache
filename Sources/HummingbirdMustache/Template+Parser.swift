@@ -62,11 +62,17 @@ extension HBMustacheTemplate {
             case "!":
                 parser.unsafeAdvance()
                 _ = try parseComment(&parser)
+                if parser.current() == "\n" {
+                    parser.unsafeAdvance()
+                }
 
             case ">":
                 parser.unsafeAdvance()
                 let (name, _) = try parseName(&parser)
                 tokens.append(.partial(name))
+                if parser.current() == "\n" {
+                    parser.unsafeAdvance()
+                }
 
             default:
                 let (name, method) = try parseName(&parser)
