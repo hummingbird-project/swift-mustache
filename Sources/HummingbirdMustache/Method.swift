@@ -3,9 +3,11 @@ protocol HBMustacheMethods {
     func runMethod(_ name: String) -> Any?
 }
 
-extension String: HBMustacheMethods {
+extension StringProtocol {
     func runMethod(_ name: String) -> Any? {
         switch name {
+        case "capitalized":
+            return self.capitalized
         case "lowercased":
             return self.lowercased()
         case "uppercased":
@@ -17,6 +19,9 @@ extension String: HBMustacheMethods {
         }
     }
 }
+
+extension String: HBMustacheMethods {}
+extension Substring: HBMustacheMethods {}
 
 protocol HBComparableSequence {
     func runComparableMethod(_ name: String) -> Any?
