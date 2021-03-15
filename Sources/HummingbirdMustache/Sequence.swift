@@ -36,4 +36,3 @@ extension Sequence {
 
 extension Array: HBMustacheSequence {}
 extension ReversedCollection: HBMustacheSequence {}
-extension EnumeratedSequence: HBMustacheSequence {}

@@ -25,6 +25,10 @@ protocol HBComparableSequence {
 extension Array: HBMustacheMethods {
     func runMethod(_ name: String) -> Any? {
         switch name {
+        case "first":
+            return self.first
+        case "last":
+            return self.last
         case "reversed":
             return self.reversed()
         case "count":
@@ -81,6 +85,8 @@ extension Int: HBMustacheMethods {
         switch name {
         case "plusone":
             return self + 1
+        case "minusone":
+            return self - 1
         default:
             return nil
         }
