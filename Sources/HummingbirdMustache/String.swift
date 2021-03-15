@@ -4,6 +4,8 @@ extension String {
         "<": "&lt;",
         ">": "&gt;",
         "&": "&amp;",
+        "\"": "&quot;",
+        "'": "&apos;",
     ]
     /// HTML escape string. Replace '<', '>' and '&' with HTML escaped versions
     func htmlEscape() -> String {
