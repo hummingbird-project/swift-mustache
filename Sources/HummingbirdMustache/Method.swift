@@ -1,10 +1,29 @@
-
-protocol HBMustacheMethods {
+/// Objects that can have a methods run on them. Mustache methods are specific to this implementation
+/// of Mustache. They allow you to process objects before they are rendered.
+///
+/// The syntax for applying methods is `{{method(variable)}}`. Methods can be applied to both
+/// variables and sections.
+///
+/// A simple example would be ensuring a string is lowercase.
+/// ```
+/// {{lowercased(myString)}}
+/// ```
+/// If applying a method to a sequence then the closing element of the sequence should not include the
+/// method name eg
+/// ```
+/// {{#reversed(sequence)}}{{.}}{{\sequence}}
+/// ```
+public protocol HBMustacheMethods {
     func runMethod(_ name: String) -> Any?
 }
 
 extension StringProtocol {
-    func runMethod(_ name: String) -> Any? {
+    /// Apply method to String/Substring
+    ///
+    /// Methods available are `capitalized`, `lowercased`, `uppercased` and `reversed`
+    /// - Parameter name: Method name
+    /// - Returns: Result
+    public func runMethod(_ name: String) -> Any? {
         switch name {
         case "capitalized":
             return self.capitalized
@@ -23,12 +42,19 @@ extension StringProtocol {
 extension String: HBMustacheMethods {}
 extension Substring: HBMustacheMethods {}
 
-protocol HBComparableSequence {
+/// Protocol for sequence that can be sorted
+private protocol HBComparableSequence {
     func runComparableMethod(_ name: String) -> Any?
 }
 
 extension Array: HBMustacheMethods {
-    func runMethod(_ name: String) -> Any? {
+    /// Apply method to Array.
+    ///
+    /// Methods available are `first`, `last`, `reversed`, `count` and for arrays
+    /// with comparable elements `sorted`.
+    /// - Parameter name: method name
+    /// - Returns: Result
+    public func runMethod(_ name: String) -> Any? {
         switch name {
         case "first":
             return self.first
@@ -59,7 +85,13 @@ extension Array: HBComparableSequence where Element: Comparable {
 }
 
 extension Dictionary: HBMustacheMethods {
-    func runMethod(_ name: String) -> Any? {
+    /// Apply method to Dictionary
+    ///
+    /// Methods available are `count`, `enumerated` and for dictionaries
+    /// with comparable keys `sorted`.
+    /// - Parameter name: method name
+    /// - Returns: Result
+    public func runMethod(_ name: String) -> Any? {
         switch name {
         case "count":
             return self.count
@@ -86,12 +118,21 @@ extension Dictionary: HBComparableSequence where Key: Comparable {
 }
 
 extension FixedWidthInteger {
-    func runMethod(_ name: String) -> Any? {
+    /// Apply method to FixedWidthInteger
+    ///
+    /// Methods available are `plusone`, `minusone`, `odd`, `even`
+    /// - Parameter name: method name
+    /// - Returns: Result
+    public func runMethod(_ name: String) -> Any? {
         switch name {
         case "plusone":
             return self + 1
         case "minusone":
             return self - 1
+        case "even":
+            return (self & 1) == 0
+        case "odd":
+            return (self & 1) == 1
         default:
             return nil
         }

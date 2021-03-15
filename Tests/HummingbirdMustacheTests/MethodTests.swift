@@ -1,5 +1,5 @@
 import XCTest
-@testable import HummingbirdMustache
+import HummingbirdMustache
 
 final class MethodTests: XCTestCase {
     func testLowercased() throws {
