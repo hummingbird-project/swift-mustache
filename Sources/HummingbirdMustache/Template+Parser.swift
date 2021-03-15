@@ -59,6 +59,11 @@ extension HBMustacheTemplate {
                 guard try parser.read("}") else { throw Error.unfinishedName }
                 tokens.append(.unescapedVariable(name: name, method: method))
 
+            case "&":
+                parser.unsafeAdvance()
+                let (name, method) = try parseName(&parser)
+                tokens.append(.unescapedVariable(name: name, method: method))
+
             case "!":
                 parser.unsafeAdvance()
                 _ = try parseComment(&parser)
