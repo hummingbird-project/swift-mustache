@@ -1,3 +1,5 @@
+import Logging
+
 /// Class holding a collection of mustache templates.
 ///
 /// Each template can reference the others via a partial using the name the template is registered under
@@ -16,9 +18,9 @@ public class HBMustacheLibrary {
     /// the folder is recursive and templates in subfolders will be registered with the name `subfolder/template`.
     /// - Parameter directory: Directory to look for mustache templates
     /// - Parameter extension: Extension of files to look for
-    public init(directory: String, withExtension extension: String = "mustache") {
+    public init(directory: String, withExtension extension: String = "mustache", logger: Logger? = nil) {
         self.templates = [:]
-        self.loadTemplates(from: directory)
+        self.loadTemplates(from: directory, withExtension: `extension`, logger: logger)
     }
 
     /// Register template under name

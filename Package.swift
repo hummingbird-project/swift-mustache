@@ -8,9 +8,13 @@ let package = Package(
     products: [
         .library(name: "HummingbirdMustache", targets: ["HummingbirdMustache"]),
     ],
-    dependencies: [],
+    dependencies: [
+        .package(url: "https://github.com/apple/swift-log.git", from: "1.4.0"),
+    ],
     targets: [
-        .target(name: "HummingbirdMustache", dependencies: []),
+        .target(name: "HummingbirdMustache", dependencies: [
+            .product(name: "Logging", package: "swift-log"),
+        ]),
         .testTarget(name: "HummingbirdMustacheTests", dependencies: ["HummingbirdMustache"]),
     ]
 )
