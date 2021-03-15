@@ -17,4 +17,3 @@ private func unwrapOptional(_ object: Any) -> Any? {
     guard let first = mirror.children.first else { return nil }
     return first.value
 }
-

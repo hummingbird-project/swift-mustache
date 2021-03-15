@@ -17,22 +17,22 @@ public protocol HBMustacheMethods {
     func runMethod(_ name: String) -> Any?
 }
 
-extension StringProtocol {
+public extension StringProtocol {
     /// Apply method to String/Substring
     ///
     /// Methods available are `capitalized`, `lowercased`, `uppercased` and `reversed`
     /// - Parameter name: Method name
     /// - Returns: Result
-    public func runMethod(_ name: String) -> Any? {
+    func runMethod(_ name: String) -> Any? {
         switch name {
         case "capitalized":
-            return self.capitalized
+            return capitalized
         case "lowercased":
-            return self.lowercased()
+            return lowercased()
         case "uppercased":
-            return self.uppercased()
+            return uppercased()
         case "reversed":
-            return self.reversed()
+            return reversed()
         default:
             return nil
         }
@@ -57,13 +57,13 @@ extension Array: HBMustacheMethods {
     public func runMethod(_ name: String) -> Any? {
         switch name {
         case "first":
-            return self.first
+            return first
         case "last":
-            return self.last
+            return last
         case "reversed":
-            return self.reversed()
+            return reversed()
         case "count":
-            return self.count
+            return count
         default:
             if let comparableSeq = self as? HBComparableSequence {
                 return comparableSeq.runComparableMethod(name)
@@ -77,7 +77,7 @@ extension Array: HBComparableSequence where Element: Comparable {
     func runComparableMethod(_ name: String) -> Any? {
         switch name {
         case "sorted":
-            return self.sorted()
+            return sorted()
         default:
             return nil
         }
@@ -94,9 +94,9 @@ extension Dictionary: HBMustacheMethods {
     public func runMethod(_ name: String) -> Any? {
         switch name {
         case "count":
-            return self.count
+            return count
         case "enumerated":
-            return self.map { (key: $0.key, value: $0.value) }
+            return map { (key: $0.key, value: $0.value) }
         default:
             if let comparableSeq = self as? HBComparableSequence {
                 return comparableSeq.runComparableMethod(name)
@@ -110,20 +110,20 @@ extension Dictionary: HBComparableSequence where Key: Comparable {
     func runComparableMethod(_ name: String) -> Any? {
         switch name {
         case "sorted":
-            return self.map { (key: $0.key, value: $0.value) }.sorted { $0.key < $1.key }
+            return map { (key: $0.key, value: $0.value) }.sorted { $0.key < $1.key }
         default:
             return nil
         }
     }
 }
 
-extension FixedWidthInteger {
+public extension FixedWidthInteger {
     /// Apply method to FixedWidthInteger
     ///
     /// Methods available are `plusone`, `minusone`, `odd`, `even`
     /// - Parameter name: method name
     /// - Returns: Result
-    public func runMethod(_ name: String) -> Any? {
+    func runMethod(_ name: String) -> Any? {
         switch name {
         case "plusone":
             return self + 1

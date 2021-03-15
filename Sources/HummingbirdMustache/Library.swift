@@ -9,7 +9,7 @@ import Logging
 public class HBMustacheLibrary {
     /// Initialize empty library
     public init() {
-        self.templates = [:]
+        templates = [:]
     }
 
     /// Initialize library with contents of folder.
@@ -19,8 +19,8 @@ public class HBMustacheLibrary {
     /// - Parameter directory: Directory to look for mustache templates
     /// - Parameter extension: Extension of files to look for
     public init(directory: String, withExtension extension: String = "mustache", logger: Logger? = nil) {
-        self.templates = [:]
-        self.loadTemplates(from: directory, withExtension: `extension`, logger: logger)
+        templates = [:]
+        loadTemplates(from: directory, withExtension: `extension`, logger: logger)
     }
 
     /// Register template under name
@@ -48,6 +48,6 @@ public class HBMustacheLibrary {
         guard let template = templates[name] else { return nil }
         return template.render(object)
     }
-    
+
     private var templates: [String: HBMustacheTemplate]
 }

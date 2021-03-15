@@ -83,7 +83,7 @@ extension HBMustacheTemplate {
     /// parse variable name
     static func parseName(_ parser: inout HBParser) throws -> (String, String?) {
         parser.read(while: \.isWhitespace)
-        var text = parser.read(while: sectionNameChars )
+        var text = parser.read(while: sectionNameChars)
         parser.read(while: \.isWhitespace)
         guard try parser.read("}"), try parser.read("}") else { throw Error.unfinishedName }
         // does the name include brackets. If so this is a method call
@@ -106,7 +106,7 @@ extension HBMustacheTemplate {
         let text = try parser.read(untilString: "}}", throwOnOverflow: true, skipToEnd: true)
         return text.string
     }
-    
+
     private static let sectionNameCharsWithoutBrackets = Set<Unicode.Scalar>("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ._?")
     private static let sectionNameChars = Set<Unicode.Scalar>("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ._?()")
 }

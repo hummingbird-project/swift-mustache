@@ -4,11 +4,11 @@ struct HBMustacheContext: HBMustacheMethods {
     var first: Bool
     var last: Bool
     var index: Int
-    
+
     init(first: Bool = false, last: Bool = false) {
         self.first = first
         self.last = last
-        self.index = 0
+        index = 0
     }
 
     /// Apply method to `HBMustacheContext`. These are available when processing elements
@@ -25,18 +25,17 @@ struct HBMustacheContext: HBMustacheMethods {
     func runMethod(_ name: String) -> Any? {
         switch name {
         case "first":
-            return self.first
+            return first
         case "last":
-            return self.last
+            return last
         case "index":
-            return self.index
+            return index
         case "even":
-            return (self.index & 1) == 0
+            return (index & 1) == 0
         case "odd":
-            return (self.index & 1) == 1
+            return (index & 1) == 1
         default:
             return nil
         }
     }
-
 }

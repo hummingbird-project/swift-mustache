@@ -13,7 +13,7 @@ extension HBMustacheLibrary {
         guard let enumerator = fs.enumerator(atPath: directory) else { return }
         for case let path as String in enumerator {
             guard path.hasSuffix(extWithDot) else { continue }
-            guard let data = fs.contents(atPath: directory + path) else { continue}
+            guard let data = fs.contents(atPath: directory + path) else { continue }
             let string = String(decoding: data, as: Unicode.UTF8.self)
             guard let template = try? HBMustacheTemplate(string: string) else {
                 logger?.error("Failed to load \(path)")

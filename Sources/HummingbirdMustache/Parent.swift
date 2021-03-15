@@ -10,4 +10,3 @@ protocol HBMustacheParent {
 extension Dictionary: HBMustacheParent where Key == String {
     func child(named: String) -> Any? { return self[named] }
 }
-

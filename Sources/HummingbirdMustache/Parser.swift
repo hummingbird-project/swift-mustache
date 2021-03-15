@@ -23,10 +23,10 @@ struct HBParser {
         if let buffer = utf8Data as? [UInt8] {
             self.buffer = buffer
         } else {
-            self.buffer = Array(utf8Data)
+            buffer = Array(utf8Data)
         }
-        self.index = 0
-        self.range = 0..<self.buffer.endIndex
+        index = 0
+        range = 0 ..< buffer.endIndex
 
         // should check that the data is valid utf8
         if validateUTF8 == true, self.validateUTF8() == false {
@@ -35,19 +35,19 @@ struct HBParser {
     }
 
     init(_ string: String) {
-        self.buffer = Array(string.utf8)
-        self.index = 0
-        self.range = 0..<self.buffer.endIndex
+        buffer = Array(string.utf8)
+        index = 0
+        range = 0 ..< buffer.endIndex
     }
 
     /// Return contents of parser as a string
     var count: Int {
-        return self.range.count
+        return range.count
     }
 
     /// Return contents of parser as a string
     var string: String {
-        return makeString(self.buffer[self.range])
+        return makeString(buffer[range])
     }
 
     private var buffer: [UInt8]
@@ -60,12 +60,12 @@ struct HBParser {
 extension HBParser {
     /// initialise a parser that parses a section of the buffer attached to another parser
     init(_ parser: HBParser, range: Range<Int>) {
-        self.buffer = parser.buffer
-        self.index = range.startIndex
+        buffer = parser.buffer
+        index = range.startIndex
         self.range = range
 
-        precondition(range.startIndex >= 0 && range.endIndex <= self.buffer.endIndex)
-        precondition(self.buffer[range.startIndex] & 0xC0 != 0x80) // check we arent in the middle of a UTF8 character
+        precondition(range.startIndex >= 0 && range.endIndex <= buffer.endIndex)
+        precondition(buffer[range.startIndex] & 0xC0 != 0x80) // check we arent in the middle of a UTF8 character
     }
 
     /// initialise a parser that parses a section of the buffer attached to this parser
@@ -79,7 +79,7 @@ extension HBParser {
     /// - Throws: .overflow
     /// - Returns: Current character
     mutating func character() throws -> Unicode.Scalar {
-        guard !self.reachedEnd() else { throw Error.overflow }
+        guard !reachedEnd() else { throw Error.overflow }
         return unsafeCurrentAndAdvance()
     }
 
@@ -88,9 +88,9 @@ extension HBParser {
     /// - Throws: .overflow
     /// - Returns: If current character was the one we expected
     mutating func read(_ char: Unicode.Scalar) throws -> Bool {
-        let initialIndex = self.index
+        let initialIndex = index
         let c = try character()
-        guard c == char else { self.index = initialIndex; return false }
+        guard c == char else { index = initialIndex; return false }
         return true
     }
 
@@ -99,9 +99,9 @@ extension HBParser {
     /// - Throws: .overflow
     /// - Returns: If current character is in character set
     mutating func read(_ characterSet: Set<Unicode.Scalar>) throws -> Bool {
-        let initialIndex = self.index
+        let initialIndex = index
         let c = try character()
-        guard characterSet.contains(c) else { self.index = initialIndex; return false }
+        guard characterSet.contains(c) else { index = initialIndex; return false }
         return true
     }
 
@@ -110,10 +110,10 @@ extension HBParser {
     /// - Throws: .overflow, .emptyString
     /// - Returns: If characters at current position equal string
     mutating func read(_ string: String) throws -> Bool {
-        let initialIndex = self.index
+        let initialIndex = index
         guard string.count > 0 else { throw Error.emptyString }
         let subString = try read(count: string.count)
-        guard subString.string == string else { self.index = initialIndex; return false }
+        guard subString.string == string else { index = initialIndex; return false }
         return true
     }
 
@@ -123,14 +123,14 @@ extension HBParser {
     /// - Returns: The string read from the buffer
     mutating func read(count: Int) throws -> HBParser {
         var count = count
-        var readEndIndex = self.index
+        var readEndIndex = index
         while count > 0 {
-            guard readEndIndex != self.range.endIndex else { throw Error.overflow }
+            guard readEndIndex != range.endIndex else { throw Error.overflow }
             readEndIndex = skipUTF8Character(at: readEndIndex)
             count -= 1
         }
-        let result = self.subParser(self.index..<readEndIndex)
-        self.index = readEndIndex
+        let result = subParser(index ..< readEndIndex)
+        index = readEndIndex
         return result
     }
 
@@ -139,10 +139,10 @@ extension HBParser {
     /// - Throws: .overflow if we hit the end of the buffer before reading character
     /// - Returns: String read from buffer
     @discardableResult mutating func read(until: Unicode.Scalar, throwOnOverflow: Bool = true) throws -> HBParser {
-        let startIndex = self.index
-        while !self.reachedEnd() {
+        let startIndex = index
+        while !reachedEnd() {
             if unsafeCurrent() == until {
-                return self.subParser(startIndex..<self.index)
+                return subParser(startIndex ..< index)
             }
             unsafeAdvance()
         }
@@ -150,7 +150,7 @@ extension HBParser {
             _setPosition(startIndex)
             throw Error.overflow
         }
-        return self.subParser(startIndex..<self.index)
+        return subParser(startIndex ..< index)
     }
 
     /// Read from buffer until we hit a character in supplied set. Position after this is of the character we were checking for
@@ -158,10 +158,10 @@ extension HBParser {
     /// - Throws: .overflow
     /// - Returns: String read from buffer
     @discardableResult mutating func read(until characterSet: Set<Unicode.Scalar>, throwOnOverflow: Bool = true) throws -> HBParser {
-        let startIndex = self.index
-        while !self.reachedEnd() {
+        let startIndex = index
+        while !reachedEnd() {
             if characterSet.contains(unsafeCurrent()) {
-                return self.subParser(startIndex..<self.index)
+                return subParser(startIndex ..< index)
             }
             unsafeAdvance()
         }
@@ -169,7 +169,7 @@ extension HBParser {
             _setPosition(startIndex)
             throw Error.overflow
         }
-        return self.subParser(startIndex..<self.index)
+        return subParser(startIndex ..< index)
     }
 
     /// Read from buffer until we hit a character that returns true for supplied closure. Position after this is of the character we were checking for
@@ -177,10 +177,10 @@ extension HBParser {
     /// - Throws: .overflow
     /// - Returns: String read from buffer
     @discardableResult mutating func read(until: (Unicode.Scalar) -> Bool, throwOnOverflow: Bool = true) throws -> HBParser {
-        let startIndex = self.index
-        while !self.reachedEnd() {
+        let startIndex = index
+        while !reachedEnd() {
             if until(unsafeCurrent()) {
-                return self.subParser(startIndex..<self.index)
+                return subParser(startIndex ..< index)
             }
             unsafeAdvance()
         }
@@ -188,7 +188,7 @@ extension HBParser {
             _setPosition(startIndex)
             throw Error.overflow
         }
-        return self.subParser(startIndex..<self.index)
+        return subParser(startIndex ..< index)
     }
 
     /// Read from buffer until we hit a character where supplied KeyPath is true. Position after this is of the character we were checking for
@@ -196,10 +196,10 @@ extension HBParser {
     /// - Throws: .overflow
     /// - Returns: String read from buffer
     @discardableResult mutating func read(until keyPath: KeyPath<Unicode.Scalar, Bool>, throwOnOverflow: Bool = true) throws -> HBParser {
-        let startIndex = self.index
-        while !self.reachedEnd() {
+        let startIndex = index
+        while !reachedEnd() {
             if unsafeCurrent()[keyPath: keyPath] {
-                return self.subParser(startIndex..<self.index)
+                return subParser(startIndex ..< index)
             }
             unsafeAdvance()
         }
@@ -207,7 +207,7 @@ extension HBParser {
             _setPosition(startIndex)
             throw Error.overflow
         }
-        return self.subParser(startIndex..<self.index)
+        return subParser(startIndex ..< index)
     }
 
     /// Read from buffer until we hit a string. By default the position after this is of the beginning of the string we were checking for
@@ -234,7 +234,7 @@ extension HBParser {
                         if skipToEnd == false {
                             index = foundIndex
                         }
-                        let result = subParser(startIndex..<foundIndex)
+                        let result = subParser(startIndex ..< foundIndex)
                         return result
                     }
                 } else {
@@ -246,16 +246,16 @@ extension HBParser {
                 _setPosition(startIndex)
                 throw Error.overflow
             }
-            return subParser(startIndex..<index)
+            return subParser(startIndex ..< index)
         }
     }
 
     /// Read from buffer from current position until the end of the buffer
     /// - Returns: String read from buffer
     @discardableResult mutating func readUntilTheEnd() -> HBParser {
-        let startIndex = self.index
-        self.index = self.range.endIndex
-        return self.subParser(startIndex..<self.index)
+        let startIndex = index
+        index = range.endIndex
+        return subParser(startIndex ..< index)
     }
 
     /// Read while character at current position is the one supplied
@@ -263,7 +263,7 @@ extension HBParser {
     /// - Returns: String read from buffer
     @discardableResult mutating func read(while: Unicode.Scalar) -> Int {
         var count = 0
-        while !self.reachedEnd(),
+        while !reachedEnd(),
               unsafeCurrent() == `while`
         {
             unsafeAdvance()
@@ -276,39 +276,39 @@ extension HBParser {
     /// - Parameter while: character set to check
     /// - Returns: String read from buffer
     @discardableResult mutating func read(while characterSet: Set<Unicode.Scalar>) -> HBParser {
-        let startIndex = self.index
-        while !self.reachedEnd(),
+        let startIndex = index
+        while !reachedEnd(),
               characterSet.contains(unsafeCurrent())
         {
             unsafeAdvance()
         }
-        return self.subParser(startIndex..<self.index)
+        return subParser(startIndex ..< index)
     }
 
     /// Read while character returns true for supplied closure
     /// - Parameter while: character set to check
     /// - Returns: String read from buffer
     @discardableResult mutating func read(while: (Unicode.Scalar) -> Bool) -> HBParser {
-        let startIndex = self.index
-        while !self.reachedEnd(),
+        let startIndex = index
+        while !reachedEnd(),
               `while`(unsafeCurrent())
         {
             unsafeAdvance()
         }
-        return self.subParser(startIndex..<self.index)
+        return subParser(startIndex ..< index)
     }
 
     /// Read while character returns true for supplied KeyPath
     /// - Parameter while: character set to check
     /// - Returns: String read from buffer
     @discardableResult mutating func read(while keyPath: KeyPath<Unicode.Scalar, Bool>) -> HBParser {
-        let startIndex = self.index
-        while !self.reachedEnd(),
+        let startIndex = index
+        while !reachedEnd(),
               unsafeCurrent()[keyPath: keyPath]
         {
             unsafeAdvance()
         }
-        return self.subParser(startIndex..<self.index)
+        return subParser(startIndex ..< index)
     }
 
     /// Split parser into sections separated by character
@@ -316,14 +316,14 @@ extension HBParser {
     /// - Returns: arrays of sub parsers
     mutating func split(separator: Unicode.Scalar) -> [HBParser] {
         var subParsers: [HBParser] = []
-        while !self.reachedEnd() {
+        while !reachedEnd() {
             do {
                 let section = try read(until: separator)
                 subParsers.append(section)
                 unsafeAdvance()
             } catch {
-                if !self.reachedEnd() {
-                    subParsers.append(self.readUntilTheEnd())
+                if !reachedEnd() {
+                    subParsers.append(readUntilTheEnd())
                 }
             }
         }
@@ -333,7 +333,7 @@ extension HBParser {
     /// Return whether we have reached the end of the buffer
     /// - Returns: Have we reached the end
     func reachedEnd() -> Bool {
-        return self.index == self.range.endIndex
+        return index == range.endIndex
     }
 }
 
@@ -343,15 +343,15 @@ extension HBParser {
     /// - Throws: .overflow
     /// - Returns: Unicode.Scalar
     func current() -> Unicode.Scalar {
-        guard !self.reachedEnd() else { return Unicode.Scalar(0) }
+        guard !reachedEnd() else { return Unicode.Scalar(0) }
         return unsafeCurrent()
     }
 
     /// Move forward one character
     /// - Throws: .overflow
     mutating func advance() throws {
-        guard !self.reachedEnd() else { throw Error.overflow }
-        return self.unsafeAdvance()
+        guard !reachedEnd() else { throw Error.overflow }
+        return unsafeAdvance()
     }
 
     /// Move forward so many character
@@ -360,8 +360,8 @@ extension HBParser {
     mutating func advance(by amount: Int) throws {
         var amount = amount
         while amount > 0 {
-            guard !self.reachedEnd() else { throw Error.overflow }
-            self.index = skipUTF8Character(at: self.index)
+            guard !reachedEnd() else { throw Error.overflow }
+            index = skipUTF8Character(at: index)
             amount -= 1
         }
     }
@@ -369,8 +369,8 @@ extension HBParser {
     /// Move backwards one character
     /// - Throws: .overflow
     mutating func retreat() throws {
-        guard self.index > self.range.startIndex else { throw Error.overflow }
-        self.index = backOneUTF8Character(at: self.index)
+        guard index > range.startIndex else { throw Error.overflow }
+        index = backOneUTF8Character(at: index)
     }
 
     /// Move back so many characters
@@ -379,20 +379,20 @@ extension HBParser {
     mutating func retreat(by amount: Int) throws {
         var amount = amount
         while amount > 0 {
-            guard self.index > self.range.startIndex else { throw Error.overflow }
-            self.index = backOneUTF8Character(at: self.index)
+            guard index > range.startIndex else { throw Error.overflow }
+            index = backOneUTF8Character(at: index)
             amount -= 1
         }
     }
 
     mutating func unsafeAdvance() {
-        self.index = skipUTF8Character(at: self.index)
+        index = skipUTF8Character(at: index)
     }
 
     mutating func unsafeAdvance(by amount: Int) {
         var amount = amount
         while amount > 0 {
-            self.index = skipUTF8Character(at: self.index)
+            index = skipUTF8Character(at: index)
             amount -= 1
         }
     }
@@ -416,8 +416,8 @@ extension HBParser: Sequence {
         }
 
         mutating func next() -> Unicode.Scalar? {
-            guard !self.parser.reachedEnd() else { return nil }
-            return self.parser.unsafeCurrentAndAdvance()
+            guard !parser.reachedEnd() else { return nil }
+            return parser.unsafeCurrentAndAdvance()
         }
     }
 }
@@ -425,7 +425,7 @@ extension HBParser: Sequence {
 // internal versions without checks
 private extension HBParser {
     func unsafeCurrent() -> Unicode.Scalar {
-        return decodeUTF8Character(at: self.index).0
+        return decodeUTF8Character(at: index).0
     }
 
     mutating func unsafeCurrentAndAdvance() -> Unicode.Scalar {
@@ -477,16 +477,16 @@ extension HBParser {
     }
 
     func skipUTF8Character(at index: Int) -> Int {
-        if self.buffer[index] & 0x80 != 0x80 { return index + 1 }
-        if self.buffer[index + 1] & 0xC0 == 0x80 { return index + 2 }
-        if self.buffer[index + 2] & 0xC0 == 0x80 { return index + 3 }
+        if buffer[index] & 0x80 != 0x80 { return index + 1 }
+        if buffer[index + 1] & 0xC0 == 0x80 { return index + 2 }
+        if buffer[index + 2] & 0xC0 == 0x80 { return index + 3 }
         return index + 4
     }
 
     func backOneUTF8Character(at index: Int) -> Int {
-        if self.buffer[index - 1] & 0xC0 != 0x80 { return index - 1 }
-        if self.buffer[index - 2] & 0xC0 != 0x80 { return index - 2 }
-        if self.buffer[index - 3] & 0xC0 != 0x80 { return index - 3 }
+        if buffer[index - 1] & 0xC0 != 0x80 { return index - 1 }
+        if buffer[index - 2] & 0xC0 != 0x80 { return index - 2 }
+        if buffer[index - 3] & 0xC0 != 0x80 { return index - 3 }
         return index - 4
     }
 
@@ -526,9 +526,9 @@ extension HBParser {
 
     /// return if the buffer is valid UTF8
     func validateUTF8() -> Bool {
-        var index = self.range.startIndex
-        while index < self.range.endIndex {
-            let (scalar, newIndex) = self.validateUTF8Character(at: index)
+        var index = range.startIndex
+        while index < range.endIndex {
+            let (scalar, newIndex) = validateUTF8Character(at: index)
             guard scalar != nil else { return false }
             index = newIndex
         }
@@ -598,17 +598,17 @@ extension HBParser {
             return newIndex
         }
 
-        guard self.index != self.range.endIndex else { return "" }
+        guard index != range.endIndex else { return "" }
         do {
             if #available(macOS 11, *) {
                 return try String(unsafeUninitializedCapacity: range.endIndex - index) { bytes -> Int in
-                    return try _percentDecode(self.buffer[self.index..<range.endIndex], bytes)
+                    try _percentDecode(self.buffer[self.index ..< range.endIndex], bytes)
                 }
             } else {
-                let newBuffer = try [UInt8].init(unsafeUninitializedCapacity: self.range.endIndex - self.index) { bytes, count in
-                    try count = _percentDecode(self.buffer[self.index..<range.endIndex], bytes)
+                let newBuffer = try [UInt8].init(unsafeUninitializedCapacity: range.endIndex - index) { bytes, count in
+                    try count = _percentDecode(self.buffer[self.index ..< range.endIndex], bytes)
                 }
-                return self.makeString(newBuffer)
+                return makeString(newBuffer)
             }
         } catch {
             return nil
@@ -622,8 +622,8 @@ extension Unicode.Scalar {
     }
 
     var isNewline: Bool {
-        switch self.value {
-        case 0x000A...0x000D /* LF ... CR */: return true
+        switch value {
+        case 0x000A ... 0x000D /* LF ... CR */: return true
         case 0x0085 /* NEXT LINE (NEL) */: return true
         case 0x2028 /* LINE SEPARATOR */: return true
         case 0x2029 /* PARAGRAPH SEPARATOR */: return true
@@ -640,7 +640,7 @@ extension Unicode.Scalar {
     }
 
     var isLetterOrNumber: Bool {
-        return self.isLetter || self.isNumber
+        return isLetter || isNumber
     }
 }
 

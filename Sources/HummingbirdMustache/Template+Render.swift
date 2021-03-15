@@ -9,9 +9,9 @@ extension HBMustacheTemplate {
         var string = ""
         for token in tokens {
             switch token {
-            case .text(let text):
+            case let .text(text):
                 string += text
-            case .variable(let variable, let method):
+            case let .variable(variable, method):
                 if let child = getChild(named: variable, from: object, method: method, context: context) {
                     if let template = child as? HBMustacheTemplate {
                         string += template.render(object)
@@ -19,19 +19,19 @@ extension HBMustacheTemplate {
                         string += String(describing: child).htmlEscape()
                     }
                 }
-            case .unescapedVariable(let variable, let method):
+            case let .unescapedVariable(variable, method):
                 if let child = getChild(named: variable, from: object, method: method, context: context) {
                     string += String(describing: child)
                 }
-            case .section(let variable, let method, let template):
+            case let .section(variable, method, template):
                 let child = getChild(named: variable, from: object, method: method, context: context)
                 string += renderSection(child, parent: object, with: template)
-                
-            case .invertedSection(let variable, let method, let template):
+
+            case let .invertedSection(variable, method, template):
                 let child = getChild(named: variable, from: object, method: method, context: context)
                 string += renderInvertedSection(child, parent: object, with: template)
-                
-            case .partial(let name):
+
+            case let .partial(name):
                 if let text = library?.render(object, withTemplate: name) {
                     string += text
                 }
@@ -54,13 +54,13 @@ extension HBMustacheTemplate {
             return bool ? template.render(parent) : ""
         case let lambda as HBMustacheLambda:
             return lambda.run(parent, template)
-        case .some(let value):
+        case let .some(value):
             return template.render(value)
         case .none:
             return ""
         }
     }
-    
+
     /// Render an inverted section
     /// - Parameters:
     ///   - child: Object to render section for
@@ -111,7 +111,8 @@ extension HBMustacheTemplate {
         // if we want to run a method and the current child can have methods applied to it then
         // run method on the current child
         if let method = method,
-           let runnable = child as? HBMustacheMethods {
+           let runnable = child as? HBMustacheMethods
+        {
             if let result = runnable.runMethod(method) {
                 return result
             }
@@ -119,4 +120,3 @@ extension HBMustacheTemplate {
         return child
     }
 }
-

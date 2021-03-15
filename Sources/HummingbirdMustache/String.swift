@@ -10,7 +10,7 @@ extension String {
     /// HTML escape string. Replace '<', '>' and '&' with HTML escaped versions
     func htmlEscape() -> String {
         var newString = ""
-        newString.reserveCapacity(self.count)
+        newString.reserveCapacity(count)
         // currently doing this by going through each character could speed
         // this us by treating as an array of UInt8's
         for c in self {
