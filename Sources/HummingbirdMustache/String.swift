@@ -5,7 +5,7 @@ extension String {
         ">": "&gt;",
         "&": "&amp;",
         "\"": "&quot;",
-        "'": "&apos;",
+        "'": "&#39;",
     ]
     /// HTML escape string. Replace '<', '>' and '&' with HTML escaped versions
     func htmlEscape() -> String {
