@@ -18,6 +18,10 @@ struct HBMustacheContext: HBMustacheMethods {
             return self.last
         case "index":
             return self.index
+        case "even":
+            return (self.index & 1) == 0
+        case "odd":
+            return (self.index & 1) == 1
         default:
             return nil
         }

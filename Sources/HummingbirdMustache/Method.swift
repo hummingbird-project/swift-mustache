@@ -10,10 +10,16 @@ extension String: HBMustacheMethods {
             return self.lowercased()
         case "uppercased":
             return self.uppercased()
+        case "reversed":
+            return self.reversed()
         default:
             return nil
         }
     }
+}
+
+protocol HBComparableSequence {
+    func runComparableMethod(_ name: String) -> Any?
 }
 
 extension Array: HBMustacheMethods {
@@ -21,8 +27,22 @@ extension Array: HBMustacheMethods {
         switch name {
         case "reversed":
             return self.reversed()
-        case "enumerated":
-            return self.enumerated()
+        case "count":
+            return self.count
+        default:
+            if let comparableSeq = self as? HBComparableSequence {
+                return comparableSeq.runComparableMethod(name)
+            }
+            return nil
+        }
+    }
+}
+
+extension Array: HBComparableSequence where Element: Comparable {
+    func runComparableMethod(_ name: String) -> Any? {
+        switch name {
+        case "sorted":
+            return self.sorted()
         default:
             return nil
         }
@@ -32,8 +52,24 @@ extension Array: HBMustacheMethods {
 extension Dictionary: HBMustacheMethods {
     func runMethod(_ name: String) -> Any? {
         switch name {
+        case "count":
+            return self.count
         case "enumerated":
-            return self.enumerated()
+            return self.map { (key: $0.key, value: $0.value) }
+        default:
+            if let comparableSeq = self as? HBComparableSequence {
+                return comparableSeq.runComparableMethod(name)
+            }
+            return nil
+        }
+    }
+}
+
+extension Dictionary: HBComparableSequence where Key: Comparable {
+    func runComparableMethod(_ name: String) -> Any? {
+        switch name {
+        case "sorted":
+            return self.map { (key: $0.key, value: $0.value) }.sorted { $0.key < $1.key }
         default:
             return nil
         }
@@ -43,7 +79,7 @@ extension Dictionary: HBMustacheMethods {
 extension Int: HBMustacheMethods {
     func runMethod(_ name: String) -> Any? {
         switch name {
-        case "plus1":
+        case "plusone":
             return self + 1
         default:
             return nil
