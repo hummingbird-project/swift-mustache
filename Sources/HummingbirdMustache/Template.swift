@@ -1,5 +1,5 @@
 /// Class holding Mustache template
-public class HBMustacheTemplate {
+public final class HBMustacheTemplate {
     /// Initialize template
     /// - Parameter string: Template text
     /// - Throws: HBMustacheTemplate.Error

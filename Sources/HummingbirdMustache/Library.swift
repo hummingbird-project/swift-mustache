@@ -6,7 +6,7 @@ import Logging
 /// ```
 /// {{#sequence}}{{>entry}}{{/sequence}}
 /// ```
-public class HBMustacheLibrary {
+public final class HBMustacheLibrary {
     /// Initialize empty library
     public init() {
         templates = [:]
