@@ -393,4 +393,134 @@ final class SpecInvertedTests: XCTestCase {
         """
         try test(object, template, expected)
     }
+
+    func testNestedFalse() throws {
+        let object = ["bool": false]
+        let template = #"| A {{^bool}}B {{^bool}}C{{/bool}} D{{/bool}} E |"#
+        let expected = #"| A B C D E |"#
+        try test(object, template, expected)
+    }
+
+    func testNestedTrue() throws {
+        let object = ["bool": true]
+        let template = #"| A {{^bool}}B {{^bool}}C{{/bool}} D{{/bool}} E |"#
+        let expected = #"| A  E |"#
+        try test(object, template, expected)
+    }
+
+    func testContextMiss() throws {
+        let object = {}
+        let template = #"[{{^missing}}Cannot find key 'missing'!{{/missing}}]"#
+        let expected = #"[Cannot find key 'missing'!]"#
+        try test(object, template, expected)
+    }
+
+    func testDottedNamesTrue() throws {
+        let object = ["a": ["b": ["c": true]]]
+        let template = #""{{^a.b.c}}Not Here{{/a.b.c}}" == """#
+        let expected = "\"\" == \"\""
+        try test(object, template, expected)
+    }
+
+    func testDottedNamesFalse() throws {
+        let object = ["a": ["b": ["c": false]]]
+        let template = #""{{^a.b.c}}Not Here{{/a.b.c}}" == "Not Here""#
+        let expected = #""Not Here" == "Not Here""#
+        try test(object, template, expected)
+    }
+
+    func testDottedNamesBrokenChain() throws {
+        let object = ["a": {}]
+        let template = #""{{^a.b.c}}Not Here{{/a.b.c}}" == "Not Here""#
+        let expected = #""Not Here" == "Not Here""#
+        try test(object, template, expected)
+    }
+
+    func testSurroundingWhitespace() throws {
+        let object = ["boolean": false]
+        let template = " | {{^boolean}}\t|\t{{/boolean}} | \n"
+        let expected = " | \t|\t | \n"
+        try test(object, template, expected)
+
+    }
+
+    func testInternalWhitespace() throws {
+        let object = ["boolean": false]
+        let template = " | {{^boolean}} {{! Important Whitespace }}\n {{/boolean}} | \n"
+        let expected = " |  \n  | \n"
+        try test(object, template, expected)
+
+    }
+
+    func testIndentedInline() throws {
+        let object = ["boolean": false]
+        let template = " {{^boolean}}NO{{/boolean}}\n {{^boolean}}WAY{{/boolean}}\n"
+        let expected = " NO\n WAY\n"
+        try test(object, template, expected)
+
+    }
+
+    func testStandaloneLines() throws {
+        let object = ["boolean": false]
+        let template = """
+        | This Is
+        {{^boolean}}
+        |
+        {{/boolean}}
+        | A Line
+        """
+        let expected = """
+        | This Is
+        |
+        | A Line
+        """
+        try test(object, template, expected)
+
+    }
+
+    func testStandaloneIndentedLines() throws {
+        let object = ["boolean": false]
+        let template = """
+        | This Is
+          {{^boolean}}
+        |
+          {{/boolean}}
+        | A Line
+        """
+        let expected = """
+        | This Is
+        |
+        | A Line
+        """
+        try test(object, template, expected)
+    }
+
+    func testStandaloneLineEndings() throws {
+        let object = ["boolean": false]
+        let template = "|\r\n{{^boolean}}\r\n{{/boolean}}\r\n|"
+        let expected = "|\r\n|"
+        try test(object, template, expected)
+
+    }
+
+    func testStandaloneWithoutPreviousLine() throws {
+        let object = ["boolean": false]
+        let template = "  {{^boolean}}\n^{{/boolean}}\n/"
+        let expected = "^\n/"
+        try test(object, template, expected)
+    }
+
+    func testStandaloneWithoutNewLine() throws {
+        let object = ["boolean": false]
+        let template = "^{{^boolean}}\n/\n  {{/boolean}}"
+        let expected = "^\n/\n"
+        try test(object, template, expected)
+    }
+
+    func testPadding() throws {
+        let object = ["boolean": false]
+        let template = "|{{^ boolean }}={{/ boolean }}|"
+        let expected = "|=|"
+        try test(object, template, expected)
+    }
 }
