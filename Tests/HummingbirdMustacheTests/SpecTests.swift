@@ -525,3 +525,122 @@ final class SpecInvertedTests: XCTestCase {
         try test(object, template, expected)
     }
 }
+
+// MARK: Partials
+
+final class SpecPartialsTests: XCTestCase {
+    func testPartial(_ object: Any, _ template: String, _ partials: [String: String], _ expected: String) throws {
+        let library = HBMustacheLibrary()
+        let template = try HBMustacheTemplate(string: template)
+        library.register(template, named: "template")
+        for (key, value) in partials {
+            let template = try HBMustacheTemplate(string: value)
+            library.register(template, named: key)
+        }
+        let result = library.render(object, withTemplate: "template")
+        XCTAssertEqual(result, expected)
+    }
+
+    func testBasic() throws {
+        let object = {}
+        let template = #""{{>text}}""#
+        let partial = "from partial"
+        let expected = #""from partial""#
+        try testPartial(object, template, ["text": partial], expected)
+    }
+
+    func testFailedLookup() throws {
+        let object = {}
+        let template = #""{{>text}}""#
+        let expected = "\"\""
+        try testPartial(object, template, [:], expected)
+    }
+
+    func testContext() throws {
+        let object = ["text": "content"]
+        let template = #""{{>partial}}""#
+        let partial = "*{{text}}*"
+        let expected = #""*content*""#
+        try testPartial(object, template, ["partial": partial], expected)
+    }
+
+    func testRecursion() throws {
+        let object: [String: Any] = ["content": "X", "nodes": [["content": "Y", "nodes": []]]]
+        let template = #"{{>node}}"#
+        let partial = "{{content}}<{{#nodes}}{{>node}}{{/nodes}}>"
+        let expected = #"X<Y<>>"#
+        try testPartial(object, template, ["node": partial], expected)
+    }
+
+    func testSurroundingWhitespace() throws {
+        let object = {}
+        let template = "| {{>partial}} |"
+        let partial = "\t|\t"
+        let expected = "| \t|\t |"
+        try testPartial(object, template, ["partial": partial], expected)
+    }
+
+    func testInlineIdention() throws {
+        let object = ["data": "|"]
+        let template = "  {{data}}  {{> partial}}\n"
+        let partial = ">\n>"
+        let expected = "  |  >\n>\n"
+        try testPartial(object, template, ["partial": partial], expected)
+    }
+
+    func testStandaloneLineEndings() throws {
+        let object = {}
+        let template = "|\r\n{{>partial}}\r\n|"
+        let partial = ">"
+        let expected = "|\r\n>|"
+        try testPartial(object, template, ["partial": partial], expected)
+    }
+
+    func testStandaloneWithoutPreviousLine() throws {
+        let object = {}
+        let template = "  {{>partial}}\n>"
+        let partial = ">\n>"
+        let expected = "  >\n  >>"
+        try testPartial(object, template, ["partial": partial], expected)
+    }
+
+    func testStandaloneWithoutNewLine() throws {
+        let object = {}
+        let template = ">\n  {{>partial}}"
+        let partial = ">\n>"
+        let expected = ">\n  >\n  >"
+        try testPartial(object, template, ["partial": partial], expected)
+    }
+
+    func testStandaloneIndentation() throws {
+        let object = ["content": "<\n->"]
+        let template = """
+        \
+         {{>partial}}
+        /
+        """
+        let partial = """
+        |
+        {{{content}}}
+        |
+
+        """
+        let expected = """
+        \
+         |
+         <
+        ->
+         |
+        /
+        """
+        try testPartial(object, template, ["partial": partial], expected)
+    }
+
+    func testPaddingWhitespace() throws {
+        let object = ["boolean": true ]
+        let template = "|{{> partial }}|"
+        let partial = "[]"
+        let expected = "|[]|"
+        try testPartial(object, template, ["partial": partial], expected)
+    }
+}

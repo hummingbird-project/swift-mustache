@@ -36,7 +36,7 @@ public final class HBMustacheTemplate {
         case unescapedVariable(name: String, method: String? = nil)
         case section(name: String, method: String? = nil, template: HBMustacheTemplate)
         case invertedSection(name: String, method: String? = nil, template: HBMustacheTemplate)
-        case partial(String)
+        case partial(String, indentation: String?)
     }
 
     let tokens: [Token]

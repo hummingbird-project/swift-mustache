@@ -5,9 +5,12 @@ extension HBMustacheTemplate {
     ///   - object: Object
     ///   - context: Context that render is occurring in. Contains information about position in sequence
     /// - Returns: Rendered text
-    func render(_ object: Any, context: HBMustacheContext? = nil) -> String {
+    func render(_ object: Any, context: HBMustacheContext? = nil, indentation: String? = nil) -> String {
         var string = ""
         for token in tokens {
+            if let indentation = indentation, string.last == "\n" {
+                string += indentation
+            }
             switch token {
             case let .text(text):
                 string += text
@@ -31,9 +34,9 @@ extension HBMustacheTemplate {
                 let child = getChild(named: variable, from: object, method: method, context: context)
                 string += renderInvertedSection(child, parent: object, with: template)
 
-            case let .partial(name):
-                if let text = library?.render(object, withTemplate: name) {
-                    string += text
+            case let .partial(name, indentation):
+                if let template = library?.getTemplate(named: name) {
+                    string += template.render(object, indentation: indentation)
                 }
             }
         }
