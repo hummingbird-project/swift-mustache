@@ -13,73 +13,136 @@ extension HBMustacheTemplate {
     }
 
     /// parse section in mustache text
-    static func parse(_ parser: inout HBParser, sectionName: String?) throws -> [Token] {
+    static func parse(_ parser: inout HBParser, sectionName: String?, newLine: Bool = true) throws -> [Token] {
         var tokens: [Token] = []
+        var newLine = newLine
+        var whiteSpaceBefore: String = ""
         while !parser.reachedEnd() {
-            let text = try parser.read(untilString: "{{", throwOnOverflow: false, skipToEnd: true)
+            // if new line read whitespace
+            if newLine {
+                whiteSpaceBefore = parser.read(while: Set(" \t")).string
+            }
+            // read until we hit either a newline or "{"
+            let text = try parser.read(until: Set("{\n"), throwOnOverflow: false)
+            // if new line append all text read plus newline
+            if parser.current() == "\n" {
+                tokens.append(.text(whiteSpaceBefore + text.string + "\n"))
+                newLine = true
+                parser.unsafeAdvance()
+                continue
+            } else if parser.current() == "{" {
+                parser.unsafeAdvance()
+                if parser.current() != "{" {
+                    if text.count > 0 {
+                        tokens.append(.text(whiteSpaceBefore + text.string + "{"))
+                        whiteSpaceBefore = ""
+                    }
+                    continue
+                } else {
+                    parser.unsafeAdvance()
+                }
+            }
+
             if text.count > 0 {
-                tokens.append(.text(text.string))
+                tokens.append(.text(whiteSpaceBefore + text.string))
+                whiteSpaceBefore = ""
+                newLine = false
             }
             if parser.reachedEnd() {
                 break
             }
             switch parser.current() {
             case "#":
+                // section
                 parser.unsafeAdvance()
                 let (name, method) = try parseName(&parser)
-                if parser.current() == "\n" {
-                    parser.unsafeAdvance()
+                if newLine && hasLineFinished(&parser) {
+                    newLine = true
+                    if parser.current() == "\n" {
+                        parser.unsafeAdvance()
+                    }
+                } else if whiteSpaceBefore.count > 0 {
+                    tokens.append(.text(whiteSpaceBefore))
                 }
-                let sectionTokens = try parse(&parser, sectionName: name)
+                let sectionTokens = try parse(&parser, sectionName: name, newLine: newLine)
                 tokens.append(.section(name: name, method: method, template: HBMustacheTemplate(sectionTokens)))
 
             case "^":
+                // inverted section
                 parser.unsafeAdvance()
                 let (name, method) = try parseName(&parser)
-                if parser.current() == "\n" {
-                    parser.unsafeAdvance()
+                if newLine && hasLineFinished(&parser) {
+                    newLine = true
+                    if parser.current() == "\n" {
+                        parser.unsafeAdvance()
+                    }
+                } else if whiteSpaceBefore.count > 0 {
+                    tokens.append(.text(whiteSpaceBefore))
                 }
-                let sectionTokens = try parse(&parser, sectionName: name)
+                let sectionTokens = try parse(&parser, sectionName: name, newLine: newLine)
                 tokens.append(.invertedSection(name: name, method: method, template: HBMustacheTemplate(sectionTokens)))
 
             case "/":
+                // end of section
                 parser.unsafeAdvance()
                 let (name, _) = try parseName(&parser)
                 guard name == sectionName else {
                     throw Error.sectionCloseNameIncorrect
                 }
-                if parser.current() == "\n" {
-                    parser.unsafeAdvance()
+                if newLine && hasLineFinished(&parser) {
+                    newLine = true
+                    if parser.current() == "\n" {
+                        parser.unsafeAdvance()
+                    }
+                } else if whiteSpaceBefore.count > 0 {
+                    tokens.append(.text(whiteSpaceBefore))
                 }
                 return tokens
 
+            case "!":
+                // comment
+                parser.unsafeAdvance()
+                _ = try parseComment(&parser)
+                if newLine && hasLineFinished(&parser) {
+                    newLine = true
+                    if !parser.reachedEnd() {
+                        parser.unsafeAdvance()
+                    }
+                }
+
             case "{":
+                // unescaped variable
+                if whiteSpaceBefore.count > 0 {
+                    tokens.append(.text(whiteSpaceBefore))
+                }
                 parser.unsafeAdvance()
                 let (name, method) = try parseName(&parser)
                 guard try parser.read("}") else { throw Error.unfinishedName }
                 tokens.append(.unescapedVariable(name: name, method: method))
 
             case "&":
+                // unescaped variable
+                if whiteSpaceBefore.count > 0 {
+                    tokens.append(.text(whiteSpaceBefore))
+                }
                 parser.unsafeAdvance()
                 let (name, method) = try parseName(&parser)
                 tokens.append(.unescapedVariable(name: name, method: method))
 
-            case "!":
-                parser.unsafeAdvance()
-                _ = try parseComment(&parser)
-                if parser.current() == "\n" {
-                    parser.unsafeAdvance()
-                }
-
             case ">":
+                // partial
+                if whiteSpaceBefore.count > 0 {
+                    tokens.append(.text(whiteSpaceBefore))
+                }
                 parser.unsafeAdvance()
                 let (name, _) = try parseName(&parser)
                 tokens.append(.partial(name))
-                if parser.current() == "\n" {
-                    parser.unsafeAdvance()
-                }
 
             default:
+                // variable
+                if whiteSpaceBefore.count > 0 {
+                    tokens.append(.text(whiteSpaceBefore))
+                }
                 let (name, method) = try parseName(&parser)
                 tokens.append(.variable(name: name, method: method))
             }
@@ -116,6 +179,17 @@ extension HBMustacheTemplate {
     static func parseComment(_ parser: inout HBParser) throws -> String {
         let text = try parser.read(untilString: "}}", throwOnOverflow: true, skipToEnd: true)
         return text.string
+    }
+
+    static func hasLineFinished(_ parser: inout HBParser) -> Bool {
+        var parser2 = parser
+        if parser.reachedEnd() { return true }
+        parser2.read(while: Set(" \t\r"))
+        if parser2.current() == "\n" {
+            try! parser.setPosition(parser2.getPosition())
+            return true
+        }
+        return false
     }
 
     private static let sectionNameCharsWithoutBrackets = Set<Unicode.Scalar>("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ._?")

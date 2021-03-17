@@ -390,6 +390,7 @@ final class SpecInvertedTests: XCTestCase {
         * first
         * second
         * third
+
         """
         try test(object, template, expected)
     }
