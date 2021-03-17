@@ -644,3 +644,31 @@ final class SpecPartialsTests: XCTestCase {
         try testPartial(object, template, ["partial": partial], expected)
     }
 }
+
+// MARK: Sections
+
+final class SpecSectionTests: XCTestCase {
+    func testTrue() throws {
+        let object = ["boolean": true]
+        let template = #""{{#boolean}}This should be rendered.{{/boolean}}""#
+        let expected = #""This should be rendered.""#
+        try test(object, template, expected)
+
+    }
+
+    func testFalse() throws {
+        let object = ["boolean": false]
+        let template = #""{{#boolean}}This should not be rendered.{{/boolean}}""#
+        let expected = "\"\""
+        try test(object, template, expected)
+
+    }
+
+    func testContext() throws {
+        let object = ["context": ["name": "Joe"]]
+        let template = #""{{#context}}Hi {{name}}.{{/context}}""#
+        let expected = #""Hi Joe.""#
+        try test(object, template, expected)
+
+    }
+}
