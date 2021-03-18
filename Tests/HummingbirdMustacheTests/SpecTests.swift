@@ -669,6 +669,258 @@ final class SpecSectionTests: XCTestCase {
         let template = #""{{#context}}Hi {{name}}.{{/context}}""#
         let expected = #""Hi Joe.""#
         try test(object, template, expected)
+    }
 
+    func testParentContext() throws {
+        let object: [String: Any] = ["a": "foo", "b": "wrong", "sec": ["b": "bar"], "c": ["d": "baz"]]
+        let template = #""{{#sec}}{{a}}, {{b}}, {{c.d}}{{/sec}}""#
+        let expected = #""foo, bar, baz""#
+        try test(object, template, expected)
+    }
+
+    func testVariables() throws {
+        let object: [String: Any] = ["foo": "bar"]
+        let template = #""{{#foo}} {{.}} is {{foo}} {{/foo}}""#
+        let expected = #"" bar is bar ""#
+        try test(object, template, expected)
+    }
+
+    func testListContexts() throws {
+        let object: [String: Any] = ["tops": ["tname": ["upper": "A", "lower": "a"], "middles": ["mname": "1", "bottoms": [["bname": "x"], ["bname": "y"]]]]]
+        let template = #"{{#tops}}{{#middles}}{{tname.lower}}{{mname}}.{{#bottoms}}{{tname.upper}}{{mname}}{{bname}}.{{/bottoms}}{{/middles}}{{/tops}}"#
+        let expected = #"a1.A1x.A1y."#
+        try test(object, template, expected)
+    }
+
+    func testDeeplyNestedContexts() throws {
+        let object: [String: Any] = ["a": ["one": 1], "b": ["two": 2], "c": ["three": 3, "d": ["four": 4, "five": 5]]]
+        let template = """
+        {{#a}}
+        {{one}}
+        {{#b}}
+        {{one}}{{two}}{{one}}
+        {{#c}}
+        {{one}}{{two}}{{three}}{{two}}{{one}}
+        {{#d}}
+        {{one}}{{two}}{{three}}{{four}}{{three}}{{two}}{{one}}
+        {{#five}}
+        {{one}}{{two}}{{three}}{{four}}{{five}}{{four}}{{three}}{{two}}{{one}}
+        {{one}}{{two}}{{three}}{{four}}{{.}}6{{.}}{{four}}{{three}}{{two}}{{one}}
+        {{one}}{{two}}{{three}}{{four}}{{five}}{{four}}{{three}}{{two}}{{one}}
+        {{/five}}
+        {{one}}{{two}}{{three}}{{four}}{{three}}{{two}}{{one}}
+        {{/d}}
+        {{one}}{{two}}{{three}}{{two}}{{one}}
+        {{/c}}
+        {{one}}{{two}}{{one}}
+        {{/b}}
+        {{one}}
+        {{/a}}
+
+        """
+        let expected = """
+        1
+        121
+        12321
+        1234321
+        123454321
+        12345654321
+        123454321
+        1234321
+        12321
+        121
+        1
+
+        """
+        try test(object, template, expected)
+    }
+
+    func testList() throws {
+        let object: [String: Any] = ["list": [["item": 1], ["item": 2], ["item": 3]]]
+        let template = #""{{#list}}{{item}}{{/list}}""#
+        let expected = #""123""#
+        try test(object, template, expected)
+    }
+
+    func testEmptyList() throws {
+        let object: [Any] = []
+        let template = #""{{#list}}Yay lists!{{/list}}""#
+        let expected = "\"\""
+        try test(object, template, expected)
+    }
+
+    func testDoubled() throws {
+        let object: [String: Any] = ["bool": true, "two": "second"]
+        let template = """
+        {{#bool}}
+        * first
+        {{/bool}}
+        * {{two}}
+        {{#bool}}
+        * third
+        {{/bool}}
+
+        """
+        let expected = """
+        * first
+        * second
+        * third
+
+        """
+        try test(object, template, expected)
+    }
+
+    func testNestedTrue() throws {
+        let object = ["bool": true]
+        let template = "| A {{#bool}}B {{#bool}}C{{/bool}} D{{/bool}} E |"
+        let expected = "| A B C D E |"
+        try test(object, template, expected)
+    }
+
+    func testNestedFalse() throws {
+        let object = ["bool": false]
+        let template = "| A {{#bool}}B {{#bool}}C{{/bool}} D{{/bool}} E |"
+        let expected = "| A  E |"
+        try test(object, template, expected)
+    }
+
+    func testContextMiss() throws {
+        let object = {}
+        let template = "[{{#missing}}Found key 'missing'!{{/missing}}]"
+        let expected = "[]"
+        try test(object, template, expected)
+    }
+
+    func testImplicitIteratorString() throws {
+        let object = ["list": [ "a", "b", "c", "d", "e" ]]
+        let template = #""{{#list}}({{.}}){{/list}}""#
+        let expected = #""(a)(b)(c)(d)(e)""#
+        try test(object, template, expected)
+    }
+
+    func testImplicitIteratorInteger() throws {
+        let object = ["list": [ 1, 2, 3, 4, 5 ]]
+        let template = #""{{#list}}({{.}}){{/list}}""#
+        let expected = #""(1)(2)(3)(4)(5)""#
+        try test(object, template, expected)
+    }
+
+    func testImplicitIteratorDecimal() throws {
+        let object = ["list": [ 1.1, 2.2, 3.3, 4.4, 5.5 ]]
+        let template = #""{{#list}}({{.}}){{/list}}""#
+        let expected = #""(1.1)(2.2)(3.3)(4.4)(5.5)""#
+        try test(object, template, expected)
+    }
+
+    func testImplicitIteratorArray() throws {
+        let object: [String: Any] = ["list": [[ 1, 2, 3], [ "a", "b", "c"]]]
+        let template = #""{{#list}}({{#.}}{{.}}{{/.}}){{/list}}""#
+        let expected = #""(123)(abc)""#
+        try test(object, template, expected)
+    }
+
+
+    func testDottedNameTrue() throws {
+        let object = ["a": ["b": ["c": true]]]
+        let template = #""{{#a.b.c}}Here{{/a.b.c}}" == "Here""#
+        let expected = #""Here" == "Here""#
+        try test(object, template, expected)
+    }
+
+    func testDottedNameFalse() throws {
+        let object = ["a": ["b": ["c": false]]]
+        let template = #""{{#a.b.c}}Here{{/a.b.c}}" == """#
+        let expected = "\"\" == \"\""
+        try test(object, template, expected)
+    }
+
+    func testDottedNameBrokenChain() throws {
+        let object = ["a": []]
+        let template = #""{{#a.b.c}}Here{{/a.b.c}}" == """#
+        let expected = "\"\" == \"\""
+        try test(object, template, expected)
+    }
+
+    func testSurroundingWhitespace() throws {
+        let object = ["boolean": true]
+        let template = " | {{#boolean}}\t|\t{{/boolean}} | \n"
+        let expected = " | \t|\t | \n"
+        try test(object, template, expected)
+    }
+
+    func testInternalWhitespace() throws {
+        let object = ["boolean": true]
+        let template = " | {{#boolean}} {{! Important Whitespace }}\n {{/boolean}} | \n"
+        let expected = " |  \n  | \n"
+        try test(object, template, expected)
+    }
+
+    func testIndentedInline() throws {
+        let object = ["boolean": true]
+        let template = " {{#boolean}}YES{{/boolean}}\n {{#boolean}}GOOD{{/boolean}}\n"
+        let expected = " YES\n GOOD\n"
+        try test(object, template, expected)
+    }
+
+    func testStandaloneLines() throws {
+        let object = ["boolean": true]
+        let template = """
+        | This Is
+        {{#boolean}}
+        |
+        {{/boolean}}
+        | A Line
+        """
+        let expected = """
+        | This Is
+        |
+        | A Line
+        """
+        try test(object, template, expected)
+    }
+
+    func testIndentedStandaloneLines() throws {
+        let object = ["boolean": true]
+        let template = """
+        | This Is
+          {{#boolean}}
+        |
+          {{/boolean}}
+        | A Line
+        """
+        let expected = """
+        | This Is
+        |
+        | A Line
+        """
+        try test(object, template, expected)
+    }
+
+    func testStandaloneLineEndings() throws {
+        let object = ["boolean": true]
+        let template = "|\r\n{{#boolean}}\r\n{{/boolean}}\r\n|"
+        let expected = "|\r\n|"
+        try test(object, template, expected)
+    }
+
+    func testStandaloneWithoutPreviousLine() throws {
+        let object = ["boolean": true]
+        let template = "  {{#boolean}}\n#{{/boolean}}\n/"
+        let expected = "#\n/"
+        try test(object, template, expected)
+    }
+
+    func testStandaloneWithoutNewLine() throws {
+        let object = ["boolean": true]
+        let template = "#{{#boolean}}\n/\n  {{/boolean}}"
+        let expected = "#\n/\n"
+        try test(object, template, expected)
+    }
+
+    func testPadding() throws {
+        let object = ["boolean": true]
+        let template = "|{{# boolean }}={{/ boolean }}|"
+        let expected = "|=|"
+        try test(object, template, expected)
     }
 }
