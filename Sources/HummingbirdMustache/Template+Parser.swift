@@ -9,6 +9,7 @@ extension HBMustacheTemplate {
 
     struct ParserState {
         var sectionName: String?
+        var sectionMethod: String?
         var newLine: Bool
         var startDelimiter: String
         var endDelimiter: String
@@ -20,9 +21,10 @@ extension HBMustacheTemplate {
             endDelimiter = "}}"
         }
 
-        func withSectionName(_ name: String) -> ParserState {
+        func withSectionName(_ name: String, method: String? = nil) -> ParserState {
             var newValue = self
             newValue.sectionName = name
+            newValue.sectionMethod = method
             return newValue
         }
 
@@ -88,7 +90,7 @@ extension HBMustacheTemplate {
                     tokens.append(.text(whiteSpaceBefore))
                     whiteSpaceBefore = ""
                 }
-                let sectionTokens = try parse(&parser, state: state.withSectionName(name))
+                let sectionTokens = try parse(&parser, state: state.withSectionName(name, method: method))
                 tokens.append(.section(name: name, method: method, template: HBMustacheTemplate(sectionTokens)))
 
             case "^":
@@ -101,14 +103,14 @@ extension HBMustacheTemplate {
                     tokens.append(.text(whiteSpaceBefore))
                     whiteSpaceBefore = ""
                 }
-                let sectionTokens = try parse(&parser, state: state.withSectionName(name))
+                let sectionTokens = try parse(&parser, state: state.withSectionName(name, method: method))
                 tokens.append(.invertedSection(name: name, method: method, template: HBMustacheTemplate(sectionTokens)))
 
             case "/":
                 // end of section
                 parser.unsafeAdvance()
-                let (name, _) = try parseName(&parser, state: state)
-                guard name == state.sectionName else {
+                let (name, method) = try parseName(&parser, state: state)
+                guard name == state.sectionName, method == state.sectionMethod else {
                     throw Error.sectionCloseNameIncorrect
                 }
                 if isStandalone(&parser, state: state) {

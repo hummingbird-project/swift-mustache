@@ -37,7 +37,7 @@ final class MethodTests: XCTestCase {
     func testFirstLast() throws {
         let template = try HBMustacheTemplate(string: """
         {{#repo}}
-        <b>{{#first()}}first: {{/}}{{#last()}}last: {{/}}{{ name }}</b>
+        <b>{{#first()}}first: {{/first()}}{{#last()}}last: {{/last()}}{{ name }}</b>
         {{/repo}}
 
         """)
@@ -53,7 +53,7 @@ final class MethodTests: XCTestCase {
     func testIndex() throws {
         let template = try HBMustacheTemplate(string: """
         {{#repo}}
-        <b>{{#index()}}{{plusone(.)}}{{/}}) {{ name }}</b>
+        <b>{{#index()}}{{plusone(.)}}{{/index()}}) {{ name }}</b>
         {{/repo}}
 
         """)
@@ -69,7 +69,7 @@ final class MethodTests: XCTestCase {
     func testEvenOdd() throws {
         let template = try HBMustacheTemplate(string: """
         {{#repo}}
-        <b>{{index()}}) {{#even()}}even {{/}}{{#odd()}}odd {{/}}{{ name }}</b>
+        <b>{{index()}}) {{#even()}}even {{/even()}}{{#odd()}}odd {{/odd()}}{{ name }}</b>
         {{/repo}}
 
         """)
@@ -86,7 +86,7 @@ final class MethodTests: XCTestCase {
         let template = try HBMustacheTemplate(string: """
         {{#reversed(repo)}}
           <b>{{ name }}</b>
-        {{/repo}}
+        {{/reversed(repo)}}
 
         """)
         let object: [String: Any] = ["repo": [["name": "resque"], ["name": "hub"], ["name": "rip"]]]
@@ -117,7 +117,7 @@ final class MethodTests: XCTestCase {
         let template = try HBMustacheTemplate(string: """
         {{#sorted(repo)}}
           <b>{{ index() }}) {{ . }}</b>
-        {{/repo}}
+        {{/sorted(repo)}}
         """)
         let object: [String: Any] = ["repo": ["resque", "hub", "rip"]]
         XCTAssertEqual(template.render(object), """
@@ -130,7 +130,7 @@ final class MethodTests: XCTestCase {
 
     func testDictionaryEnumerated() throws {
         let template = try HBMustacheTemplate(string: """
-        {{#enumerated(.)}}<b>{{ key }} = {{ value }}</b>{{/.}}
+        {{#enumerated(.)}}<b>{{ key }} = {{ value }}</b>{{/enumerated(.)}}
         """)
         let object: [String: Any] = ["one": 1, "two": 2]
         let result = template.render(object)
@@ -139,7 +139,7 @@ final class MethodTests: XCTestCase {
 
     func testDictionarySortedByKey() throws {
         let template = try HBMustacheTemplate(string: """
-        {{#sorted(.)}}<b>{{ key }} = {{ value }}</b>{{/.}}
+        {{#sorted(.)}}<b>{{ key }} = {{ value }}</b>{{/sorted(.)}}
         """)
         let object: [String: Any] = ["one": 1, "two": 2, "three": 3]
         let result = template.render(object)
