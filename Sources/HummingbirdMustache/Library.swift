@@ -47,8 +47,14 @@ public final class HBMustacheLibrary {
         return template.render(object)
     }
 
-    public enum Error: Swift.Error {
-        case failedToLoad(String, Swift.Error)
+    /// Error returned by init() when parser fails
+    public struct ParserError: Swift.Error {
+        /// File error occurred in
+        public let filename: String
+        /// Context (line, linenumber and column number)
+        public let context: HBParser.Context
+        /// Actual error that occurred
+        public let error: Error
     }
 
     private var templates: [String: HBMustacheTemplate]

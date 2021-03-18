@@ -1,6 +1,11 @@
 
 extension HBMustacheTemplate {
-    enum Error: Swift.Error {
+    public struct ParserError: Swift.Error {
+        public let context: HBParser.Context
+        public let error: Swift.Error
+    }
+
+    public enum Error: Swift.Error {
         case sectionCloseNameIncorrect
         case unfinishedName
         case expectedSectionEnd
@@ -46,7 +51,11 @@ extension HBMustacheTemplate {
     /// parse mustache text to generate a list of tokens
     static func parse(_ string: String) throws -> [Token] {
         var parser = HBParser(string)
-        return try parse(&parser, state: .init())
+        do {
+            return try parse(&parser, state: .init())
+        } catch {
+            throw ParserError(context: parser.getContext(), error: error)
+        }
     }
 
     /// parse section in mustache text
@@ -109,8 +118,10 @@ extension HBMustacheTemplate {
             case "/":
                 // end of section
                 parser.unsafeAdvance()
+                let position = parser.position
                 let (name, method) = try parseName(&parser, state: state)
                 guard name == state.sectionName, method == state.sectionMethod else {
+                    parser.unsafeSetPosition(position)
                     throw Error.sectionCloseNameIncorrect
                 }
                 if isStandalone(&parser, state: state) {
@@ -242,11 +253,18 @@ extension HBMustacheTemplate {
     }
 
     static func parserSetDelimiter(_ parser: inout HBParser, state: ParserState) throws -> ParserState {
-        parser.read(while: \.isWhitespace)
-        let startDelimiter = try parser.read(until: \.isWhitespace)
-        parser.read(while: \.isWhitespace)
-        let endDelimiter = try parser.read(until: { $0 == "=" || $0.isWhitespace })
-        parser.read(while: \.isWhitespace)
+        let startDelimiter: Substring
+        let endDelimiter: Substring
+
+        do {
+            parser.read(while: \.isWhitespace)
+            startDelimiter = try parser.read(until: \.isWhitespace)
+            parser.read(while: \.isWhitespace)
+            endDelimiter = try parser.read(until: { $0 == "=" || $0.isWhitespace })
+            parser.read(while: \.isWhitespace)
+        } catch {
+            throw Error.invalidSetDelimiter
+        }
         guard try parser.read("=") else { throw Error.invalidSetDelimiter }
         guard try parser.read(string: state.endDelimiter) else { throw Error.invalidSetDelimiter }
         guard startDelimiter.count > 0, endDelimiter.count > 0 else { throw Error.invalidSetDelimiter }

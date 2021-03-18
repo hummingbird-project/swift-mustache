@@ -17,8 +17,8 @@ extension HBMustacheLibrary {
             let template: HBMustacheTemplate
             do {
                 template = try HBMustacheTemplate(string: string)
-            } catch {
-                throw Error.failedToLoad(path, error)
+            } catch let error as HBMustacheTemplate.ParserError {
+                throw ParserError(filename: path, context: error.context, error: error.error)
             }
             // drop ".mustache" from path to get name
             let name = String(path.dropLast(extWithDot.count))

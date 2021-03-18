@@ -1,7 +1,7 @@
 import Foundation
 
 /// Reader object for parsing String buffers
-struct HBParser {
+public struct HBParser {
     enum Error: Swift.Error {
         case overflow
     }
@@ -261,10 +261,10 @@ extension HBParser {
 }
 
 extension HBParser {
-    struct Context {
-        let line: String
-        let lineNumber: Int
-        let columnNumber: Int
+    public struct Context {
+        public let line: String
+        public let lineNumber: Int
+        public let columnNumber: Int
     }
 
     /// Return context of current position (line, lineNumber, columnNumber)
