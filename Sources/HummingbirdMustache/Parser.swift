@@ -284,7 +284,7 @@ extension HBParser {
             unsafeAdvance()
         }
         if startIndex == index {
-            return subParser(startIndex..<startIndex)
+            return subParser(startIndex ..< startIndex)
         }
         return subParser(startIndex ..< index)
     }
@@ -404,8 +404,9 @@ extension HBParser {
     func getPosition() -> Int {
         return index
     }
+
     mutating func setPosition(_ index: Int) throws {
-        guard range.contains(index)  else { throw Error.invalidPosition }
+        guard range.contains(index) else { throw Error.invalidPosition }
         guard validateUTF8Character(at: index).0 != nil else { throw Error.invalidPosition }
         _setPosition(index)
     }

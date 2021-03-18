@@ -61,7 +61,7 @@ extension HBMustacheTemplate {
                 // section
                 parser.unsafeAdvance()
                 let (name, method) = try parseName(&parser)
-                if newLine && hasLineFinished(&parser) {
+                if newLine, hasLineFinished(&parser) {
                     setNewLine = true
                     if parser.current() == "\n" {
                         parser.unsafeAdvance()
@@ -77,7 +77,7 @@ extension HBMustacheTemplate {
                 // inverted section
                 parser.unsafeAdvance()
                 let (name, method) = try parseName(&parser)
-                if newLine && hasLineFinished(&parser) {
+                if newLine, hasLineFinished(&parser) {
                     setNewLine = true
                     if parser.current() == "\n" {
                         parser.unsafeAdvance()
@@ -96,7 +96,7 @@ extension HBMustacheTemplate {
                 guard name == sectionName else {
                     throw Error.sectionCloseNameIncorrect
                 }
-                if newLine && hasLineFinished(&parser) {
+                if newLine, hasLineFinished(&parser) {
                     setNewLine = true
                     if parser.current() == "\n" {
                         parser.unsafeAdvance()
@@ -111,7 +111,7 @@ extension HBMustacheTemplate {
                 // comment
                 parser.unsafeAdvance()
                 _ = try parseComment(&parser)
-                if newLine && hasLineFinished(&parser) {
+                if newLine, hasLineFinished(&parser) {
                     setNewLine = true
                     if !parser.reachedEnd() {
                         parser.unsafeAdvance()
@@ -143,16 +143,16 @@ extension HBMustacheTemplate {
                 // partial
                 parser.unsafeAdvance()
                 let (name, _) = try parseName(&parser)
-                /*if newLine && hasLineFinished(&parser) {
-                    setNewLine = true
-                    if parser.current() == "\n" {
-                        parser.unsafeAdvance()
-                    }
-                }*/
+                /* if newLine && hasLineFinished(&parser) {
+                     setNewLine = true
+                     if parser.current() == "\n" {
+                         parser.unsafeAdvance()
+                     }
+                 } */
                 if whiteSpaceBefore.count > 0 {
                     tokens.append(.text(whiteSpaceBefore))
                 }
-                if newLine && hasLineFinished(&parser) {
+                if newLine, hasLineFinished(&parser) {
                     setNewLine = true
                     if parser.current() == "\n" {
                         parser.unsafeAdvance()

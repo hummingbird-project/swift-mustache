@@ -10,10 +10,9 @@ func test(_ object: Any, _ template: String, _ expected: String) throws {
     XCTAssertEqual(result, expected)
 }
 
-//MARK: Comments
+// MARK: Comments
 
 final class SpecCommentsTests: XCTestCase {
-
     func testInline() throws {
         let object = {}
         let template = "12345{{! Comment Block! }}67890"
@@ -98,14 +97,14 @@ final class SpecCommentsTests: XCTestCase {
         try test(object, template, expected)
     }
 
-    func testIndentedInline()  throws {
+    func testIndentedInline() throws {
         let object = {}
         let template = "  12 {{! 34 }}\n"
         let expected = "  12 \n"
         try test(object, template, expected)
     }
 
-    func testSurroundingWhitespace()  throws {
+    func testSurroundingWhitespace() throws {
         let object = {}
         let template = "12345 {{! Comment Block! }} 67890"
         let expected = "12345  67890"
@@ -113,7 +112,7 @@ final class SpecCommentsTests: XCTestCase {
     }
 }
 
-//MARK: Interpolation
+// MARK: Interpolation
 
 final class SpecInterpolationTests: XCTestCase {
     func testNoInterpolation() throws {
@@ -121,71 +120,66 @@ final class SpecInterpolationTests: XCTestCase {
         let template = "Hello from {Mustache}!"
         let expected = "Hello from {Mustache}!"
         try test(object, template, expected)
-
     }
 
     func testBasicInterpolation() throws {
-        let object = [ "subject": "world" ]
+        let object = ["subject": "world"]
         let template = "Hello, {{subject}}!"
         let expected = "Hello, world!"
         try test(object, template, expected)
-
     }
 
     func testHTMLEscaping() throws {
-        let object = [ "forbidden": #"& " < >"# ]
+        let object = ["forbidden": #"& " < >"#]
         let template = "These characters should be HTML escaped: {{forbidden}}"
         let expected = #"These characters should be HTML escaped: &amp; &quot; &lt; &gt;"#
         try test(object, template, expected)
-
     }
 
     func testTripleMustache() throws {
-        let object = [ "forbidden": #"& " < >"# ]
+        let object = ["forbidden": #"& " < >"#]
         let template = "These characters should not be HTML escaped: {{{forbidden}}}"
         let expected = #"These characters should not be HTML escaped: & " < >"#
         try test(object, template, expected)
-
     }
 
     func testAmpersand() throws {
-        let object = [ "forbidden": #"& " < >"# ]
+        let object = ["forbidden": #"& " < >"#]
         let template = "These characters should not be HTML escaped: {{&forbidden}}"
         let expected = #"These characters should not be HTML escaped: & " < >"#
         try test(object, template, expected)
-
     }
 
     func testBasicInteger() throws {
-        let object = [ "mph": 85 ]
+        let object = ["mph": 85]
         let template = #""{{mph}} miles an hour!""#
         let expected = #""85 miles an hour!""#
         try test(object, template, expected)
     }
 
     func testTripleMustacheInteger() throws {
-        let object = [ "mph": 85 ]
+        let object = ["mph": 85]
         let template = #""{{{mph}}} miles an hour!""#
         let expected = #""85 miles an hour!""#
         try test(object, template, expected)
     }
 
     func testBasicDecimal() throws {
-        let object = [ "power": 1.210 ]
+        let object = ["power": 1.210]
         let template = #""{{power}} jiggawatts!""#
         let expected = #""1.21 jiggawatts!""#
         try test(object, template, expected)
     }
 
     func testTripleMustacheDecimal() throws {
-        let object = [ "power": 1.210 ]
+        let object = ["power": 1.210]
         let template = #""{{{power}}} jiggawatts!""#
         let expected = #""1.21 jiggawatts!""#
         try test(object, template, expected)
     }
 
     func testAmpersandDecimal() throws {
-        let object = [ "power": 1.210 ]
+        let object = ["power": 1.210]
         let template = #""{{&power}} jiggawatts!""#
         let expected = #""1.21 jiggawatts!""#
         try test(object, template, expected)
@@ -250,7 +244,7 @@ final class SpecInterpolationTests: XCTestCase {
     func testInitialResolutionDottedName() throws {
         let object = [
             "a": ["b": ["c": ["d": ["e": ["name": "Phil"]]]]],
-            "b": ["c": ["d": ["e": ["name": "Wrong"]]]]
+            "b": ["c": ["d": ["e": ["name": "Wrong"]]]],
         ]
         let template = #""{{#a}}{{b.c.d.e.name}}{{/a}}" == "Phil""#
         let expected = #""Phil" == "Phil""#
@@ -260,7 +254,7 @@ final class SpecInterpolationTests: XCTestCase {
     func testContextPrecedenceDottedName() throws {
         let object = [
             "a": ["b": []],
-            "b": ["c": "Error"]
+            "b": ["c": "Error"],
         ]
         let template = #"{{#a}}{{b.c}}{{/a}}"#
         let expected = ""
@@ -314,7 +308,6 @@ final class SpecInterpolationTests: XCTestCase {
         let template = "|{{ string }}|"
         let expected = "|---|"
         try test(object, template, expected)
-
     }
 
     func testTripleMustacheWithPadding() throws {
@@ -322,7 +315,6 @@ final class SpecInterpolationTests: XCTestCase {
         let template = "|{{{ string }}}|"
         let expected = "|---|"
         try test(object, template, expected)
-
     }
 
     func testAmpersandWithPadding() throws {
@@ -341,7 +333,6 @@ final class SpecInvertedTests: XCTestCase {
         let template = #""{{^boolean}}This should be rendered.{{/boolean}}""#
         let expected = #""This should be rendered.""#
         try test(object, template, expected)
-
     }
 
     func testTrue() throws {
@@ -349,7 +340,6 @@ final class SpecInvertedTests: XCTestCase {
         let template = #""{{^boolean}}This should not be rendered.{{/boolean}}""#
         let expected = "\"\""
         try test(object, template, expected)
-
     }
 
     func testContext() throws {
@@ -357,7 +347,6 @@ final class SpecInvertedTests: XCTestCase {
         let template = #""{{^context}}Hi {{name}}.{{/context}}""#
         let expected = "\"\""
         try test(object, template, expected)
-
     }
 
     func testList() throws {
@@ -365,7 +354,6 @@ final class SpecInvertedTests: XCTestCase {
         let template = #""{{^list}}{{n}}{{/list}}""#
         let expected = "\"\""
         try test(object, template, expected)
-
     }
 
     func testEmptyList() throws {
@@ -442,7 +430,6 @@ final class SpecInvertedTests: XCTestCase {
         let template = " | {{^boolean}}\t|\t{{/boolean}} | \n"
         let expected = " | \t|\t | \n"
         try test(object, template, expected)
-
     }
 
     func testInternalWhitespace() throws {
@@ -450,7 +437,6 @@ final class SpecInvertedTests: XCTestCase {
         let template = " | {{^boolean}} {{! Important Whitespace }}\n {{/boolean}} | \n"
         let expected = " |  \n  | \n"
         try test(object, template, expected)
-
     }
 
     func testIndentedInline() throws {
@@ -458,7 +444,6 @@ final class SpecInvertedTests: XCTestCase {
         let template = " {{^boolean}}NO{{/boolean}}\n {{^boolean}}WAY{{/boolean}}\n"
         let expected = " NO\n WAY\n"
         try test(object, template, expected)
-
     }
 
     func testStandaloneLines() throws {
@@ -476,7 +461,6 @@ final class SpecInvertedTests: XCTestCase {
         | A Line
         """
         try test(object, template, expected)
-
     }
 
     func testStandaloneIndentedLines() throws {
@@ -501,7 +485,6 @@ final class SpecInvertedTests: XCTestCase {
         let template = "|\r\n{{^boolean}}\r\n{{/boolean}}\r\n|"
         let expected = "|\r\n|"
         try test(object, template, expected)
-
     }
 
     func testStandaloneWithoutPreviousLine() throws {
@@ -637,7 +620,7 @@ final class SpecPartialsTests: XCTestCase {
     }
 
     func testPaddingWhitespace() throws {
-        let object = ["boolean": true ]
+        let object = ["boolean": true]
         let template = "|{{> partial }}|"
         let partial = "[]"
         let expected = "|[]|"
@@ -653,7 +636,6 @@ final class SpecSectionTests: XCTestCase {
         let template = #""{{#boolean}}This should be rendered.{{/boolean}}""#
         let expected = #""This should be rendered.""#
         try test(object, template, expected)
-
     }
 
     func testFalse() throws {
@@ -661,7 +643,6 @@ final class SpecSectionTests: XCTestCase {
         let template = #""{{#boolean}}This should not be rendered.{{/boolean}}""#
         let expected = "\"\""
         try test(object, template, expected)
-
     }
 
     func testContext() throws {
@@ -792,33 +773,32 @@ final class SpecSectionTests: XCTestCase {
     }
 
     func testImplicitIteratorString() throws {
-        let object = ["list": [ "a", "b", "c", "d", "e" ]]
+        let object = ["list": ["a", "b", "c", "d", "e"]]
         let template = #""{{#list}}({{.}}){{/list}}""#
         let expected = #""(a)(b)(c)(d)(e)""#
         try test(object, template, expected)
     }
 
     func testImplicitIteratorInteger() throws {
-        let object = ["list": [ 1, 2, 3, 4, 5 ]]
+        let object = ["list": [1, 2, 3, 4, 5]]
         let template = #""{{#list}}({{.}}){{/list}}""#
         let expected = #""(1)(2)(3)(4)(5)""#
         try test(object, template, expected)
     }
 
     func testImplicitIteratorDecimal() throws {
-        let object = ["list": [ 1.1, 2.2, 3.3, 4.4, 5.5 ]]
+        let object = ["list": [1.1, 2.2, 3.3, 4.4, 5.5]]
         let template = #""{{#list}}({{.}}){{/list}}""#
         let expected = #""(1.1)(2.2)(3.3)(4.4)(5.5)""#
         try test(object, template, expected)
     }
 
     func testImplicitIteratorArray() throws {
-        let object: [String: Any] = ["list": [[ 1, 2, 3], [ "a", "b", "c"]]]
+        let object: [String: Any] = ["list": [[1, 2, 3], ["a", "b", "c"]]]
         let template = #""{{#list}}({{#.}}{{.}}{{/.}}){{/list}}""#
         let expected = #""(123)(abc)""#
         try test(object, template, expected)
     }
-
 
     func testDottedNameTrue() throws {
         let object = ["a": ["b": ["c": true]]]
