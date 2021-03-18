@@ -8,7 +8,7 @@ extension HBMustacheTemplate {
     /// - Returns: Rendered text
     func render(_ stack: [Any], context: HBMustacheContext? = nil, indentation: String? = nil) -> String {
         var string = ""
-        if let indentation = indentation {
+        if let indentation = indentation, indentation != "" {
             for token in tokens {
                 if string.last == "\n" {
                     string += indentation

@@ -82,11 +82,8 @@ extension HBMustacheTemplate {
                 // section
                 parser.unsafeAdvance()
                 let (name, method) = try parseName(&parser, state: state)
-                if state.newLine, hasLineFinished(&parser) {
+                if isStandalone(&parser, state: state) {
                     setNewLine = true
-                    if parser.current() == "\n" {
-                        parser.unsafeAdvance()
-                    }
                 } else if whiteSpaceBefore.count > 0 {
                     tokens.append(.text(whiteSpaceBefore))
                     whiteSpaceBefore = ""
@@ -98,11 +95,8 @@ extension HBMustacheTemplate {
                 // inverted section
                 parser.unsafeAdvance()
                 let (name, method) = try parseName(&parser, state: state)
-                if state.newLine, hasLineFinished(&parser) {
+                if isStandalone(&parser, state: state) {
                     setNewLine = true
-                    if parser.current() == "\n" {
-                        parser.unsafeAdvance()
-                    }
                 } else if whiteSpaceBefore.count > 0 {
                     tokens.append(.text(whiteSpaceBefore))
                     whiteSpaceBefore = ""
@@ -117,11 +111,8 @@ extension HBMustacheTemplate {
                 guard name == state.sectionName else {
                     throw Error.sectionCloseNameIncorrect
                 }
-                if state.newLine, hasLineFinished(&parser) {
+                if isStandalone(&parser, state: state) {
                     setNewLine = true
-                    if parser.current() == "\n" {
-                        parser.unsafeAdvance()
-                    }
                 } else if whiteSpaceBefore.count > 0 {
                     tokens.append(.text(whiteSpaceBefore))
                     whiteSpaceBefore = ""
@@ -132,12 +123,7 @@ extension HBMustacheTemplate {
                 // comment
                 parser.unsafeAdvance()
                 _ = try parseComment(&parser, state: state)
-                if state.newLine, hasLineFinished(&parser) {
-                    setNewLine = true
-                    if !parser.reachedEnd() {
-                        parser.unsafeAdvance()
-                    }
-                }
+                setNewLine = isStandalone(&parser, state: state)
 
             case "{":
                 // unescaped variable
@@ -167,11 +153,8 @@ extension HBMustacheTemplate {
                 if whiteSpaceBefore.count > 0 {
                     tokens.append(.text(whiteSpaceBefore))
                 }
-                if state.newLine, hasLineFinished(&parser) {
+                if isStandalone(&parser, state: state) {
                     setNewLine = true
-                    if parser.current() == "\n" {
-                        parser.unsafeAdvance()
-                    }
                     tokens.append(.partial(name, indentation: whiteSpaceBefore))
                 } else {
                     tokens.append(.partial(name, indentation: nil))
@@ -182,12 +165,7 @@ extension HBMustacheTemplate {
                 // set delimiter
                 parser.unsafeAdvance()
                 state = try parserSetDelimiter(&parser, state: state)
-                if state.newLine, hasLineFinished(&parser) {
-                    setNewLine = true
-                    if !parser.reachedEnd() {
-                        parser.unsafeAdvance()
-                    }
-                }
+                setNewLine = isStandalone(&parser, state: state)
 
             default:
                 // variable
@@ -278,10 +256,15 @@ extension HBMustacheTemplate {
         if parser.reachedEnd() { return true }
         parser2.read(while: Set(" \t\r"))
         if parser2.current() == "\n" {
+            parser2.unsafeAdvance()
             try! parser.setPosition(parser2.getPosition())
             return true
         }
         return false
+    }
+
+    static func isStandalone(_ parser: inout HBParser, state: ParserState) -> Bool  {
+        return state.newLine && hasLineFinished(&parser)
     }
 
     private static let sectionNameCharsWithoutBrackets = Set<Unicode.Scalar>("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ._?")

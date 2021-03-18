@@ -406,6 +406,10 @@ extension HBParser {
     }
 
     mutating func setPosition(_ index: Int) throws {
+        if index == self.range.endIndex {
+            _setPosition(index)
+            return
+        }
         guard range.contains(index) else { throw Error.invalidPosition }
         guard validateUTF8Character(at: index).0 != nil else { throw Error.invalidPosition }
         _setPosition(index)
