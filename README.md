@@ -8,7 +8,7 @@ Load your templates from the filesystem
 ```swift
 let library = HBMustacheLibrary("folder/my/templates/are/in")
 ```
-This will look for all the files with the extension ".mustache" in the specified folder and attempt to load them.
+This will look for all the files with the extension ".mustache" in the specified folder and sub-folders and attempt to load them.
 
 Render an object with a template 
 ```swift
@@ -29,3 +29,6 @@ let object = Person(name: "John Smith", age: 68)
 let output = library.render(object, withTemplate: "myTemplate")
 ```
 
+## Support
+
+HummingbirdMustache supports all standard Mustache tags and is fully compliant with the Mustache [spec](https://github.com/mustache/spec) with the exception of the Lambda support.  
