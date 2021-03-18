@@ -18,9 +18,9 @@ public final class HBMustacheLibrary {
     /// the folder is recursive and templates in subfolders will be registered with the name `subfolder/template`.
     /// - Parameter directory: Directory to look for mustache templates
     /// - Parameter extension: Extension of files to look for
-    public init(directory: String, withExtension extension: String = "mustache", logger: Logger? = nil) {
+    public init(directory: String, withExtension extension: String = "mustache") throws {
         templates = [:]
-        loadTemplates(from: directory, withExtension: `extension`, logger: logger)
+        try loadTemplates(from: directory, withExtension: `extension`)
     }
 
     /// Register template under name
@@ -47,6 +47,10 @@ public final class HBMustacheLibrary {
     public func render(_ object: Any, withTemplate name: String) -> String? {
         guard let template = templates[name] else { return nil }
         return template.render(object)
+    }
+
+    public enum Error: Swift.Error {
+        case failedToLoad(String, Swift.Error)
     }
 
     private var templates: [String: HBMustacheTemplate]
