@@ -71,6 +71,9 @@ extension HBParser {
 
     /// initialise a parser that parses a section of the buffer attached to this parser
     func subParser(_ range: Range<Int>) -> HBParser {
+        if range.startIndex == range.endIndex {
+            return HBParser(self, range: self.range.startIndex ..< self.range.startIndex)
+        }
         return HBParser(self, range: range)
     }
 }
@@ -282,9 +285,6 @@ extension HBParser {
               characterSet.contains(unsafeCurrent())
         {
             unsafeAdvance()
-        }
-        if startIndex == index {
-            return subParser(startIndex ..< startIndex)
         }
         return subParser(startIndex ..< index)
     }
