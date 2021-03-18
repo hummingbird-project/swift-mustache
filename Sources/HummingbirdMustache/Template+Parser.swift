@@ -33,7 +33,7 @@ extension HBMustacheTemplate {
             return newValue
         }
 
-        func withDefaultDelimiters(start: String, end: String) -> ParserState {
+        func withDefaultDelimiters(start _: String, end _: String) -> ParserState {
             var newValue = self
             newValue.startDelimiter = "{{"
             newValue.endDelimiter = "}}"
@@ -269,7 +269,7 @@ extension HBMustacheTemplate {
         parser.read(while: \.isWhitespace)
         guard try parser.read("=") else { throw Error.invalidSetDelimiter }
         guard try parser.read(state.endDelimiter) else { throw Error.invalidSetDelimiter }
-        guard startDelimiter.count > 0, endDelimiter.count > 0 else { throw Error.invalidSetDelimiter}
+        guard startDelimiter.count > 0, endDelimiter.count > 0 else { throw Error.invalidSetDelimiter }
         return state.withDelimiters(start: startDelimiter, end: endDelimiter)
     }
 
