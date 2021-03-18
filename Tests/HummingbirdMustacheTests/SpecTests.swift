@@ -10,6 +10,18 @@ func test(_ object: Any, _ template: String, _ expected: String) throws {
     XCTAssertEqual(result, expected)
 }
 
+func testPartial(_ object: Any, _ template: String, _ partials: [String: String], _ expected: String) throws {
+    let library = HBMustacheLibrary()
+    let template = try HBMustacheTemplate(string: template)
+    library.register(template, named: "template")
+    for (key, value) in partials {
+        let template = try HBMustacheTemplate(string: value)
+        library.register(template, named: key)
+    }
+    let result = library.render(object, withTemplate: "template")
+    XCTAssertEqual(result, expected)
+}
+
 // MARK: Comments
 
 final class SpecCommentsTests: XCTestCase {
@@ -108,6 +120,179 @@ final class SpecCommentsTests: XCTestCase {
         let object = {}
         let template = "12345 {{! Comment Block! }} 67890"
         let expected = "12345  67890"
+        try test(object, template, expected)
+    }
+}
+
+// MARK: Delimiters
+
+final class SpecDelimiterTests: XCTestCase {
+    func testPairBehaviour() throws {
+        let object = ["text": "Hey!"]
+        let template = "{{=<% %>=}}(<%text%>)"
+        let expected = "(Hey!)"
+        try test(object, template, expected)
+    }
+
+    func testSpecialCharacter() throws {
+        let object = ["text": "It worked!"]
+        let template = "({{=[ ]=}}[text])"
+        let expected = "(It worked!)"
+        try test(object, template, expected)
+    }
+
+    func testSections() throws {
+        let object: [String: Any] = ["section": true, "data": "I got interpolated."]
+        let template = """
+        [
+        {{#section}}
+          {{data}}
+          |data|
+        {{/section}}
+
+        {{= | | =}}
+        |#section|
+          {{data}}
+          |data|
+        |/section|
+        ]
+        """
+        let expected = """
+        [
+          I got interpolated.
+          |data|
+
+          {{data}}
+          I got interpolated.
+        ]
+        """
+        try test(object, template, expected)
+    }
+
+    func testInvertedSections() throws {
+        let object: [String: Any] = ["section": false, "data": "I got interpolated."]
+        let template = """
+        [
+        {{^section}}
+          {{data}}
+          |data|
+        {{/section}}
+
+        {{= | | =}}
+        |^section|
+          {{data}}
+          |data|
+        |/section|
+        ]
+        """
+        let expected = """
+        [
+          I got interpolated.
+          |data|
+
+          {{data}}
+          I got interpolated.
+        ]
+        """
+        try test(object, template, expected)
+    }
+
+    func testPartialInheritance() throws {
+        let object = ["value": "yes"]
+        let template = """
+        [ {{>include}} ]
+        {{= | | =}}
+        [ |>include| ]
+        """
+        let partial = ".{{value}}."
+        let expected = """
+        [ .yes. ]
+        [ .yes. ]
+        """
+        try testPartial(object, template, ["include": partial], expected)
+    }
+
+    func testPostPartialBehaviour() throws {
+        let object = ["value": "yes"]
+        let template = """
+        [ {{>include}} ]
+        [ .{{value}}.  .|value|. ]
+        """
+        let partial = ".{{value}}. {{= | | =}} .|value|."
+        let expected = """
+        [ .yes.  .yes. ]
+        [ .yes.  .|value|. ]
+        """
+        try testPartial(object, template, ["include": partial], expected)
+    }
+
+    func testSurroundingWhitespace() throws {
+        let object = {}
+        let template = "| {{=@ @=}} |"
+        let expected = "|  |"
+        try test(object, template, expected)
+    }
+
+    func testOutlyingWhitespace() throws {
+        let object = {}
+        let template = " | {{=@ @=}}\n"
+        let expected = " | \n"
+        try test(object, template, expected)
+    }
+
+    func testStandalone() throws {
+        let object = {}
+        let template = """
+        Begin.
+        {{=@ @=}}
+        End.
+        """
+        let expected = """
+        Begin.
+        End.
+        """
+        try test(object, template, expected)
+    }
+
+    func testIndentedStandalone() throws {
+        let object = {}
+        let template = """
+        Begin.
+          {{=@ @=}}
+        End.
+        """
+        let expected = """
+        Begin.
+        End.
+        """
+        try test(object, template, expected)
+    }
+
+    func testStandaloneLineEndings() throws {
+        let object = {}
+        let template = "|\r\n{{= @ @ =}}\r\n|"
+        let expected = "|\r\n|"
+        try test(object, template, expected)
+    }
+
+    func testStandaloneWithoutPreviousLine() throws {
+        let object = {}
+        let template = "  {{=@ @=}}\n="
+        let expected = "="
+        try test(object, template, expected)
+    }
+
+    func testStandaloneWithoutNewLine() throws {
+        let object = {}
+        let template = "=\n  {{=@ @=}}"
+        let expected = "=\n"
+        try test(object, template, expected)
+    }
+
+    func testPairWithPadding() throws {
+        let object = {}
+        let template = "|{{= @   @ =}}|"
+        let expected = "||"
         try test(object, template, expected)
     }
 }
@@ -512,18 +697,6 @@ final class SpecInvertedTests: XCTestCase {
 // MARK: Partials
 
 final class SpecPartialsTests: XCTestCase {
-    func testPartial(_ object: Any, _ template: String, _ partials: [String: String], _ expected: String) throws {
-        let library = HBMustacheLibrary()
-        let template = try HBMustacheTemplate(string: template)
-        library.register(template, named: "template")
-        for (key, value) in partials {
-            let template = try HBMustacheTemplate(string: value)
-            library.register(template, named: key)
-        }
-        let result = library.render(object, withTemplate: "template")
-        XCTAssertEqual(result, expected)
-    }
-
     func testBasic() throws {
         let object = {}
         let template = #""{{>text}}""#
