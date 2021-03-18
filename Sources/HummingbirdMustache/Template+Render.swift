@@ -2,45 +2,57 @@
 extension HBMustacheTemplate {
     /// Render template using object
     /// - Parameters:
-    ///   - object: Object
+    ///   - stack: Object
     ///   - context: Context that render is occurring in. Contains information about position in sequence
+    ///   - indentation: indentation of partial
     /// - Returns: Rendered text
-    func render(_ object: [Any], context: HBMustacheContext? = nil, indentation: String? = nil) -> String {
+    func render(_ stack: [Any], context: HBMustacheContext? = nil, indentation: String? = nil) -> String {
         var string = ""
-        for token in tokens {
-            if let indentation = indentation, string.last == "\n" {
-                string += indentation
+        if let indentation = indentation {
+            for token in tokens {
+                if string.last == "\n" {
+                    string += indentation
+                }
+                string += renderToken(token, stack: stack, context: context)
             }
-            switch token {
-            case let .text(text):
-                string += text
-            case let .variable(variable, method):
-                if let child = getChild(named: variable, from: object, method: method, context: context) {
-                    if let template = child as? HBMustacheTemplate {
-                        string += template.render(object)
-                    } else {
-                        string += String(describing: child).htmlEscape()
-                    }
-                }
-            case let .unescapedVariable(variable, method):
-                if let child = getChild(named: variable, from: object, method: method, context: context) {
-                    string += String(describing: child)
-                }
-            case let .section(variable, method, template):
-                let child = getChild(named: variable, from: object, method: method, context: context)
-                string += renderSection(child, stack: object, with: template)
-
-            case let .invertedSection(variable, method, template):
-                let child = getChild(named: variable, from: object, method: method, context: context)
-                string += renderInvertedSection(child, stack: object, with: template)
-
-            case let .partial(name, indentation):
-                if let template = library?.getTemplate(named: name) {
-                    string += template.render(object, indentation: indentation)
-                }
+        } else {
+            for token in tokens {
+                string += renderToken(token, stack: stack, context: context)
             }
         }
         return string
+    }
+
+    func renderToken(_ token: Token, stack: [Any], context: HBMustacheContext? = nil) -> String {
+        switch token {
+        case let .text(text):
+            return text
+        case let .variable(variable, method):
+            if let child = getChild(named: variable, from: stack, method: method, context: context) {
+                if let template = child as? HBMustacheTemplate {
+                    return template.render(stack)
+                } else {
+                    return String(describing: child).htmlEscape()
+                }
+            }
+        case let .unescapedVariable(variable, method):
+            if let child = getChild(named: variable, from: stack, method: method, context: context) {
+                return String(describing: child)
+            }
+        case let .section(variable, method, template):
+            let child = getChild(named: variable, from: stack, method: method, context: context)
+            return renderSection(child, stack: stack, with: template)
+
+        case let .invertedSection(variable, method, template):
+            let child = getChild(named: variable, from: stack, method: method, context: context)
+            return renderInvertedSection(child, stack: stack, with: template)
+
+        case let .partial(name, indentation):
+            if let template = library?.getTemplate(named: name) {
+                return template.render(stack, indentation: indentation)
+            }
+        }
+        return ""
     }
 
     /// Render a section

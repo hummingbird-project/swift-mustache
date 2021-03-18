@@ -143,12 +143,6 @@ extension HBMustacheTemplate {
                 // partial
                 parser.unsafeAdvance()
                 let (name, _) = try parseName(&parser)
-                /* if newLine && hasLineFinished(&parser) {
-                     setNewLine = true
-                     if parser.current() == "\n" {
-                         parser.unsafeAdvance()
-                     }
-                 } */
                 if whiteSpaceBefore.count > 0 {
                     tokens.append(.text(whiteSpaceBefore))
                 }

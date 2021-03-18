@@ -661,8 +661,8 @@ final class SpecSectionTests: XCTestCase {
 
     func testVariables() throws {
         let object: [String: Any] = ["foo": "bar"]
-        let template = #""{{#foo}} {{.}} is {{foo}} {{/foo}}""#
-        let expected = #"" bar is bar ""#
+        let template = #""{{#foo}}{{.}} is {{foo}}{{/foo}}""#
+        let expected = #""bar is bar""#
         try test(object, template, expected)
     }
 
