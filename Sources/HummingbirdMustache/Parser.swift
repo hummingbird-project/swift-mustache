@@ -15,6 +15,7 @@ struct HBParser {
         case unexpected
         case emptyString
         case invalidUTF8
+        case invalidPosition
     }
 
     /// Create a Parser object
@@ -282,6 +283,9 @@ extension HBParser {
         {
             unsafeAdvance()
         }
+        if startIndex == index {
+            return subParser(startIndex ..< startIndex)
+        }
         return subParser(startIndex ..< index)
     }
 
@@ -395,6 +399,16 @@ extension HBParser {
             index = skipUTF8Character(at: index)
             amount -= 1
         }
+    }
+
+    func getPosition() -> Int {
+        return index
+    }
+
+    mutating func setPosition(_ index: Int) throws {
+        guard range.contains(index) else { throw Error.invalidPosition }
+        guard validateUTF8Character(at: index).0 != nil else { throw Error.invalidPosition }
+        _setPosition(index)
     }
 }
 

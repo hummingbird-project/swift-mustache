@@ -13,6 +13,7 @@ final class PartialTests: XCTestCase {
         """)
         let template2 = try HBMustacheTemplate(string: """
         <strong>{{.}}</strong>
+
         """)
         library.register(template, named: "base")
         library.register(template2, named: "user")

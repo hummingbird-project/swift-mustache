@@ -18,11 +18,28 @@ final class MethodTests: XCTestCase {
         XCTAssertEqual(template.render(object), "TEST")
     }
 
+    func testNewline() throws {
+        let template = try HBMustacheTemplate(string: """
+        {{#repo}}
+        <b>{{name}}</b>
+        {{/repo}}
+
+        """)
+        let object: [String: Any] = ["repo": [["name": "resque"], ["name": "hub"], ["name": "rip"]]]
+        XCTAssertEqual(template.render(object), """
+        <b>resque</b>
+        <b>hub</b>
+        <b>rip</b>
+
+        """)
+    }
+
     func testFirstLast() throws {
         let template = try HBMustacheTemplate(string: """
         {{#repo}}
         <b>{{#first()}}first: {{/}}{{#last()}}last: {{/}}{{ name }}</b>
         {{/repo}}
+
         """)
         let object: [String: Any] = ["repo": [["name": "resque"], ["name": "hub"], ["name": "rip"]]]
         XCTAssertEqual(template.render(object), """
@@ -38,6 +55,7 @@ final class MethodTests: XCTestCase {
         {{#repo}}
         <b>{{#index()}}{{plusone(.)}}{{/}}) {{ name }}</b>
         {{/repo}}
+
         """)
         let object: [String: Any] = ["repo": [["name": "resque"], ["name": "hub"], ["name": "rip"]]]
         XCTAssertEqual(template.render(object), """
@@ -53,6 +71,7 @@ final class MethodTests: XCTestCase {
         {{#repo}}
         <b>{{index()}}) {{#even()}}even {{/}}{{#odd()}}odd {{/}}{{ name }}</b>
         {{/repo}}
+
         """)
         let object: [String: Any] = ["repo": [["name": "resque"], ["name": "hub"], ["name": "rip"]]]
         XCTAssertEqual(template.render(object), """
@@ -68,6 +87,7 @@ final class MethodTests: XCTestCase {
         {{#reversed(repo)}}
           <b>{{ name }}</b>
         {{/repo}}
+
         """)
         let object: [String: Any] = ["repo": [["name": "resque"], ["name": "hub"], ["name": "rip"]]]
         XCTAssertEqual(template.render(object), """

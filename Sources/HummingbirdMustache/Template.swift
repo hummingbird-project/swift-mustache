@@ -11,7 +11,7 @@ public final class HBMustacheTemplate {
     /// - Parameter object: Object to render
     /// - Returns: Rendered text
     public func render(_ object: Any) -> String {
-        render(object, context: nil)
+        render([object], context: nil)
     }
 
     internal init(_ tokens: [Token]) {
@@ -36,7 +36,7 @@ public final class HBMustacheTemplate {
         case unescapedVariable(name: String, method: String? = nil)
         case section(name: String, method: String? = nil, template: HBMustacheTemplate)
         case invertedSection(name: String, method: String? = nil, template: HBMustacheTemplate)
-        case partial(String)
+        case partial(String, indentation: String?)
     }
 
     let tokens: [Token]

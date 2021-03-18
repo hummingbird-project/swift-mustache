@@ -83,8 +83,8 @@ extension HBMustacheTemplate.Token: Equatable {
             return lhs1 == rhs1 && lhs2 == rhs2 && lhs3 == rhs3
         case let (.invertedSection(lhs1, lhs2, lhs3), .invertedSection(rhs1, rhs2, rhs3)):
             return lhs1 == rhs1 && lhs2 == rhs2 && lhs3 == rhs3
-        case let (.partial(name1), .partial(name2)):
-            return name1 == name2
+        case let (.partial(name1, indent1), .partial(name2, indent2)):
+            return name1 == name2 && indent1 == indent2
         default:
             return false
         }

@@ -2,42 +2,57 @@
 extension HBMustacheTemplate {
     /// Render template using object
     /// - Parameters:
-    ///   - object: Object
+    ///   - stack: Object
     ///   - context: Context that render is occurring in. Contains information about position in sequence
+    ///   - indentation: indentation of partial
     /// - Returns: Rendered text
-    func render(_ object: Any, context: HBMustacheContext? = nil) -> String {
+    func render(_ stack: [Any], context: HBMustacheContext? = nil, indentation: String? = nil) -> String {
         var string = ""
-        for token in tokens {
-            switch token {
-            case let .text(text):
-                string += text
-            case let .variable(variable, method):
-                if let child = getChild(named: variable, from: object, method: method, context: context) {
-                    if let template = child as? HBMustacheTemplate {
-                        string += template.render(object)
-                    } else {
-                        string += String(describing: child).htmlEscape()
-                    }
+        if let indentation = indentation {
+            for token in tokens {
+                if string.last == "\n" {
+                    string += indentation
                 }
-            case let .unescapedVariable(variable, method):
-                if let child = getChild(named: variable, from: object, method: method, context: context) {
-                    string += String(describing: child)
-                }
-            case let .section(variable, method, template):
-                let child = getChild(named: variable, from: object, method: method, context: context)
-                string += renderSection(child, parent: object, with: template)
-
-            case let .invertedSection(variable, method, template):
-                let child = getChild(named: variable, from: object, method: method, context: context)
-                string += renderInvertedSection(child, parent: object, with: template)
-
-            case let .partial(name):
-                if let text = library?.render(object, withTemplate: name) {
-                    string += text
-                }
+                string += renderToken(token, stack: stack, context: context)
+            }
+        } else {
+            for token in tokens {
+                string += renderToken(token, stack: stack, context: context)
             }
         }
         return string
+    }
+
+    func renderToken(_ token: Token, stack: [Any], context: HBMustacheContext? = nil) -> String {
+        switch token {
+        case let .text(text):
+            return text
+        case let .variable(variable, method):
+            if let child = getChild(named: variable, from: stack, method: method, context: context) {
+                if let template = child as? HBMustacheTemplate {
+                    return template.render(stack)
+                } else {
+                    return String(describing: child).htmlEscape()
+                }
+            }
+        case let .unescapedVariable(variable, method):
+            if let child = getChild(named: variable, from: stack, method: method, context: context) {
+                return String(describing: child)
+            }
+        case let .section(variable, method, template):
+            let child = getChild(named: variable, from: stack, method: method, context: context)
+            return renderSection(child, stack: stack, with: template)
+
+        case let .invertedSection(variable, method, template):
+            let child = getChild(named: variable, from: stack, method: method, context: context)
+            return renderInvertedSection(child, stack: stack, with: template)
+
+        case let .partial(name, indentation):
+            if let template = library?.getTemplate(named: name) {
+                return template.render(stack, indentation: indentation)
+            }
+        }
+        return ""
     }
 
     /// Render a section
@@ -46,16 +61,16 @@ extension HBMustacheTemplate {
     ///   - parent: Current object being rendered
     ///   - template: Template to render with
     /// - Returns: Rendered text
-    func renderSection(_ child: Any?, parent: Any, with template: HBMustacheTemplate) -> String {
+    func renderSection(_ child: Any?, stack: [Any], with template: HBMustacheTemplate) -> String {
         switch child {
         case let array as HBMustacheSequence:
-            return array.renderSection(with: template)
+            return array.renderSection(with: template, stack: stack + [array])
         case let bool as Bool:
-            return bool ? template.render(parent) : ""
+            return bool ? template.render(stack) : ""
         case let lambda as HBMustacheLambda:
-            return lambda.run(parent, template)
+            return lambda.run(stack.last!, template)
         case let .some(value):
-            return template.render(value)
+            return template.render(stack + [value])
         case .none:
             return ""
         }
@@ -67,33 +82,46 @@ extension HBMustacheTemplate {
     ///   - parent: Current object being rendered
     ///   - template: Template to render with
     /// - Returns: Rendered text
-    func renderInvertedSection(_ child: Any?, parent: Any, with template: HBMustacheTemplate) -> String {
+    func renderInvertedSection(_ child: Any?, stack: [Any], with template: HBMustacheTemplate) -> String {
         switch child {
         case let array as HBMustacheSequence:
-            return array.renderInvertedSection(with: template)
+            return array.renderInvertedSection(with: template, stack: stack)
         case let bool as Bool:
-            return bool ? "" : template.render(parent)
+            return bool ? "" : template.render(stack)
         case .some:
             return ""
         case .none:
-            return template.render(parent)
+            return template.render(stack)
         }
     }
 
     /// Get child object from variable name
-    func getChild(named name: String, from object: Any, method: String?, context: HBMustacheContext?) -> Any? {
-        func _getChild(named names: ArraySlice<String>, from object: Any) -> Any? {
-            guard let name = names.first else { return object }
-            let childObject: Any?
+    func getChild(named name: String, from stack: [Any], method: String?, context: HBMustacheContext?) -> Any? {
+        func _getImmediateChild(named name: String, from object: Any) -> Any? {
             if let customBox = object as? HBMustacheParent {
-                childObject = customBox.child(named: name)
+                return customBox.child(named: name)
             } else {
                 let mirror = Mirror(reflecting: object)
-                childObject = mirror.getValue(forKey: name)
+                return mirror.getValue(forKey: name)
             }
-            guard childObject != nil else { return nil }
+        }
+
+        func _getChild(named names: ArraySlice<String>, from object: Any) -> Any? {
+            guard let name = names.first else { return object }
+            guard let childObject = _getImmediateChild(named: name, from: object) else { return nil }
             let names2 = names.dropFirst()
-            return _getChild(named: names2, from: childObject!)
+            return _getChild(named: names2, from: childObject)
+        }
+
+        func _getChildInStack(named names: ArraySlice<String>, from stack: [Any]) -> Any? {
+            guard let name = names.first else { return stack.last }
+            for object in stack.reversed() {
+                if let childObject = _getImmediateChild(named: name, from: object) {
+                    let names2 = names.dropFirst()
+                    return _getChild(named: names2, from: childObject)
+                }
+            }
+            return nil
         }
 
         // work out which object to access. "." means the current object, if the variable name is ""
@@ -101,12 +129,12 @@ extension HBMustacheTemplate {
         // the name is split by "." and we use mirror to get the correct child object
         let child: Any?
         if name == "." {
-            child = object
+            child = stack.last!
         } else if name == "", method != nil {
             child = context
         } else {
             let nameSplit = name.split(separator: ".").map { String($0) }
-            child = _getChild(named: nameSplit[...], from: object)
+            child = _getChildInStack(named: nameSplit[...], from: stack)
         }
         // if we want to run a method and the current child can have methods applied to it then
         // run method on the current child
