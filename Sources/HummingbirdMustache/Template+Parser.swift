@@ -6,20 +6,36 @@ extension HBMustacheTemplate {
         case expectedSectionEnd
     }
 
+    struct ParserState {
+        var sectionName: String?
+        var newLine: Bool
+
+        init() {
+            sectionName = nil
+            newLine = true
+        }
+
+        func withSectionName(_ name: String) -> ParserState {
+            var newValue = self
+            newValue.sectionName = name
+            return newValue
+        }
+    }
+
     /// parse mustache text to generate a list of tokens
     static func parse(_ string: String) throws -> [Token] {
         var parser = HBParser(string)
-        return try parse(&parser, sectionName: nil)
+        return try parse(&parser, state: .init())
     }
 
     /// parse section in mustache text
-    static func parse(_ parser: inout HBParser, sectionName: String?, newLine: Bool = true) throws -> [Token] {
+    static func parse(_ parser: inout HBParser, state: ParserState) throws -> [Token] {
         var tokens: [Token] = []
-        var newLine = newLine
+        var state = state
         var whiteSpaceBefore: String = ""
         while !parser.reachedEnd() {
             // if new line read whitespace
-            if newLine {
+            if state.newLine {
                 whiteSpaceBefore = parser.read(while: Set(" \t")).string
             }
             // read until we hit either a newline or "{"
@@ -27,7 +43,7 @@ extension HBMustacheTemplate {
             // if new line append all text read plus newline
             if parser.current() == "\n" {
                 tokens.append(.text(whiteSpaceBefore + text.string + "\n"))
-                newLine = true
+                state.newLine = true
                 parser.unsafeAdvance()
                 continue
             } else if parser.current() == "{" {
@@ -37,7 +53,7 @@ extension HBMustacheTemplate {
                     if text.count > 0 {
                         tokens.append(.text(whiteSpaceBefore + text.string + "{"))
                         whiteSpaceBefore = ""
-                        newLine = false
+                        state.newLine = false
                     }
                     continue
                 } else {
@@ -49,7 +65,7 @@ extension HBMustacheTemplate {
             if text.count > 0 {
                 tokens.append(.text(whiteSpaceBefore + text.string))
                 whiteSpaceBefore = ""
-                newLine = false
+                state.newLine = false
             }
             // have we reached the end of the text
             if parser.reachedEnd() {
@@ -61,7 +77,7 @@ extension HBMustacheTemplate {
                 // section
                 parser.unsafeAdvance()
                 let (name, method) = try parseName(&parser)
-                if newLine, hasLineFinished(&parser) {
+                if state.newLine, hasLineFinished(&parser) {
                     setNewLine = true
                     if parser.current() == "\n" {
                         parser.unsafeAdvance()
@@ -70,14 +86,14 @@ extension HBMustacheTemplate {
                     tokens.append(.text(whiteSpaceBefore))
                     whiteSpaceBefore = ""
                 }
-                let sectionTokens = try parse(&parser, sectionName: name, newLine: newLine)
+                let sectionTokens = try parse(&parser, state: state.withSectionName(name))
                 tokens.append(.section(name: name, method: method, template: HBMustacheTemplate(sectionTokens)))
 
             case "^":
                 // inverted section
                 parser.unsafeAdvance()
                 let (name, method) = try parseName(&parser)
-                if newLine, hasLineFinished(&parser) {
+                if state.newLine, hasLineFinished(&parser) {
                     setNewLine = true
                     if parser.current() == "\n" {
                         parser.unsafeAdvance()
@@ -86,17 +102,17 @@ extension HBMustacheTemplate {
                     tokens.append(.text(whiteSpaceBefore))
                     whiteSpaceBefore = ""
                 }
-                let sectionTokens = try parse(&parser, sectionName: name, newLine: newLine)
+                let sectionTokens = try parse(&parser, state: state.withSectionName(name))
                 tokens.append(.invertedSection(name: name, method: method, template: HBMustacheTemplate(sectionTokens)))
 
             case "/":
                 // end of section
                 parser.unsafeAdvance()
                 let (name, _) = try parseName(&parser)
-                guard name == sectionName else {
+                guard name == state.sectionName else {
                     throw Error.sectionCloseNameIncorrect
                 }
-                if newLine, hasLineFinished(&parser) {
+                if state.newLine, hasLineFinished(&parser) {
                     setNewLine = true
                     if parser.current() == "\n" {
                         parser.unsafeAdvance()
@@ -111,7 +127,7 @@ extension HBMustacheTemplate {
                 // comment
                 parser.unsafeAdvance()
                 _ = try parseComment(&parser)
-                if newLine, hasLineFinished(&parser) {
+                if state.newLine, hasLineFinished(&parser) {
                     setNewLine = true
                     if !parser.reachedEnd() {
                         parser.unsafeAdvance()
@@ -146,7 +162,7 @@ extension HBMustacheTemplate {
                 if whiteSpaceBefore.count > 0 {
                     tokens.append(.text(whiteSpaceBefore))
                 }
-                if newLine, hasLineFinished(&parser) {
+                if state.newLine, hasLineFinished(&parser) {
                     setNewLine = true
                     if parser.current() == "\n" {
                         parser.unsafeAdvance()
@@ -166,10 +182,10 @@ extension HBMustacheTemplate {
                 let (name, method) = try parseName(&parser)
                 tokens.append(.variable(name: name, method: method))
             }
-            newLine = setNewLine
+            state.newLine = setNewLine
         }
         // should never get here if reading section
-        guard sectionName == nil else {
+        guard state.sectionName == nil else {
             throw Error.expectedSectionEnd
         }
         return tokens
