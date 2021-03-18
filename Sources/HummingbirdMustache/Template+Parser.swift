@@ -265,7 +265,7 @@ extension HBMustacheTemplate {
         return false
     }
 
-    static func isStandalone(_ parser: inout HBParser, state: ParserState) -> Bool  {
+    static func isStandalone(_ parser: inout HBParser, state: ParserState) -> Bool {
         return state.newLine && hasLineFinished(&parser)
     }
 
