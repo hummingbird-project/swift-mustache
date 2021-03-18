@@ -128,6 +128,12 @@ final class MethodTests: XCTestCase {
         """)
     }
 
+    func testListOutput() throws {
+        let object = [1,2,3,4]
+        let template = try HBMustacheTemplate(string: "{{#.}}{{.}}{{^last()}}, {{/last()}}{{/.}}")
+        XCTAssertEqual(template.render(object), "1, 2, 3, 4")
+    }
+
     func testDictionaryEnumerated() throws {
         let template = try HBMustacheTemplate(string: """
         {{#enumerated(.)}}<b>{{ key }} = {{ value }}</b>{{/enumerated(.)}}
