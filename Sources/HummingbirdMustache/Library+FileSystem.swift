@@ -1,5 +1,4 @@
 import Foundation
-import Logging
 
 extension HBMustacheLibrary {
     /// Load templates from a folder

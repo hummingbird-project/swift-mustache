@@ -1,5 +1,3 @@
-import Logging
-
 /// Class holding a collection of mustache templates.
 ///
 /// Each template can reference the others via a partial using the name the template is registered under
