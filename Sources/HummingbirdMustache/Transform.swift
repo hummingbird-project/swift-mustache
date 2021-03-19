@@ -1,17 +1,17 @@
-/// Objects that can have a methods run on them. Mustache methods are specific to this implementation
+/// Objects that can have a transforms run on them. Mustache transforms are specific to this implementation
 /// of Mustache. They allow you to process objects before they are rendered.
 ///
-/// The syntax for applying methods is `{{method(variable)}}`. Methods can be applied to both
-/// variables and sections.
+/// The syntax for applying transforms is `{{method(variable)}}`. Transforms can be applied to both
+/// variables, sections and inverted sections.
 ///
 /// A simple example would be ensuring a string is lowercase.
 /// ```
 /// {{lowercased(myString)}}
 /// ```
-/// If applying a method to a sequence then the closing element of the sequence should not include the
-/// method name eg
+/// If applying a transform to a sequence then the closing element of the sequence should include the
+/// transform name eg
 /// ```
-/// {{#reversed(sequence)}}{{.}}{{\sequence}}
+/// {{#reversed(sequence)}}{{.}}{{\reversed(sequence)}}
 /// ```
 public protocol HBMustacheTransformable {
     func transform(_ name: String) -> Any?

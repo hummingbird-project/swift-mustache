@@ -261,6 +261,7 @@ extension HBParser {
 }
 
 extension HBParser {
+    /// context used in parser error
     public struct Context {
         public let line: String
         public let lineNumber: Int
