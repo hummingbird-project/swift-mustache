@@ -81,7 +81,7 @@ They can be applied to variable, section and inverted section tags. If you apply
 ```
 The library comes with a series of transforms for the Swift standard objects.
 - String/Substring
-  - capitalized: Capitalized the string
+  - capitalized: Return string with first letter capitalized
   - lowercase: Return lowercased version of string
   - uppercase: Return uppercased version of string
   - reversed: Reverse string
