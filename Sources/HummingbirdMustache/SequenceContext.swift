@@ -1,6 +1,6 @@
 
-/// Context that current object is being rendered in. Only really relevant when rendering a sequence
-struct HBMustacheContext: HBMustacheMethods {
+/// Context that current object inside a sequence is being rendered in. Only relevant when rendering a sequence
+struct HBMustacheSequenceContext: HBMustacheTransformable {
     var first: Bool
     var last: Bool
     var index: Int
@@ -11,7 +11,7 @@ struct HBMustacheContext: HBMustacheMethods {
         index = 0
     }
 
-    /// Apply method to `HBMustacheContext`. These are available when processing elements
+    /// Transform `HBMustacheContext`. These are available when processing elements
     /// of a sequence.
     ///
     /// Format your mustache as follows to accept them. They look like a function without any arguments
@@ -19,10 +19,10 @@ struct HBMustacheContext: HBMustacheMethods {
     /// {{#sequence}}{{index()}}{{/sequence}}
     /// ```
     ///
-    /// Methods available are `first`, `last`, and `index`
+    /// Transforms available are `first`, `last`, `index`, `even` and `odd`
     /// - Parameter name: Method name
     /// - Returns: Result
-    func runMethod(_ name: String) -> Any? {
+    func transform(_ name: String) -> Any? {
         switch name {
         case "first":
             return first

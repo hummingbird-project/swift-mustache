@@ -13,17 +13,17 @@
 /// ```
 /// {{#reversed(sequence)}}{{.}}{{\sequence}}
 /// ```
-public protocol HBMustacheMethods {
-    func runMethod(_ name: String) -> Any?
+public protocol HBMustacheTransformable {
+    func transform(_ name: String) -> Any?
 }
 
 public extension StringProtocol {
-    /// Apply method to String/Substring
+    /// Transform String/Substring
     ///
-    /// Methods available are `capitalized`, `lowercased`, `uppercased` and `reversed`
+    /// Transforms available are `capitalized`, `lowercased`, `uppercased` and `reversed`
     /// - Parameter name: Method name
     /// - Returns: Result
-    func runMethod(_ name: String) -> Any? {
+    func transform(_ name: String) -> Any? {
         switch name {
         case "capitalized":
             return capitalized
@@ -39,22 +39,22 @@ public extension StringProtocol {
     }
 }
 
-extension String: HBMustacheMethods {}
-extension Substring: HBMustacheMethods {}
+extension String: HBMustacheTransformable {}
+extension Substring: HBMustacheTransformable {}
 
 /// Protocol for sequence that can be sorted
 private protocol HBComparableSequence {
-    func runComparableMethod(_ name: String) -> Any?
+    func comparableTransform(_ name: String) -> Any?
 }
 
-extension Array: HBMustacheMethods {
-    /// Apply method to Array.
+extension Array: HBMustacheTransformable {
+    /// Transform Array.
     ///
-    /// Methods available are `first`, `last`, `reversed`, `count` and for arrays
+    /// Transforms available are `first`, `last`, `reversed`, `count` and for arrays
     /// with comparable elements `sorted`.
     /// - Parameter name: method name
     /// - Returns: Result
-    public func runMethod(_ name: String) -> Any? {
+    public func transform(_ name: String) -> Any? {
         switch name {
         case "first":
             return first
@@ -66,7 +66,7 @@ extension Array: HBMustacheMethods {
             return count
         default:
             if let comparableSeq = self as? HBComparableSequence {
-                return comparableSeq.runComparableMethod(name)
+                return comparableSeq.comparableTransform(name)
             }
             return nil
         }
@@ -74,7 +74,7 @@ extension Array: HBMustacheMethods {
 }
 
 extension Array: HBComparableSequence where Element: Comparable {
-    func runComparableMethod(_ name: String) -> Any? {
+    func comparableTransform(_ name: String) -> Any? {
         switch name {
         case "sorted":
             return sorted()
@@ -84,14 +84,14 @@ extension Array: HBComparableSequence where Element: Comparable {
     }
 }
 
-extension Dictionary: HBMustacheMethods {
-    /// Apply method to Dictionary
+extension Dictionary: HBMustacheTransformable {
+    /// Transform Dictionary
     ///
-    /// Methods available are `count`, `enumerated` and for dictionaries
+    /// Transforms available are `count`, `enumerated` and for dictionaries
     /// with comparable keys `sorted`.
     /// - Parameter name: method name
     /// - Returns: Result
-    public func runMethod(_ name: String) -> Any? {
+    public func transform(_ name: String) -> Any? {
         switch name {
         case "count":
             return count
@@ -99,7 +99,7 @@ extension Dictionary: HBMustacheMethods {
             return map { (key: $0.key, value: $0.value) }
         default:
             if let comparableSeq = self as? HBComparableSequence {
-                return comparableSeq.runComparableMethod(name)
+                return comparableSeq.comparableTransform(name)
             }
             return nil
         }
@@ -107,7 +107,7 @@ extension Dictionary: HBMustacheMethods {
 }
 
 extension Dictionary: HBComparableSequence where Key: Comparable {
-    func runComparableMethod(_ name: String) -> Any? {
+    func comparableTransform(_ name: String) -> Any? {
         switch name {
         case "sorted":
             return map { (key: $0.key, value: $0.value) }.sorted { $0.key < $1.key }
@@ -118,12 +118,12 @@ extension Dictionary: HBComparableSequence where Key: Comparable {
 }
 
 public extension FixedWidthInteger {
-    /// Apply method to FixedWidthInteger
+    /// Transform FixedWidthInteger
     ///
-    /// Methods available are `plusone`, `minusone`, `odd`, `even`
+    /// Transforms available are `plusone`, `minusone`, `odd`, `even`
     /// - Parameter name: method name
     /// - Returns: Result
-    func runMethod(_ name: String) -> Any? {
+    func transform(_ name: String) -> Any? {
         switch name {
         case "plusone":
             return self + 1
@@ -139,13 +139,13 @@ public extension FixedWidthInteger {
     }
 }
 
-extension Int: HBMustacheMethods {}
-extension Int8: HBMustacheMethods {}
-extension Int16: HBMustacheMethods {}
-extension Int32: HBMustacheMethods {}
-extension Int64: HBMustacheMethods {}
-extension UInt: HBMustacheMethods {}
-extension UInt8: HBMustacheMethods {}
-extension UInt16: HBMustacheMethods {}
-extension UInt32: HBMustacheMethods {}
-extension UInt64: HBMustacheMethods {}
+extension Int: HBMustacheTransformable {}
+extension Int8: HBMustacheTransformable {}
+extension Int16: HBMustacheTransformable {}
+extension Int32: HBMustacheTransformable {}
+extension Int64: HBMustacheTransformable {}
+extension UInt: HBMustacheTransformable {}
+extension UInt8: HBMustacheTransformable {}
+extension UInt16: HBMustacheTransformable {}
+extension UInt32: HBMustacheTransformable {}
+extension UInt64: HBMustacheTransformable {}

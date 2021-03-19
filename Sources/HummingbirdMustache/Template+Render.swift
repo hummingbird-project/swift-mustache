@@ -6,7 +6,7 @@ extension HBMustacheTemplate {
     ///   - context: Context that render is occurring in. Contains information about position in sequence
     ///   - indentation: indentation of partial
     /// - Returns: Rendered text
-    func render(_ stack: [Any], context: HBMustacheContext? = nil, indentation: String? = nil) -> String {
+    func render(_ stack: [Any], context: HBMustacheSequenceContext? = nil, indentation: String? = nil) -> String {
         var string = ""
         if let indentation = indentation, indentation != "" {
             for token in tokens {
@@ -23,7 +23,7 @@ extension HBMustacheTemplate {
         return string
     }
 
-    func renderToken(_ token: Token, stack: [Any], context: HBMustacheContext? = nil) -> String {
+    func renderToken(_ token: Token, stack: [Any], context: HBMustacheSequenceContext? = nil) -> String {
         switch token {
         case let .text(text):
             return text
@@ -96,7 +96,7 @@ extension HBMustacheTemplate {
     }
 
     /// Get child object from variable name
-    func getChild(named name: String, from stack: [Any], method: String?, context: HBMustacheContext?) -> Any? {
+    func getChild(named name: String, from stack: [Any], method: String?, context: HBMustacheSequenceContext?) -> Any? {
         func _getImmediateChild(named name: String, from object: Any) -> Any? {
             if let customBox = object as? HBMustacheParent {
                 return customBox.child(named: name)
@@ -139,9 +139,9 @@ extension HBMustacheTemplate {
         // if we want to run a method and the current child can have methods applied to it then
         // run method on the current child
         if let method = method,
-           let runnable = child as? HBMustacheMethods
+           let runnable = child as? HBMustacheTransformable
         {
-            if let result = runnable.runMethod(method) {
+            if let result = runnable.transform(method) {
                 return result
             }
         }

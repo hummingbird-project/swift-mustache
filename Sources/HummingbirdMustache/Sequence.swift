@@ -11,7 +11,7 @@ public extension Sequence {
     /// Render section using template
     func renderSection(with template: HBMustacheTemplate, stack: [Any]) -> String {
         var string = ""
-        var context = HBMustacheContext(first: true)
+        var context = HBMustacheSequenceContext(first: true)
 
         var iterator = makeIterator()
         guard var currentObject = iterator.next() else { return "" }
