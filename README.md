@@ -10,7 +10,7 @@ Load your templates from the filesystem
 ```swift
 let library = HBMustacheLibrary("folder/my/templates/are/in")
 ```
-This will look for all the files with the extension ".mustache" in the specified folder and sub-folders and attempt to load them.
+This will look for all the files with the extension ".mustache" in the specified folder and subfolders and attempt to load them. Each file is registed with the name of the file (with subfolder, if inside a subfolder) minus the "mustache" extension.
 
 Render an object with a template 
 ```swift
@@ -66,16 +66,16 @@ let output = template.render(john)
 ```
 Will render as 
 ```
-<b>Willy is awesome.</b>
+<b>John is awesome.</b>
 ```
 
 ### Transforms
 
-Transforms are similar to lambdas in that they are functions run an object but with the difference they return a new object instead of rendered text. Transforms are implemented as a function call inside a tag eg
+Transforms are similar to lambdas in that they are functions run an object but with the difference they return a new object instead of rendered text. Transforms are formatted as a function call inside a tag eg
 ```
 {{uppercase(string)}}
 ```
-They can be applied to variable, section and inverted section tags. If you apply it to section or inverted section the function name is included in the end section tag as well eg
+They can be applied to variable, section and inverted section tags. If you apply them to a section or inverted section tag the function name should be included in the end section tag as well eg
 ```
 {{#sorted(array)}}{{.}}{{/sorted(array)}}
 ```
@@ -85,7 +85,7 @@ The library comes with a series of transforms for the Swift standard objects.
   - lowercase: Return lowercased version of string
   - uppercase: Return uppercased version of string
   - reversed: Reverse string
-- Int/UInt/Int8...
+- Int/UInt/Int8/Int16...
   - plusone: Add one to integer
   - minusone: Subtract one from integer
   - odd: return if integer is odd
@@ -95,7 +95,7 @@ The library comes with a series of transforms for the Swift standard objects.
   - last: Return last element of array
   - count: Return number of elements in array
   - reversed: Reverse array
-  - sorted: If the element of the array are comparable sort them
+  - sorted: If the elements of the array are comparable sort them
 - Dictionary
   - count: Return number of elements in dictionary
   - enumerated: Return dictionary as array of key, value pairs
@@ -103,7 +103,7 @@ The library comes with a series of transforms for the Swift standard objects.
 
 ### Sequence context transforms
 
-Sequence context transforms are transforms applied to the position in the sequence you are currently. They are formatted as a function that takes no parameter eg
+Sequence context transforms are transforms applied to the current position in the sequence. They are formatted as a function that takes no parameter eg
 ```
 {{#first()}}First{{/first()}}
 ```
