@@ -26,10 +26,10 @@ extension HBMustacheTemplate {
         var endDelimiter: String
 
         init() {
-            sectionName = nil
-            newLine = true
-            startDelimiter = "{{"
-            endDelimiter = "}}"
+            self.sectionName = nil
+            self.newLine = true
+            self.startDelimiter = "{{"
+            self.endDelimiter = "}}"
         }
 
         func withSectionName(_ name: String, method: String? = nil) -> ParserState {
@@ -58,7 +58,7 @@ extension HBMustacheTemplate {
     static func parse(_ string: String) throws -> [Token] {
         var parser = HBParser(string)
         do {
-            return try parse(&parser, state: .init())
+            return try self.parse(&parser, state: .init())
         } catch {
             throw ParserError(context: parser.getContext(), error: error)
         }
@@ -99,7 +99,7 @@ extension HBMustacheTemplate {
                 // section
                 parser.unsafeAdvance()
                 let (name, method) = try parseName(&parser, state: state)
-                if isStandalone(&parser, state: state) {
+                if self.isStandalone(&parser, state: state) {
                     setNewLine = true
                 } else if whiteSpaceBefore.count > 0 {
                     tokens.append(.text(String(whiteSpaceBefore)))
@@ -112,7 +112,7 @@ extension HBMustacheTemplate {
                 // inverted section
                 parser.unsafeAdvance()
                 let (name, method) = try parseName(&parser, state: state)
-                if isStandalone(&parser, state: state) {
+                if self.isStandalone(&parser, state: state) {
                     setNewLine = true
                 } else if whiteSpaceBefore.count > 0 {
                     tokens.append(.text(String(whiteSpaceBefore)))
@@ -130,7 +130,7 @@ extension HBMustacheTemplate {
                     parser.unsafeSetPosition(position)
                     throw Error.sectionCloseNameIncorrect
                 }
-                if isStandalone(&parser, state: state) {
+                if self.isStandalone(&parser, state: state) {
                     setNewLine = true
                 } else if whiteSpaceBefore.count > 0 {
                     tokens.append(.text(String(whiteSpaceBefore)))
@@ -141,8 +141,8 @@ extension HBMustacheTemplate {
             case "!":
                 // comment
                 parser.unsafeAdvance()
-                _ = try parseComment(&parser, state: state)
-                setNewLine = isStandalone(&parser, state: state)
+                _ = try self.parseComment(&parser, state: state)
+                setNewLine = self.isStandalone(&parser, state: state)
 
             case "{":
                 // unescaped variable
@@ -172,7 +172,7 @@ extension HBMustacheTemplate {
                 if whiteSpaceBefore.count > 0 {
                     tokens.append(.text(String(whiteSpaceBefore)))
                 }
-                if isStandalone(&parser, state: state) {
+                if self.isStandalone(&parser, state: state) {
                     setNewLine = true
                     tokens.append(.partial(name, indentation: String(whiteSpaceBefore)))
                 } else {
@@ -183,8 +183,8 @@ extension HBMustacheTemplate {
             case "=":
                 // set delimiter
                 parser.unsafeAdvance()
-                state = try parserSetDelimiter(&parser, state: state)
-                setNewLine = isStandalone(&parser, state: state)
+                state = try self.parserSetDelimiter(&parser, state: state)
+                setNewLine = self.isStandalone(&parser, state: state)
 
             default:
                 // variable
@@ -232,20 +232,20 @@ extension HBMustacheTemplate {
     /// parse variable name
     static func parseName(_ parser: inout HBParser, state: ParserState) throws -> (String, String?) {
         parser.read(while: \.isWhitespace)
-        let text = String(parser.read(while: sectionNameChars))
+        let text = String(parser.read(while: self.sectionNameChars))
         parser.read(while: \.isWhitespace)
         guard try parser.read(string: state.endDelimiter) else { throw Error.unfinishedName }
 
         // does the name include brackets. If so this is a method call
         var nameParser = HBParser(String(text))
-        let string = nameParser.read(while: sectionNameCharsWithoutBrackets)
+        let string = nameParser.read(while: self.sectionNameCharsWithoutBrackets)
         if nameParser.reachedEnd() {
             return (text, nil)
         } else {
             // parse function parameter, as we have just parsed a function name
             guard nameParser.current() == "(" else { throw Error.unfinishedName }
             nameParser.unsafeAdvance()
-            let string2 = nameParser.read(while: sectionNameCharsWithoutBrackets)
+            let string2 = nameParser.read(while: self.sectionNameCharsWithoutBrackets)
             guard nameParser.current() == ")" else { throw Error.unfinishedName }
             nameParser.unsafeAdvance()
             guard nameParser.reachedEnd() else { throw Error.unfinishedName }
@@ -290,7 +290,7 @@ extension HBMustacheTemplate {
     }
 
     static func isStandalone(_ parser: inout HBParser, state: ParserState) -> Bool {
-        return state.newLine && hasLineFinished(&parser)
+        return state.newLine && self.hasLineFinished(&parser)
     }
 
     private static let sectionNameCharsWithoutBrackets = Set<Character>("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ._?")

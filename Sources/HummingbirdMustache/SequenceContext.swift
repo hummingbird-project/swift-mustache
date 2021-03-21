@@ -8,7 +8,7 @@ struct HBMustacheSequenceContext: HBMustacheTransformable {
     init(first: Bool = false, last: Bool = false) {
         self.first = first
         self.last = last
-        index = 0
+        self.index = 0
     }
 
     /// Transform `HBMustacheContext`. These are available when processing elements
@@ -25,15 +25,15 @@ struct HBMustacheSequenceContext: HBMustacheTransformable {
     func transform(_ name: String) -> Any? {
         switch name {
         case "first":
-            return first
+            return self.first
         case "last":
-            return last
+            return self.last
         case "index":
-            return index
+            return self.index
         case "even":
-            return (index & 1) == 0
+            return (self.index & 1) == 0
         case "odd":
-            return (index & 1) == 1
+            return (self.index & 1) == 1
         default:
             return nil
         }

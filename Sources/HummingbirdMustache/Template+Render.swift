@@ -13,11 +13,11 @@ extension HBMustacheTemplate {
                 if string.last == "\n" {
                     string += indentation
                 }
-                string += renderToken(token, stack: stack, context: context)
+                string += self.renderToken(token, stack: stack, context: context)
             }
         } else {
             for token in tokens {
-                string += renderToken(token, stack: stack, context: context)
+                string += self.renderToken(token, stack: stack, context: context)
             }
         }
         return string
@@ -25,9 +25,9 @@ extension HBMustacheTemplate {
 
     func renderToken(_ token: Token, stack: [Any], context: HBMustacheSequenceContext? = nil) -> String {
         switch token {
-        case let .text(text):
+        case .text(let text):
             return text
-        case let .variable(variable, method):
+        case .variable(let variable, let method):
             if let child = getChild(named: variable, from: stack, method: method, context: context) {
                 if let template = child as? HBMustacheTemplate {
                     return template.render(stack)
@@ -35,19 +35,19 @@ extension HBMustacheTemplate {
                     return String(describing: child).htmlEscape()
                 }
             }
-        case let .unescapedVariable(variable, method):
+        case .unescapedVariable(let variable, let method):
             if let child = getChild(named: variable, from: stack, method: method, context: context) {
                 return String(describing: child)
             }
-        case let .section(variable, method, template):
-            let child = getChild(named: variable, from: stack, method: method, context: context)
-            return renderSection(child, stack: stack, with: template)
+        case .section(let variable, let method, let template):
+            let child = self.getChild(named: variable, from: stack, method: method, context: context)
+            return self.renderSection(child, stack: stack, with: template)
 
-        case let .invertedSection(variable, method, template):
-            let child = getChild(named: variable, from: stack, method: method, context: context)
-            return renderInvertedSection(child, stack: stack, with: template)
+        case .invertedSection(let variable, let method, let template):
+            let child = self.getChild(named: variable, from: stack, method: method, context: context)
+            return self.renderInvertedSection(child, stack: stack, with: template)
 
-        case let .partial(name, indentation):
+        case .partial(let name, let indentation):
             if let template = library?.getTemplate(named: name) {
                 return template.render(stack, indentation: indentation)
             }
@@ -69,7 +69,7 @@ extension HBMustacheTemplate {
             return bool ? template.render(stack) : ""
         case let lambda as HBMustacheLambda:
             return lambda.run(stack.last!, template)
-        case let .some(value):
+        case .some(let value):
             return template.render(stack + [value])
         case .none:
             return ""

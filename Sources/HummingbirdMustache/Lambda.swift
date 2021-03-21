@@ -28,10 +28,10 @@ public struct HBMustacheLambda {
     /// Initialize `HBMustacheLambda`
     /// - Parameter cb: function to be called by lambda
     public init(_ cb: @escaping Callback) {
-        callback = cb
+        self.callback = cb
     }
 
     internal func run(_ object: Any, _ template: HBMustacheTemplate) -> String {
-        return callback(object, template)
+        return self.callback(object, template)
     }
 }

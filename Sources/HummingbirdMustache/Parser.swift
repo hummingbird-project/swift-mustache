@@ -20,11 +20,11 @@ public struct HBParser {
     /// Create a Reader object
     /// - Parameter string: String to parse
     init(_ string: String) {
-        _storage = Storage(string)
-        position = string.startIndex
+        self._storage = Storage(string)
+        self.position = string.startIndex
     }
 
-    var buffer: String { return _storage.buffer }
+    var buffer: String { return self._storage.buffer }
     private(set) var position: String.Index
 }
 
@@ -33,7 +33,7 @@ extension HBParser {
     /// - Throws: .overflow
     /// - Returns: Current character
     mutating func character() throws -> Character {
-        guard !reachedEnd() else { throw HBParser.Error.overflow }
+        guard !self.reachedEnd() else { throw HBParser.Error.overflow }
         let c = unsafeCurrent()
         unsafeAdvance()
         return c
@@ -54,11 +54,11 @@ extension HBParser {
     /// - Throws: .overflow
     /// - Returns: If current character was the one we expected
     mutating func read(string: String) throws -> Bool {
-        let initialPosition = position
+        let initialPosition = self.position
         guard string.count > 0 else { return true }
         let subString = try read(count: string.count)
         guard subString == string else {
-            position = initialPosition
+            self.position = initialPosition
             return false
         }
         return true
@@ -79,9 +79,9 @@ extension HBParser {
     /// - Throws: .overflow
     /// - Returns: The string read from the buffer
     mutating func read(count: Int) throws -> Substring {
-        guard buffer.distance(from: position, to: buffer.endIndex) >= count else { throw HBParser.Error.overflow }
-        let end = buffer.index(position, offsetBy: count)
-        let subString = buffer[position ..< end]
+        guard self.buffer.distance(from: self.position, to: self.buffer.endIndex) >= count else { throw HBParser.Error.overflow }
+        let end = self.buffer.index(self.position, offsetBy: count)
+        let subString = self.buffer[self.position..<end]
         unsafeAdvance(by: count)
         return subString
     }
@@ -91,10 +91,10 @@ extension HBParser {
     /// - Throws: .overflow if we hit the end of the buffer before reading character
     /// - Returns: String read from buffer
     @discardableResult mutating func read(until: Character, throwOnOverflow: Bool = true) throws -> Substring {
-        let startIndex = position
-        while !reachedEnd() {
+        let startIndex = self.position
+        while !self.reachedEnd() {
             if unsafeCurrent() == until {
-                return buffer[startIndex ..< position]
+                return self.buffer[startIndex..<self.position]
             }
             unsafeAdvance()
         }
@@ -102,7 +102,7 @@ extension HBParser {
             unsafeSetPosition(startIndex)
             throw HBParser.Error.overflow
         }
-        return buffer[startIndex ..< position]
+        return self.buffer[startIndex..<self.position]
     }
 
     /// Read from buffer until we hit a string. By default the position after this is of the beginning of the string we were checking for
@@ -113,21 +113,21 @@ extension HBParser {
     /// - Returns: String read from buffer
     @discardableResult mutating func read(untilString: String, throwOnOverflow: Bool = true, skipToEnd: Bool = false) throws -> Substring {
         guard untilString.count > 0 else { return "" }
-        let startIndex = position
-        var foundIndex = position
+        let startIndex = self.position
+        var foundIndex = self.position
         var untilIndex = untilString.startIndex
-        while !reachedEnd() {
+        while !self.reachedEnd() {
             if unsafeCurrent() == untilString[untilIndex] {
                 if untilIndex == untilString.startIndex {
-                    foundIndex = position
+                    foundIndex = self.position
                 }
                 untilIndex = untilString.index(after: untilIndex)
                 if untilIndex == untilString.endIndex {
                     unsafeAdvance()
                     if skipToEnd == false {
-                        position = foundIndex
+                        self.position = foundIndex
                     }
-                    let result = buffer[startIndex ..< foundIndex]
+                    let result = self.buffer[startIndex..<foundIndex]
                     return result
                 }
             } else {
@@ -136,10 +136,10 @@ extension HBParser {
             unsafeAdvance()
         }
         if throwOnOverflow {
-            position = startIndex
+            self.position = startIndex
             throw Error.overflow
         }
-        return buffer[startIndex ..< position]
+        return self.buffer[startIndex..<self.position]
     }
 
     /// Read from buffer until we hit a character in supplied set. Position after this is of the character we were checking for
@@ -147,10 +147,10 @@ extension HBParser {
     /// - Throws: .overflow
     /// - Returns: String read from buffer
     @discardableResult mutating func read(until characterSet: Set<Character>, throwOnOverflow: Bool = true) throws -> Substring {
-        let startIndex = position
-        while !reachedEnd() {
+        let startIndex = self.position
+        while !self.reachedEnd() {
             if characterSet.contains(unsafeCurrent()) {
-                return buffer[startIndex ..< position]
+                return self.buffer[startIndex..<self.position]
             }
             unsafeAdvance()
         }
@@ -158,7 +158,7 @@ extension HBParser {
             unsafeSetPosition(startIndex)
             throw HBParser.Error.overflow
         }
-        return buffer[startIndex ..< position]
+        return self.buffer[startIndex..<self.position]
     }
 
     /// Read from buffer until keyPath on character returns true. Position after this is of the character we were checking for
@@ -166,18 +166,18 @@ extension HBParser {
     /// - Throws: .overflow
     /// - Returns: String read from buffer
     @discardableResult mutating func read(until keyPath: KeyPath<Character, Bool>, throwOnOverflow: Bool = true) throws -> Substring {
-        let startIndex = position
-        while !reachedEnd() {
+        let startIndex = self.position
+        while !self.reachedEnd() {
             if current()[keyPath: keyPath] {
-                return buffer[startIndex ..< position]
+                return self.buffer[startIndex..<self.position]
             }
             unsafeAdvance()
         }
         if throwOnOverflow {
-            position = startIndex
+            self.position = startIndex
             throw Error.overflow
         }
-        return buffer[startIndex ..< position]
+        return self.buffer[startIndex..<self.position]
     }
 
     /// Read from buffer until keyPath on character returns true. Position after this is of the character we were checking for
@@ -185,26 +185,26 @@ extension HBParser {
     /// - Throws: .overflow
     /// - Returns: String read from buffer
     @discardableResult mutating func read(until cb: (Character) -> Bool, throwOnOverflow: Bool = true) throws -> Substring {
-        let startIndex = position
-        while !reachedEnd() {
+        let startIndex = self.position
+        while !self.reachedEnd() {
             if cb(current()) {
-                return buffer[startIndex ..< position]
+                return self.buffer[startIndex..<self.position]
             }
             unsafeAdvance()
         }
         if throwOnOverflow {
-            position = startIndex
+            self.position = startIndex
             throw Error.overflow
         }
-        return buffer[startIndex ..< position]
+        return self.buffer[startIndex..<self.position]
     }
 
     /// Read from buffer from current position until the end of the buffer
     /// - Returns: String read from buffer
     @discardableResult mutating func readUntilTheEnd() -> Substring {
-        let startIndex = position
-        position = buffer.endIndex
-        return buffer[startIndex ..< position]
+        let startIndex = self.position
+        self.position = self.buffer.endIndex
+        return self.buffer[startIndex..<self.position]
     }
 
     /// Read while character at current position is the one supplied
@@ -212,7 +212,7 @@ extension HBParser {
     /// - Returns: String read from buffer
     @discardableResult mutating func read(while: Character) -> Int {
         var count = 0
-        while !reachedEnd(),
+        while !self.reachedEnd(),
               unsafeCurrent() == `while`
         {
             unsafeAdvance()
@@ -225,38 +225,38 @@ extension HBParser {
     /// - Parameter while: keyPath to check
     /// - Returns: String read from buffer
     @discardableResult mutating func read(while keyPath: KeyPath<Character, Bool>) -> Substring {
-        let startIndex = position
-        while !reachedEnd(),
+        let startIndex = self.position
+        while !self.reachedEnd(),
               unsafeCurrent()[keyPath: keyPath]
         {
             unsafeAdvance()
         }
-        return buffer[startIndex ..< position]
+        return self.buffer[startIndex..<self.position]
     }
 
     /// Read while character at current position is in supplied set
     /// - Parameter while: character set to check
     /// - Returns: String read from buffer
     @discardableResult mutating func read(while characterSet: Set<Character>) -> Substring {
-        let startIndex = position
-        while !reachedEnd(),
+        let startIndex = self.position
+        while !self.reachedEnd(),
               characterSet.contains(unsafeCurrent())
         {
             unsafeAdvance()
         }
-        return buffer[startIndex ..< position]
+        return self.buffer[startIndex..<self.position]
     }
 
     /// Return whether we have reached the end of the buffer
     /// - Returns: Have we reached the end
     func reachedEnd() -> Bool {
-        return position == buffer.endIndex
+        return self.position == self.buffer.endIndex
     }
 
     /// Return whether we are at the start of the buffer
     /// - Returns: Are we are the start
     func atStart() -> Bool {
-        return position == buffer.startIndex
+        return self.position == self.buffer.startIndex
     }
 }
 
@@ -286,7 +286,7 @@ extension HBParser {
         let line = try! parser.read(until: Character("\n"), throwOnOverflow: false)
         // count new lines up to this current position
         let buffer = parser.buffer
-        let textBefore = buffer[buffer.startIndex ..< position]
+        let textBefore = buffer[buffer.startIndex..<self.position]
         let lineNumber = textBefore.filter { $0.isNewline }.count
 
         return Context(line: String(line), lineNumber: lineNumber + 1, columnNumber: columnNumber + 1)
@@ -299,21 +299,21 @@ extension HBParser {
     /// - Throws: .overflow
     /// - Returns: Character
     func current() -> Character {
-        guard !reachedEnd() else { return "\0" }
+        guard !self.reachedEnd() else { return "\0" }
         return unsafeCurrent()
     }
 
     /// Move forward one character
     /// - Throws: .overflow
     mutating func advance() throws {
-        guard !reachedEnd() else { throw HBParser.Error.overflow }
+        guard !self.reachedEnd() else { throw HBParser.Error.overflow }
         return unsafeAdvance()
     }
 
     /// Move back one character
     /// - Throws: .overflow
     mutating func retreat() throws {
-        guard position != buffer.startIndex else { throw HBParser.Error.overflow }
+        guard self.position != self.buffer.startIndex else { throw HBParser.Error.overflow }
         return unsafeRetreat()
     }
 
@@ -321,7 +321,7 @@ extension HBParser {
     /// - Parameter amount: number of characters to move forward
     /// - Throws: .overflow
     mutating func advance(by amount: Int) throws {
-        guard buffer.distance(from: position, to: buffer.endIndex) >= amount else { throw HBParser.Error.overflow }
+        guard self.buffer.distance(from: self.position, to: self.buffer.endIndex) >= amount else { throw HBParser.Error.overflow }
         return unsafeAdvance(by: amount)
     }
 
@@ -329,12 +329,12 @@ extension HBParser {
     /// - Parameter amount: number of characters to move back
     /// - Throws: .overflow
     mutating func retreat(by amount: Int) throws {
-        guard buffer.distance(from: buffer.startIndex, to: position) >= amount else { throw HBParser.Error.overflow }
+        guard self.buffer.distance(from: self.buffer.startIndex, to: self.position) >= amount else { throw HBParser.Error.overflow }
         return unsafeRetreat(by: amount)
     }
 
     mutating func setPosition(_ position: String.Index) throws {
-        guard position <= buffer.endIndex else { throw HBParser.Error.overflow }
+        guard position <= self.buffer.endIndex else { throw HBParser.Error.overflow }
         unsafeSetPosition(position)
     }
 }
@@ -342,23 +342,23 @@ extension HBParser {
 // unsafe versions without checks
 extension HBParser {
     func unsafeCurrent() -> Character {
-        return buffer[position]
+        return self.buffer[self.position]
     }
 
     mutating func unsafeAdvance() {
-        position = buffer.index(after: position)
+        self.position = self.buffer.index(after: self.position)
     }
 
     mutating func unsafeRetreat() {
-        position = buffer.index(before: position)
+        self.position = self.buffer.index(before: self.position)
     }
 
     mutating func unsafeAdvance(by amount: Int) {
-        position = buffer.index(position, offsetBy: amount)
+        self.position = self.buffer.index(self.position, offsetBy: amount)
     }
 
     mutating func unsafeRetreat(by amount: Int) {
-        position = buffer.index(position, offsetBy: -amount)
+        self.position = self.buffer.index(self.position, offsetBy: -amount)
     }
 
     mutating func unsafeSetPosition(_ position: String.Index) {

@@ -222,7 +222,7 @@ final class TemplateRendererTests: XCTestCase {
         """)
         let object: [String: Any] = ["repo": [["name": "resque"], ["name": "hub"], ["name": "rip"]]]
         let date = Date()
-        for _ in 1 ... 10000 {
+        for _ in 1...10000 {
             _ = template.render(object)
         }
         print(-date.timeIntervalSinceNow)

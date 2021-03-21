@@ -4,14 +4,14 @@ public final class HBMustacheTemplate {
     /// - Parameter string: Template text
     /// - Throws: HBMustacheTemplate.Error
     public init(string: String) throws {
-        tokens = try Self.parse(string)
+        self.tokens = try Self.parse(string)
     }
 
     /// Render object using this template
     /// - Parameter object: Object to render
     /// - Returns: Rendered text
     public func render(_ object: Any) -> String {
-        render([object], context: nil)
+        self.render([object], context: nil)
     }
 
     internal init(_ tokens: [Token]) {
@@ -20,9 +20,9 @@ public final class HBMustacheTemplate {
 
     internal func setLibrary(_ library: HBMustacheLibrary) {
         self.library = library
-        for token in tokens {
+        for token in self.tokens {
             switch token {
-            case let .section(_, _, template), let .invertedSection(_, _, template):
+            case .section(_, _, let template), .invertedSection(_, _, let template):
                 template.setLibrary(library)
             default:
                 break

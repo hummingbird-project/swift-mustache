@@ -7,7 +7,7 @@
 public final class HBMustacheLibrary {
     /// Initialize empty library
     public init() {
-        templates = [:]
+        self.templates = [:]
     }
 
     /// Initialize library with contents of folder.
@@ -17,7 +17,7 @@ public final class HBMustacheLibrary {
     /// - Parameter directory: Directory to look for mustache templates
     /// - Parameter extension: Extension of files to look for
     public init(directory: String, withExtension extension: String = "mustache") throws {
-        templates = [:]
+        self.templates = [:]
         try loadTemplates(from: directory, withExtension: `extension`)
     }
 
@@ -27,14 +27,14 @@ public final class HBMustacheLibrary {
     ///   - name: Name of template
     public func register(_ template: HBMustacheTemplate, named name: String) {
         template.setLibrary(self)
-        templates[name] = template
+        self.templates[name] = template
     }
 
     /// Return template registed with name
     /// - Parameter name: name to search for
     /// - Returns: Template
     public func getTemplate(named name: String) -> HBMustacheTemplate? {
-        templates[name]
+        self.templates[name]
     }
 
     /// Render object using templated with name
