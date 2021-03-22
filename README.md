@@ -71,11 +71,11 @@ Will render as
 
 ### Transforms
 
-Transforms are similar to lambdas in that they are functions run an object but with the difference they return a new object instead of rendered text. Transforms are formatted as a function call inside a tag eg
+Transforms are similar to lambdas in that they are functions run on an object but with the difference they return a new object instead of rendered text. Transforms are formatted as a function call inside a tag eg
 ```
 {{uppercase(string)}}
 ```
-They can be applied to variable, section and inverted section tags. If you apply them to a section or inverted section tag the function name should be included in the end section tag as well eg
+They can be applied to variable, section and inverted section tags. If you apply them to a section or inverted section tag the handler name should be included in the end section tag as well eg
 ```
 {{#sorted(array)}}{{.}}{{/sorted(array)}}
 ```
