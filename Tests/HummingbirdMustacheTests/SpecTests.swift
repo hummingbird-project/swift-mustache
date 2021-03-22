@@ -68,11 +68,11 @@ final class MustacheSpecTests: XCTestCase {
                         library.register(template, named: key)
                     }
                     let result = library.render(self.data.value, withTemplate: "__test__")
-                    XCTAssertSpecEqual(result, self)
+                    self.XCTAssertSpecEqual(result, self)
                 } else {
                     let template = try HBMustacheTemplate(string: self.template)
                     let result = template.render(self.data.value)
-                    XCTAssertSpecEqual(result, self)
+                    self.XCTAssertSpecEqual(result, self)
                 }
             }
 
