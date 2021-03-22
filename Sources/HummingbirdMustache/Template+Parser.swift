@@ -221,7 +221,7 @@ extension HBMustacheTemplate {
                     switch token {
                     case .inheritedSection(let name, let template):
                         inherit[name] = template
-                    case .text(let string):
+                    case .text:
                         break
                     default:
                         throw Error.illegalTokenInsideInheritSection
