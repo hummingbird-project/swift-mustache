@@ -50,7 +50,7 @@ extension HBMustacheTemplate.Token: Equatable {
             return lhs1 == rhs1 && lhs2 == rhs2 && lhs3 == rhs3
         case (.invertedSection(let lhs1, let lhs2, let lhs3), .invertedSection(let rhs1, let rhs2, let rhs3)):
             return lhs1 == rhs1 && lhs2 == rhs2 && lhs3 == rhs3
-        case (.partial(let name1, let indent1), .partial(let name2, let indent2)):
+        case (.partial(let name1, let indent1, _), .partial(let name2, let indent2, _)):
             return name1 == name2 && indent1 == indent2
         default:
             return false

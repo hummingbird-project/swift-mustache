@@ -47,9 +47,16 @@ extension HBMustacheTemplate {
             let child = self.getChild(named: variable, method: method, context: context)
             return self.renderInvertedSection(child, with: template, context: context)
 
-        case .partial(let name, let indentation):
+        case .inheritedSection(let name, let template):
+            if let override = context.inherited?[name] {
+                return override.render(context: context)
+            } else {
+                return template.render(context: context)
+            }
+
+        case .partial(let name, let indentation, let overrides):
             if let template = library?.getTemplate(named: name) {
-                return template.render(context: context.withPartial(indented: indentation))
+                return template.render(context: context.withPartial(indented: indentation, inheriting: overrides))
             }
         }
         return ""

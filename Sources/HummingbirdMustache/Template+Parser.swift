@@ -16,6 +16,8 @@ extension HBMustacheTemplate {
         case expectedSectionEnd
         /// set delimiter tag badly formatted
         case invalidSetDelimiter
+        /// cannot apply transform to inherited section
+        case transformAppliedToInheritanceSection
     }
 
     struct ParserState {
@@ -121,6 +123,21 @@ extension HBMustacheTemplate {
                 let sectionTokens = try parse(&parser, state: state.withSectionName(name, method: method))
                 tokens.append(.invertedSection(name: name, method: method, template: HBMustacheTemplate(sectionTokens)))
 
+            case "$":
+                // inherited section
+                parser.unsafeAdvance()
+                let (name, method) = try parseName(&parser, state: state)
+                // ERROR: can't have methods applied to inherited sections
+                guard method == nil else { throw Error.transformAppliedToInheritanceSection }
+                if self.isStandalone(&parser, state: state) {
+                    setNewLine = true
+                } else if whiteSpaceBefore.count > 0 {
+                    tokens.append(.text(String(whiteSpaceBefore)))
+                    whiteSpaceBefore = ""
+                }
+                let sectionTokens = try parse(&parser, state: state.withSectionName(name, method: method))
+                tokens.append(.inheritedSection(name: name, template: HBMustacheTemplate(sectionTokens)))
+
             case "/":
                 // end of section
                 parser.unsafeAdvance()
@@ -174,9 +191,9 @@ extension HBMustacheTemplate {
                 }
                 if self.isStandalone(&parser, state: state) {
                     setNewLine = true
-                    tokens.append(.partial(name, indentation: String(whiteSpaceBefore)))
+                    tokens.append(.partial(name, indentation: String(whiteSpaceBefore), inherits: nil))
                 } else {
-                    tokens.append(.partial(name, indentation: nil))
+                    tokens.append(.partial(name, indentation: nil, inherits: nil))
                 }
                 whiteSpaceBefore = ""
 
