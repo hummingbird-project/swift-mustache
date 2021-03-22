@@ -11,7 +11,7 @@ public final class HBMustacheTemplate {
     /// - Parameter object: Object to render
     /// - Returns: Rendered text
     public func render(_ object: Any) -> String {
-        self.render([object], context: nil)
+        self.render(context: .init(object))
     }
 
     internal init(_ tokens: [Token]) {
