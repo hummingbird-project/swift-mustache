@@ -1,9 +1,11 @@
+/// Context while rendering mustache tokens
 struct HBMustacheContext {
     let stack: [Any]
     let sequenceContext: HBMustacheSequenceContext?
     let indentation: String?
     let inherited: [String: HBMustacheTemplate]?
 
+    /// initialize context with a single objectt
     init(_ object: Any) {
         self.stack = [object]
         self.sequenceContext = nil
@@ -23,12 +25,14 @@ struct HBMustacheContext {
         self.inherited = inherited
     }
 
+    /// return context with object add to stack
     func withObject(_ object: Any) -> HBMustacheContext {
         var stack = self.stack
         stack.append(object)
         return .init(stack: stack, sequenceContext: nil, indentation: self.indentation, inherited: self.inherited)
     }
 
+    /// return context with indent and parameter information for invoking a partial
     func withPartial(indented: String?, inheriting: [String: HBMustacheTemplate]?) -> HBMustacheContext {
         let indentation: String?
         if let indented = indented {
@@ -48,7 +52,8 @@ struct HBMustacheContext {
         }
         return .init(stack: self.stack, sequenceContext: nil, indentation: indentation, inherited: inherits)
     }
-
+    
+    /// return context with sequence info and sequence element added to stack
     func withSequence(_ object: Any, sequenceContext: HBMustacheSequenceContext) -> HBMustacheContext {
         var stack = self.stack
         stack.append(object)
