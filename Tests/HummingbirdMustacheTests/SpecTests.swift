@@ -46,11 +46,6 @@ public extension AnyDecodable {
 /// Verify implementation against formal standard for Mustache.
 /// https://github.com/mustache/spec
 final class MustacheSpecTests: XCTestCase {
-    func loadSpec(name: String) throws -> Data {
-        let url = URL(string: "https://raw.githubusercontent.com/mustache/spec/master/specs/\(name).json")!
-        return try Data(contentsOf: url)
-    }
-
     struct Spec: Decodable {
         struct Test: Decodable {
             let name: String
@@ -91,7 +86,12 @@ final class MustacheSpecTests: XCTestCase {
     }
 
     func testSpec(name: String, ignoring: [String] = []) throws {
-        let data = try loadSpec(name: name)
+        let url = URL(string: "https://raw.githubusercontent.com/mustache/spec/master/specs/\(name).json")!
+        try testSpec(url: url, ignoring: ignoring)
+    }
+
+    func testSpec(url: URL, ignoring: [String] = []) throws {
+        let data = try Data(contentsOf: url)
         let spec = try JSONDecoder().decode(Spec.self, from: data)
 
         print(spec.overview)
@@ -123,5 +123,12 @@ final class MustacheSpecTests: XCTestCase {
 
     func testSectionsSpec() throws {
         try self.testSpec(name: "sections", ignoring: ["Variable test"])
+    }
+
+    func testInheritanceSpec() throws {
+        let url = URL(
+            string: "https://raw.githubusercontent.com/mustache/spec/ab227509e64961943ca374c09c08b63f59da014a/specs/inheritance.json"
+        )!
+        try self.testSpec(url: url)
     }
 }

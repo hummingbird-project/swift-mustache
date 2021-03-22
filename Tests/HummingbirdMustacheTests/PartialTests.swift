@@ -51,4 +51,51 @@ final class PartialTests: XCTestCase {
 
         """)
     }
+
+    /// test inheritance
+    func testInheritance() throws {
+        let library = HBMustacheLibrary()
+        try library.register(
+            """
+            <head>
+            <title>{{$title}}Default title{{/title}}</title>
+            </head>
+
+            """,
+            named: "header"
+        )
+        try library.register(
+            """
+            <html>
+            {{$header}}{{/header}}
+            {{$content}}{{/content}}
+            </html>
+
+            """,
+            named: "base"
+        )
+        try library.register(
+            """
+            {{<base}}
+            {{$header}}
+            {{<header}}
+            {{$title}}My page title{{/title}}
+            {{/header}}
+            {{/header}}
+            {{$content}}<h1>Hello world</h1>{{/content}}
+            {{/base}}
+
+            """,
+            named: "mypage"
+        )
+        XCTAssertEqual(library.render({}, withTemplate: "mypage")!, """
+        <html>
+        <head>
+        <title>My page title</title>
+        </head>
+        <h1>Hello world</h1>
+        </html>
+
+        """)
+    }
 }
