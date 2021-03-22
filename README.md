@@ -1,6 +1,6 @@
 # HummingbirdMustache
 
-Package for rendering Mustache templates. Mustache is a templating language commonly used in server frameworks for generating HTML files (although it is not limited to HTML). You can find out more about Mustache [here](http://mustache.github.io/mustache.5.html).
+Package for rendering Mustache templates. Mustache is a logicless templating language commonly used in web and mobile platforms. You can find out more about Mustache [here](http://mustache.github.io/mustache.5.html).
 
 While Hummingbird Mustache has been designed to be used with the Hummingbird server framework it has no dependencies and can be used as a standalone library.
 
