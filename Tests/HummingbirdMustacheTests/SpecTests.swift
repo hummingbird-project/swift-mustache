@@ -16,9 +16,9 @@ public extension AnyDecodable {
 
         if container.decodeNil() {
             #if canImport(Foundation)
-                self.init(NSNull())
+            self.init(NSNull())
             #else
-                self.init(Self?.none)
+            self.init(Self?.none)
             #endif
         } else if let bool = try? container.decode(Bool.self) {
             self.init(bool)
@@ -31,7 +31,7 @@ public extension AnyDecodable {
         } else if let string = try? container.decode(String.self) {
             self.init(string)
         } else if let array = try? container.decode([AnyDecodable].self) {
-            self.init(array.map { $0.value })
+            self.init(array.map(\.value))
         } else if let dictionary = try? container.decode([String: AnyDecodable].self) {
             self.init(dictionary.mapValues { $0.value })
         } else {
@@ -58,7 +58,7 @@ final class MustacheSpecTests: XCTestCase {
             let expected: String
 
             func run() throws {
-                print("Test: \(name)")
+                print("Test: \(self.name)")
                 if let partials = self.partials {
                     let library = HBMustacheLibrary()
                     let template = try HBMustacheTemplate(string: self.template)
@@ -67,12 +67,18 @@ final class MustacheSpecTests: XCTestCase {
                         let template = try HBMustacheTemplate(string: value)
                         library.register(template, named: key)
                     }
-                    let result = library.render(data.value, withTemplate: "__test__")
-                    XCTAssertEqual(result, expected)
+                    let result = library.render(self.data.value, withTemplate: "__test__")
+                    XCTAssertSpecEqual(result, self)
                 } else {
                     let template = try HBMustacheTemplate(string: self.template)
-                    let result = template.render(data.value)
-                    XCTAssertEqual(result, expected)
+                    let result = template.render(self.data.value)
+                    XCTAssertSpecEqual(result, self)
+                }
+            }
+
+            func XCTAssertSpecEqual(_ result: String?, _ test: Spec.Test) {
+                if result != test.expected {
+                    XCTFail("\n\(test.desc)result:\n\(result ?? "nil")\nexpected:\n\(test.expected)")
                 }
             }
         }
@@ -93,26 +99,26 @@ final class MustacheSpecTests: XCTestCase {
     }
 
     func testCommentsSpec() throws {
-        try testSpec(name: "comments")
+        try self.testSpec(name: "comments")
     }
 
     func testDelimitersSpec() throws {
-        try testSpec(name: "delimiters")
+        try self.testSpec(name: "delimiters")
     }
 
     func testInterpolationSpec() throws {
-        try testSpec(name: "interpolation")
+        try self.testSpec(name: "interpolation")
     }
 
     func testInvertedSpec() throws {
-        try testSpec(name: "inverted")
+        try self.testSpec(name: "inverted")
     }
 
     func testPartialsSpec() throws {
-        try testSpec(name: "partials")
+        try self.testSpec(name: "partials")
     }
 
     func testSectionsSpec() throws {
-        try testSpec(name: "sections", ignoring: ["Variable test"])
+        try self.testSpec(name: "sections", ignoring: ["Variable test"])
     }
 }

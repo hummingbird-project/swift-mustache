@@ -20,8 +20,8 @@ public struct HBParser {
     /// Create a Reader object
     /// - Parameter string: String to parse
     init(_ string: String) {
-        _storage = Storage(string)
-        position = string.startIndex
+        self._storage = Storage(string)
+        self.position = string.startIndex
     }
 
     var buffer: String { return self._storage.buffer }
