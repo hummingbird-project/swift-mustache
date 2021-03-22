@@ -34,10 +34,10 @@ public final class HBMustacheTemplate {
 
     enum Token {
         case text(String)
-        case variable(name: String, method: String? = nil)
-        case unescapedVariable(name: String, method: String? = nil)
-        case section(name: String, method: String? = nil, template: HBMustacheTemplate)
-        case invertedSection(name: String, method: String? = nil, template: HBMustacheTemplate)
+        case variable(name: String, transform: String? = nil)
+        case unescapedVariable(name: String, transform: String? = nil)
+        case section(name: String, transform: String? = nil, template: HBMustacheTemplate)
+        case invertedSection(name: String, transform: String? = nil, template: HBMustacheTemplate)
         case inheritedSection(name: String, template: HBMustacheTemplate)
         case partial(String, indentation: String?, inherits: [String: HBMustacheTemplate]?)
     }

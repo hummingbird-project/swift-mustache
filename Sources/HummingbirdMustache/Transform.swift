@@ -1,7 +1,7 @@
 /// Objects that can have a transforms run on them. Mustache transforms are specific to this implementation
 /// of Mustache. They allow you to process objects before they are rendered.
 ///
-/// The syntax for applying transforms is `{{method(variable)}}`. Transforms can be applied to both
+/// The syntax for applying transforms is `{{transform(variable)}}`. Transforms can be applied to both
 /// variables, sections and inverted sections.
 ///
 /// A simple example would be ensuring a string is lowercase.
@@ -21,7 +21,7 @@ public extension StringProtocol {
     /// Transform String/Substring
     ///
     /// Transforms available are `capitalized`, `lowercased`, `uppercased` and `reversed`
-    /// - Parameter name: Method name
+    /// - Parameter name: transform name
     /// - Returns: Result
     func transform(_ name: String) -> Any? {
         switch name {
@@ -52,7 +52,7 @@ extension Array: HBMustacheTransformable {
     ///
     /// Transforms available are `first`, `last`, `reversed`, `count` and for arrays
     /// with comparable elements `sorted`.
-    /// - Parameter name: method name
+    /// - Parameter name: transform name
     /// - Returns: Result
     public func transform(_ name: String) -> Any? {
         switch name {
@@ -89,7 +89,7 @@ extension Dictionary: HBMustacheTransformable {
     ///
     /// Transforms available are `count`, `enumerated` and for dictionaries
     /// with comparable keys `sorted`.
-    /// - Parameter name: method name
+    /// - Parameter name: transform name
     /// - Returns: Result
     public func transform(_ name: String) -> Any? {
         switch name {
@@ -121,7 +121,7 @@ public extension FixedWidthInteger {
     /// Transform FixedWidthInteger
     ///
     /// Transforms available are `plusone`, `minusone`, `odd`, `even`
-    /// - Parameter name: method name
+    /// - Parameter name: transform name
     /// - Returns: Result
     func transform(_ name: String) -> Any? {
         switch name {

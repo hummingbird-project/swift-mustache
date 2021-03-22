@@ -27,24 +27,24 @@ extension HBMustacheTemplate {
         switch token {
         case .text(let text):
             return text
-        case .variable(let variable, let method):
-            if let child = getChild(named: variable, method: method, context: context) {
+        case .variable(let variable, let transform):
+            if let child = getChild(named: variable, transform: transform, context: context) {
                 if let template = child as? HBMustacheTemplate {
                     return template.render(context: context)
                 } else {
                     return String(describing: child).htmlEscape()
                 }
             }
-        case .unescapedVariable(let variable, let method):
-            if let child = getChild(named: variable, method: method, context: context) {
+        case .unescapedVariable(let variable, let transform):
+            if let child = getChild(named: variable, transform: transform, context: context) {
                 return String(describing: child)
             }
-        case .section(let variable, let method, let template):
-            let child = self.getChild(named: variable, method: method, context: context)
+        case .section(let variable, let transform, let template):
+            let child = self.getChild(named: variable, transform: transform, context: context)
             return self.renderSection(child, with: template, context: context)
 
-        case .invertedSection(let variable, let method, let template):
-            let child = self.getChild(named: variable, method: method, context: context)
+        case .invertedSection(let variable, let transform, let template):
+            let child = self.getChild(named: variable, transform: transform, context: context)
             return self.renderInvertedSection(child, with: template, context: context)
 
         case .inheritedSection(let name, let template):
@@ -103,7 +103,7 @@ extension HBMustacheTemplate {
     }
 
     /// Get child object from variable name
-    func getChild(named name: String, method: String?, context: HBMustacheContext) -> Any? {
+    func getChild(named name: String, transform: String?, context: HBMustacheContext) -> Any? {
         func _getImmediateChild(named name: String, from object: Any) -> Any? {
             if let customBox = object as? HBMustacheParent {
                 return customBox.child(named: name)
@@ -132,23 +132,23 @@ extension HBMustacheTemplate {
         }
 
         // work out which object to access. "." means the current object, if the variable name is ""
-        // and we have a method to run on the variable then we need the context object, otherwise
+        // and we have a transform to run on the variable then we need the context object, otherwise
         // the name is split by "." and we use mirror to get the correct child object
         let child: Any?
         if name == "." {
             child = context.stack.last!
-        } else if name == "", method != nil {
+        } else if name == "", transform != nil {
             child = context.sequenceContext
         } else {
             let nameSplit = name.split(separator: ".").map { String($0) }
             child = _getChildInStack(named: nameSplit[...], from: context.stack)
         }
-        // if we want to run a method and the current child can have methods applied to it then
-        // run method on the current child
-        if let method = method,
+        // if we want to run a transform and the current child can have transforms applied to it then
+        // run transform on the current child
+        if let transform = transform,
            let runnable = child as? HBMustacheTransformable
         {
-            if let result = runnable.transform(method) {
+            if let result = runnable.transform(transform) {
                 return result
             }
         }

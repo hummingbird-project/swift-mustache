@@ -1,7 +1,7 @@
 import HummingbirdMustache
 import XCTest
 
-final class MethodTests: XCTestCase {
+final class TransformTests: XCTestCase {
     func testLowercased() throws {
         let template = try HBMustacheTemplate(string: """
         {{ lowercased(name) }}

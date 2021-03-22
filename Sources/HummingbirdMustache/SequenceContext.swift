@@ -20,7 +20,7 @@ struct HBMustacheSequenceContext: HBMustacheTransformable {
     /// ```
     ///
     /// Transforms available are `first`, `last`, `index`, `even` and `odd`
-    /// - Parameter name: Method name
+    /// - Parameter name: transform name
     /// - Returns: Result
     func transform(_ name: String) -> Any? {
         switch name {

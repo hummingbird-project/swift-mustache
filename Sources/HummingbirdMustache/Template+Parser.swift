@@ -26,7 +26,7 @@ extension HBMustacheTemplate {
 
     struct ParserState {
         var sectionName: String?
-        var sectionMethod: String?
+        var sectionTransform: String?
         var newLine: Bool
         var startDelimiter: String
         var endDelimiter: String
@@ -38,10 +38,10 @@ extension HBMustacheTemplate {
             self.endDelimiter = "}}"
         }
 
-        func withSectionName(_ name: String, method: String? = nil) -> ParserState {
+        func withSectionName(_ name: String, transform: String? = nil) -> ParserState {
             var newValue = self
             newValue.sectionName = name
-            newValue.sectionMethod = method
+            newValue.sectionTransform = transform
             return newValue
         }
 
@@ -104,50 +104,50 @@ extension HBMustacheTemplate {
             case "#":
                 // section
                 parser.unsafeAdvance()
-                let (name, method) = try parseName(&parser, state: state)
+                let (name, transform) = try parseName(&parser, state: state)
                 if self.isStandalone(&parser, state: state) {
                     setNewLine = true
                 } else if whiteSpaceBefore.count > 0 {
                     tokens.append(.text(String(whiteSpaceBefore)))
                     whiteSpaceBefore = ""
                 }
-                let sectionTokens = try parse(&parser, state: state.withSectionName(name, method: method))
-                tokens.append(.section(name: name, method: method, template: HBMustacheTemplate(sectionTokens)))
+                let sectionTokens = try parse(&parser, state: state.withSectionName(name, transform: transform))
+                tokens.append(.section(name: name, transform: transform, template: HBMustacheTemplate(sectionTokens)))
 
             case "^":
                 // inverted section
                 parser.unsafeAdvance()
-                let (name, method) = try parseName(&parser, state: state)
+                let (name, transform) = try parseName(&parser, state: state)
                 if self.isStandalone(&parser, state: state) {
                     setNewLine = true
                 } else if whiteSpaceBefore.count > 0 {
                     tokens.append(.text(String(whiteSpaceBefore)))
                     whiteSpaceBefore = ""
                 }
-                let sectionTokens = try parse(&parser, state: state.withSectionName(name, method: method))
-                tokens.append(.invertedSection(name: name, method: method, template: HBMustacheTemplate(sectionTokens)))
+                let sectionTokens = try parse(&parser, state: state.withSectionName(name, transform: transform))
+                tokens.append(.invertedSection(name: name, transform: transform, template: HBMustacheTemplate(sectionTokens)))
 
             case "$":
                 // inherited section
                 parser.unsafeAdvance()
-                let (name, method) = try parseName(&parser, state: state)
-                // ERROR: can't have methods applied to inherited sections
-                guard method == nil else { throw Error.transformAppliedToInheritanceSection }
+                let (name, transform) = try parseName(&parser, state: state)
+                // ERROR: can't have transform applied to inherited sections
+                guard transform == nil else { throw Error.transformAppliedToInheritanceSection }
                 if self.isStandalone(&parser, state: state) {
                     setNewLine = true
                 } else if whiteSpaceBefore.count > 0 {
                     tokens.append(.text(String(whiteSpaceBefore)))
                     whiteSpaceBefore = ""
                 }
-                let sectionTokens = try parse(&parser, state: state.withSectionName(name, method: method))
+                let sectionTokens = try parse(&parser, state: state.withSectionName(name, transform: transform))
                 tokens.append(.inheritedSection(name: name, template: HBMustacheTemplate(sectionTokens)))
 
             case "/":
                 // end of section
                 parser.unsafeAdvance()
                 let position = parser.position
-                let (name, method) = try parseName(&parser, state: state)
-                guard name == state.sectionName, method == state.sectionMethod else {
+                let (name, transform) = try parseName(&parser, state: state)
+                guard name == state.sectionName, transform == state.sectionTransform else {
                     parser.unsafeSetPosition(position)
                     throw Error.sectionCloseNameIncorrect
                 }
@@ -172,9 +172,9 @@ extension HBMustacheTemplate {
                     whiteSpaceBefore = ""
                 }
                 parser.unsafeAdvance()
-                let (name, method) = try parseName(&parser, state: state)
+                let (name, transform) = try parseName(&parser, state: state)
                 guard try parser.read("}") else { throw Error.unfinishedName }
-                tokens.append(.unescapedVariable(name: name, method: method))
+                tokens.append(.unescapedVariable(name: name, transform: transform))
 
             case "&":
                 // unescaped variable
@@ -183,8 +183,8 @@ extension HBMustacheTemplate {
                     whiteSpaceBefore = ""
                 }
                 parser.unsafeAdvance()
-                let (name, method) = try parseName(&parser, state: state)
-                tokens.append(.unescapedVariable(name: name, method: method))
+                let (name, transform) = try parseName(&parser, state: state)
+                tokens.append(.unescapedVariable(name: name, transform: transform))
 
             case ">":
                 // partial
@@ -204,9 +204,9 @@ extension HBMustacheTemplate {
             case "<":
                 // partial with inheritance
                 parser.unsafeAdvance()
-                let (name, method) = try parseName(&parser, state: state)
-                // ERROR: can't have methods applied to inherited sections
-                guard method == nil else { throw Error.transformAppliedToInheritanceSection }
+                let (name, transform) = try parseName(&parser, state: state)
+                // ERROR: can't have transform applied to inherited sections
+                guard transform == nil else { throw Error.transformAppliedToInheritanceSection }
                 var indent: String?
                 if self.isStandalone(&parser, state: state) {
                     setNewLine = true
@@ -215,8 +215,9 @@ extension HBMustacheTemplate {
                     tokens.append(.text(indent!))
                     whiteSpaceBefore = ""
                 }
-                let sectionTokens = try parse(&parser, state: state.withSectionName(name, method: method))
+                let sectionTokens = try parse(&parser, state: state.withSectionName(name, transform: transform))
                 var inherit: [String: HBMustacheTemplate] = [:]
+                // parse tokens in section to extract inherited sections
                 for token in sectionTokens {
                     switch token {
                     case .inheritedSection(let name, let template):
@@ -241,8 +242,8 @@ extension HBMustacheTemplate {
                     tokens.append(.text(String(whiteSpaceBefore)))
                     whiteSpaceBefore = ""
                 }
-                let (name, method) = try parseName(&parser, state: state)
-                tokens.append(.variable(name: name, method: method))
+                let (name, transform) = try parseName(&parser, state: state)
+                tokens.append(.variable(name: name, transform: transform))
             }
             state.newLine = setNewLine
         }
@@ -285,7 +286,7 @@ extension HBMustacheTemplate {
         parser.read(while: \.isWhitespace)
         guard try parser.read(string: state.endDelimiter) else { throw Error.unfinishedName }
 
-        // does the name include brackets. If so this is a method call
+        // does the name include brackets. If so this is a transform call
         var nameParser = HBParser(String(text))
         let string = nameParser.read(while: self.sectionNameCharsWithoutBrackets)
         if nameParser.reachedEnd() {
