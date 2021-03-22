@@ -30,6 +30,16 @@ public final class HBMustacheLibrary {
         self.templates[name] = template
     }
 
+    /// Register template under name
+    /// - Parameters:
+    ///   - mustache: Mustache text
+    ///   - name: Name of template
+    public func register(_ mustache: String, named name: String) throws {
+        let template = try HBMustacheTemplate(string: mustache)
+        template.setLibrary(self)
+        self.templates[name] = template
+    }
+
     /// Return template registed with name
     /// - Parameter name: name to search for
     /// - Returns: Template

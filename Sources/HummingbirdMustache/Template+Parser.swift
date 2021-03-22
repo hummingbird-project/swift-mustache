@@ -18,6 +18,10 @@ extension HBMustacheTemplate {
         case invalidSetDelimiter
         /// cannot apply transform to inherited section
         case transformAppliedToInheritanceSection
+        /// illegal token inside inherit section of partial
+        case illegalTokenInsideInheritSection
+        /// text found inside inherit section of partial
+        case textInsideInheritSection
     }
 
     struct ParserState {
@@ -196,6 +200,34 @@ extension HBMustacheTemplate {
                     tokens.append(.partial(name, indentation: nil, inherits: nil))
                 }
                 whiteSpaceBefore = ""
+
+            case "<":
+                // partial with inheritance
+                parser.unsafeAdvance()
+                let (name, method) = try parseName(&parser, state: state)
+                // ERROR: can't have methods applied to inherited sections
+                guard method == nil else { throw Error.transformAppliedToInheritanceSection }
+                var indent: String?
+                if self.isStandalone(&parser, state: state) {
+                    setNewLine = true
+                } else if whiteSpaceBefore.count > 0 {
+                    indent = String(whiteSpaceBefore)
+                    tokens.append(.text(indent!))
+                    whiteSpaceBefore = ""
+                }
+                let sectionTokens = try parse(&parser, state: state.withSectionName(name, method: method))
+                var inherit: [String: HBMustacheTemplate] = [:]
+                for token in sectionTokens {
+                    switch token {
+                    case .inheritedSection(let name, let template):
+                        inherit[name] = template
+                    case .text(let string):
+                        try string.forEach { guard $0.isWhitespace else { throw Error.textInsideInheritSection } }
+                    default:
+                        throw Error.illegalTokenInsideInheritSection
+                    }
+                }
+                tokens.append(.partial(name, indentation: indent, inherits: inherit))
 
             case "=":
                 // set delimiter

@@ -22,8 +22,10 @@ public final class HBMustacheTemplate {
         self.library = library
         for token in self.tokens {
             switch token {
-            case .section(_, _, let template), .invertedSection(_, _, let template):
+            case .section(_, _, let template), .invertedSection(_, _, let template), .inheritedSection(_, let template):
                 template.setLibrary(library)
+            case .partial(_, _, let templates):
+                templates?.forEach { $1.setLibrary(library) }
             default:
                 break
             }
