@@ -39,7 +39,7 @@ struct HBMustacheContext {
         let inherits: [String: HBMustacheTemplate]?
         if let inheriting = inheriting {
             if let originalInherits = self.inherited {
-                inherits = originalInherits.merging(inheriting) { _,newValue in newValue }
+                inherits = originalInherits.merging(inheriting) { value,_ in value }
             } else {
                 inherits = inheriting
             }

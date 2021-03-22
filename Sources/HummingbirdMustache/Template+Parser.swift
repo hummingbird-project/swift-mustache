@@ -222,7 +222,7 @@ extension HBMustacheTemplate {
                     case .inheritedSection(let name, let template):
                         inherit[name] = template
                     case .text(let string):
-                        try string.forEach { guard $0.isWhitespace else { throw Error.textInsideInheritSection } }
+                        break
                     default:
                         throw Error.illegalTokenInsideInheritSection
                     }
