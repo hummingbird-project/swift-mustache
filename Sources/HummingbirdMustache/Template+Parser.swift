@@ -343,6 +343,7 @@ extension HBMustacheTemplate {
             guard try parser.read(":") else { throw Error.invalidConfigVariableSyntax }
             parser.read(while: \.isWhitespace)
             value = parser.read(while: self.sectionNameCharsWithoutBrackets)
+            parser.read(while: \.isWhitespace)
             guard try parser.read(string: state.endDelimiter) else { throw Error.invalidConfigVariableSyntax }
         } catch {
             throw Error.invalidConfigVariableSyntax

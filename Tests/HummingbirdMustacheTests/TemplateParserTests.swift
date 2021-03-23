@@ -34,7 +34,13 @@ final class TemplateParserTests: XCTestCase {
 
     func testContentType() throws {
         let template = try HBMustacheTemplate(string: "{{% CONTENT_TYPE:TEXT}}")
+        let template1 = try HBMustacheTemplate(string: "{{% CONTENT_TYPE:TEXT }}")
+        let template2 = try HBMustacheTemplate(string: "{{% CONTENT_TYPE: TEXT}}")
+        let template3 = try HBMustacheTemplate(string: "{{%CONTENT_TYPE:TEXT}}")
         XCTAssertEqual(template.tokens, [.contentType(HBTextContentType())])
+        XCTAssertEqual(template1.tokens, [.contentType(HBTextContentType())])
+        XCTAssertEqual(template2.tokens, [.contentType(HBTextContentType())])
+        XCTAssertEqual(template3.tokens, [.contentType(HBTextContentType())])
     }
 }
 
