@@ -64,6 +64,8 @@ extension Array: HBMustacheTransformable {
             return reversed()
         case "count":
             return count
+        case "empty":
+            return isEmpty
         default:
             if let comparableSeq = self as? HBComparableSequence {
                 return comparableSeq.comparableTransform(name)
@@ -95,6 +97,8 @@ extension Dictionary: HBMustacheTransformable {
         switch name {
         case "count":
             return count
+        case "empty":
+            return isEmpty
         case "enumerated":
             return map { (key: $0.key, value: $0.value) }
         default:
@@ -125,6 +129,8 @@ public extension FixedWidthInteger {
     /// - Returns: Result
     func transform(_ name: String) -> Any? {
         switch name {
+        case "equalzero":
+            return self == 0
         case "plusone":
             return self + 1
         case "minusone":
