@@ -65,7 +65,7 @@ struct HBMustacheContext {
             sequenceContext: nil,
             indentation: indentation,
             inherited: inherits,
-            contentType: self.contentType
+            contentType: HBHTMLContentType()
         )
     }
 
