@@ -68,7 +68,7 @@ struct HBMustacheContext {
             contentType: self.contentType
         )
     }
-    
+
     /// return context with sequence info and sequence element added to stack
     func withSequence(_ object: Any, sequenceContext: HBMustacheSequenceContext) -> HBMustacheContext {
         var stack = self.stack
@@ -81,7 +81,7 @@ struct HBMustacheContext {
             contentType: self.contentType
         )
     }
-    
+
     /// return context with sequence info and sequence element added to stack
     func withContentType(_ contentType: HBMustacheContentType) -> HBMustacheContext {
         return .init(

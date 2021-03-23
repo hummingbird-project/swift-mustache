@@ -60,7 +60,7 @@ extension HBMustacheTemplate {
             if let template = library?.getTemplate(named: name) {
                 return template.render(context: context.withPartial(indented: indentation, inheriting: overrides))
             }
-            
+
         case .contentType(let contentType):
             context = context.withContentType(contentType)
         }

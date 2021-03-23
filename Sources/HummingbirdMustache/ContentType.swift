@@ -23,21 +23,21 @@ struct HBHTMLContentType: HBMustacheContentType {
 /// The string is read from the "CONTENT_TYPE" pragma `{{% CONTENT_TYPE: type}}`. Replace type with
 /// the content type required. The default available types are `TEXT` and `HTML`. You can register your own
 /// with `HBMustacheContentTypes.register`.
-public struct HBMustacheContentTypes {
+public enum HBMustacheContentTypes {
     static func get(_ name: String) -> HBMustacheContentType? {
-        return types[name]
+        return self.types[name]
     }
-    
+
     /// Register new content type
     /// - Parameters:
     ///   - contentType: Content type
     ///   - name: String to identify it
     public static func register(_ contentType: HBMustacheContentType, named name: String) {
-        types[name] = contentType
+        self.types[name] = contentType
     }
-    
+
     static var types: [String: HBMustacheContentType] = [
         "HTML": HBHTMLContentType(),
-        "TEXT": HBTextContentType()
+        "TEXT": HBTextContentType(),
     ]
 }

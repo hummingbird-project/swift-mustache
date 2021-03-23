@@ -342,22 +342,22 @@ extension HBMustacheTemplate {
     static func readConfigVariable(_ parser: inout HBParser, state: ParserState) throws -> Token? {
         let variable: Substring
         let value: Substring
-        
+
         do {
             parser.read(while: \.isWhitespace)
-            variable = parser.read(while: sectionNameCharsWithoutBrackets)
+            variable = parser.read(while: self.sectionNameCharsWithoutBrackets)
             parser.read(while: \.isWhitespace)
             guard try parser.read(":") else { throw Error.invalidConfigVariableSyntax }
             parser.read(while: \.isWhitespace)
-            value = parser.read(while: sectionNameCharsWithoutBrackets)
+            value = parser.read(while: self.sectionNameCharsWithoutBrackets)
             guard try parser.read(string: state.endDelimiter) else { throw Error.invalidConfigVariableSyntax }
         } catch {
             throw Error.invalidConfigVariableSyntax
         }
-        
+
         // do both variable and value have content
         guard variable.count > 0, value.count > 0 else { throw Error.invalidConfigVariableSyntax }
-        
+
         switch variable {
         case "CONTENT_TYPE":
             guard let contentType = HBMustacheContentTypes.get(String(value)) else { throw Error.unrecognisedConfigVariable }
@@ -366,7 +366,7 @@ extension HBMustacheTemplate {
             throw Error.unrecognisedConfigVariable
         }
     }
-    
+
     static func hasLineFinished(_ parser: inout HBParser) -> Bool {
         var parser2 = parser
         if parser.reachedEnd() { return true }

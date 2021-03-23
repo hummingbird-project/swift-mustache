@@ -98,7 +98,7 @@ final class TemplateRendererTests: XCTestCase {
         let template2 = try HBMustacheTemplate(string: "{{% CONTENT_TYPE:HTML}}{{.}}")
         XCTAssertEqual(template2.render("<>"), "&lt;&gt;")
     }
-    
+
     /// variables
     func testMustacheManualExample1() throws {
         let template = try HBMustacheTemplate(string: """
