@@ -55,13 +55,6 @@ extension HBMustacheTemplate {
             newValue.endDelimiter = end
             return newValue
         }
-
-        func withDefaultDelimiters(start _: String, end _: String) -> ParserState {
-            var newValue = self
-            newValue.startDelimiter = "{{"
-            newValue.endDelimiter = "}}"
-            return newValue
-        }
     }
 
     /// parse mustache text to generate a list of tokens
