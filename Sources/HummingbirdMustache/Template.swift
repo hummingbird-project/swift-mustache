@@ -40,6 +40,7 @@ public final class HBMustacheTemplate {
         case invertedSection(name: String, transform: String? = nil, template: HBMustacheTemplate)
         case inheritedSection(name: String, template: HBMustacheTemplate)
         case partial(String, indentation: String?, inherits: [String: HBMustacheTemplate]?)
+        case contentType(HBMustacheContentType)
     }
 
     let tokens: [Token]

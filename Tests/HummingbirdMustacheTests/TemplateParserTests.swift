@@ -31,6 +31,11 @@ final class TemplateParserTests: XCTestCase {
         let template = try HBMustacheTemplate(string: "{{ section }}")
         XCTAssertEqual(template.tokens, [.variable(name: "section")])
     }
+
+    func testContentType() throws {
+        let template = try HBMustacheTemplate(string: "{{% CONTENT_TYPE:TEXT}}")
+        XCTAssertEqual(template.tokens, [.contentType(HBTextContentType())])
+    }
 }
 
 extension HBMustacheTemplate: Equatable {
@@ -52,6 +57,8 @@ extension HBMustacheTemplate.Token: Equatable {
             return lhs1 == rhs1 && lhs2 == rhs2 && lhs3 == rhs3
         case (.partial(let name1, let indent1, _), .partial(let name2, let indent2, _)):
             return name1 == name2 && indent1 == indent2
+        case (.contentType(let contentType), .contentType(let contentType2)):
+            return type(of: contentType) == type(of: contentType2)
         default:
             return false
         }

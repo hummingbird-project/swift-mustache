@@ -8,22 +8,24 @@ extension HBMustacheTemplate {
     /// - Returns: Rendered text
     func render(context: HBMustacheContext) -> String {
         var string = ""
+        var context = context
+
         if let indentation = context.indentation, indentation != "" {
             for token in tokens {
                 if string.last == "\n" {
                     string += indentation
                 }
-                string += self.renderToken(token, context: context)
+                string += self.renderToken(token, context: &context)
             }
         } else {
             for token in tokens {
-                string += self.renderToken(token, context: context)
+                string += self.renderToken(token, context: &context)
             }
         }
         return string
     }
 
-    func renderToken(_ token: Token, context: HBMustacheContext) -> String {
+    func renderToken(_ token: Token, context: inout HBMustacheContext) -> String {
         switch token {
         case .text(let text):
             return text
@@ -32,7 +34,7 @@ extension HBMustacheTemplate {
                 if let template = child as? HBMustacheTemplate {
                     return template.render(context: context)
                 } else {
-                    return String(describing: child).htmlEscape()
+                    return context.contentType.escapeText(String(describing: child))
                 }
             }
         case .unescapedVariable(let variable, let transform):
@@ -58,6 +60,9 @@ extension HBMustacheTemplate {
             if let template = library?.getTemplate(named: name) {
                 return template.render(context: context.withPartial(indented: indentation, inheriting: overrides))
             }
+
+        case .contentType(let contentType):
+            context = context.withContentType(contentType)
         }
         return ""
     }

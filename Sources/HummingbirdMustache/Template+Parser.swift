@@ -22,6 +22,10 @@ extension HBMustacheTemplate {
         case illegalTokenInsideInheritSection
         /// text found inside inherit section of partial
         case textInsideInheritSection
+        /// config variable syntax is wrong
+        case invalidConfigVariableSyntax
+        /// unrecognised config variable
+        case unrecognisedConfigVariable
     }
 
     struct ParserState {
@@ -49,13 +53,6 @@ extension HBMustacheTemplate {
             var newValue = self
             newValue.startDelimiter = start
             newValue.endDelimiter = end
-            return newValue
-        }
-
-        func withDefaultDelimiters(start _: String, end _: String) -> ParserState {
-            var newValue = self
-            newValue.startDelimiter = "{{"
-            newValue.endDelimiter = "}}"
             return newValue
         }
     }
@@ -236,6 +233,14 @@ extension HBMustacheTemplate {
                 state = try self.parserSetDelimiter(&parser, state: state)
                 setNewLine = self.isStandalone(&parser, state: state)
 
+            case "%":
+                // read config variable
+                parser.unsafeAdvance()
+                if let token = try self.readConfigVariable(&parser, state: state) {
+                    tokens.append(token)
+                }
+                setNewLine = self.isStandalone(&parser, state: state)
+
             default:
                 // variable
                 if whiteSpaceBefore.count > 0 {
@@ -325,6 +330,34 @@ extension HBMustacheTemplate {
         guard try parser.read(string: state.endDelimiter) else { throw Error.invalidSetDelimiter }
         guard startDelimiter.count > 0, endDelimiter.count > 0 else { throw Error.invalidSetDelimiter }
         return state.withDelimiters(start: String(startDelimiter), end: String(endDelimiter))
+    }
+
+    static func readConfigVariable(_ parser: inout HBParser, state: ParserState) throws -> Token? {
+        let variable: Substring
+        let value: Substring
+
+        do {
+            parser.read(while: \.isWhitespace)
+            variable = parser.read(while: self.sectionNameCharsWithoutBrackets)
+            parser.read(while: \.isWhitespace)
+            guard try parser.read(":") else { throw Error.invalidConfigVariableSyntax }
+            parser.read(while: \.isWhitespace)
+            value = parser.read(while: self.sectionNameCharsWithoutBrackets)
+            guard try parser.read(string: state.endDelimiter) else { throw Error.invalidConfigVariableSyntax }
+        } catch {
+            throw Error.invalidConfigVariableSyntax
+        }
+
+        // do both variable and value have content
+        guard variable.count > 0, value.count > 0 else { throw Error.invalidConfigVariableSyntax }
+
+        switch variable {
+        case "CONTENT_TYPE":
+            guard let contentType = HBMustacheContentTypes.get(String(value)) else { throw Error.unrecognisedConfigVariable }
+            return .contentType(contentType)
+        default:
+            throw Error.unrecognisedConfigVariable
+        }
     }
 
     static func hasLineFinished(_ parser: inout HBParser) -> Bool {

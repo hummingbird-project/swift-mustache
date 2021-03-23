@@ -234,6 +234,19 @@ extension HBParser {
         return self.buffer[startIndex..<self.position]
     }
 
+    /// Read while closure returns true
+    /// - Parameter while: closure
+    /// - Returns: String read from buffer
+    @discardableResult mutating func read(while cb: (Character) -> Bool) -> Substring {
+        let startIndex = self.position
+        while !self.reachedEnd(),
+              cb(unsafeCurrent())
+        {
+            unsafeAdvance()
+        }
+        return self.buffer[startIndex..<self.position]
+    }
+
     /// Read while character at current position is in supplied set
     /// - Parameter while: character set to check
     /// - Returns: String read from buffer

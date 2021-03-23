@@ -92,6 +92,13 @@ final class TemplateRendererTests: XCTestCase {
         XCTAssertEqual(template.render(Test(test: .init(string: "sub"))), "test sub")
     }
 
+    func testTextEscaping() throws {
+        let template1 = try HBMustacheTemplate(string: "{{% CONTENT_TYPE:TEXT}}{{.}}")
+        XCTAssertEqual(template1.render("<>"), "<>")
+        let template2 = try HBMustacheTemplate(string: "{{% CONTENT_TYPE:HTML}}{{.}}")
+        XCTAssertEqual(template2.render("<>"), "&lt;&gt;")
+    }
+
     /// variables
     func testMustacheManualExample1() throws {
         let template = try HBMustacheTemplate(string: """
