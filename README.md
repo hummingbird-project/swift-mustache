@@ -101,6 +101,8 @@ The library comes with a series of transforms for the Swift standard objects.
   - enumerated: Return dictionary as array of key, value pairs
   - sorted: If the keys are comparable return as array of key, value pairs sorted by key
 
+If a transform is applied to an object that doesn't recognise it then `nil` is returned.
+
 ### Sequence context transforms
 
 Sequence context transforms are transforms applied to the current position in the sequence. They are formatted as a function that takes no parameter eg
