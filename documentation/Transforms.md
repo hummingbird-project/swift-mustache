@@ -41,7 +41,7 @@ Sequence context transforms are transforms applied to the current position in th
 ```
 {{#array}}{{.}}{{^last()}}, {{/last()}}{{/array}}
 ```
-This will render an array as a comma separated list. The `last()` transform ensures we don't add a comma after the last element.
+This will render an array as a comma separated list. The inverted section of the `last()` transform ensures we don't add a comma after the last element.
 
 The following sequence context transforms are available
 - first: Is this the first element of the sequence
