@@ -4,7 +4,19 @@ Mustache is a "logic-less" templating engine. The core language has no flow cont
 
 ## Context
 
-Mustache renders a template with a context stack. A context is a list of key/value pairs. These can be represented by either a `Dictionary` or the reflection information from `Mirror`. Initially the stack will consist of the root context object you want to render. When we enter a section tag we push the associated value onto the context stack and when we leave a section we pop that value back off the stack.
+Mustache renders a template with a context stack. A context is a list of key/value pairs. These can be represented by either a `Dictionary` or the reflection information from `Mirror`. For example the following two objects will render in the same way
+```swift
+let object = ["name": "John Smith", "age": 68]
+```
+```swift
+struct Person {
+    let name: String
+    let age: Int
+}
+let object = Person(name: "John Smith", age: 68)
+```
+
+Initially the stack will consist of the root context object you want to render. When we enter a section tag we push the associated value onto the context stack and when we leave the section we pop that value back off the stack.
 
 ## Tags
 
