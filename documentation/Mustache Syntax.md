@@ -20,7 +20,7 @@ Initially the stack will consist of the root context object you want to render. 
 
 ## Tags
 
-All tags are surrounded by a double curly bracket `{{}}`. When a tag has a reference to a key the associated value will be searched for from the context at the top of the context stack. If the value cannot be found then the next context down will be searched for and so on until either a value is found or we have reached the bottom of the stack. If no value is found the output for that value is `nil`.
+All tags are surrounded by a double curly bracket `{{}}`. When a tag has a reference to a key the associated value will be searched for from the context at the top of the context stack. If the value cannot be found then the next context down will be searched and so on until either a value is found or we have reached the bottom of the stack. If no value is found the output for that value is `nil`.
 
 ## Tag types
 
