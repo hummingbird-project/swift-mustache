@@ -155,12 +155,11 @@ extension HBMustacheTemplate {
         }
         // if we want to run a transform and the current child can have transforms applied to it then
         // run transform on the current child
-        if let transform = transform,
-           let runnable = child as? HBMustacheTransformable
-        {
-            if let result = runnable.transform(transform) {
-                return result
+        if let transform = transform {
+            if let runnable = child as? HBMustacheTransformable {
+                return runnable.transform(transform)
             }
+            return nil
         }
         return child
     }
