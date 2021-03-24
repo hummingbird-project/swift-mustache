@@ -138,12 +138,17 @@ extension HBMustacheTemplate {
 
         // work out which object to access. "." means the current object, if the variable name is ""
         // and we have a transform to run on the variable then we need the context object, otherwise
-        // the name is split by "." and we use mirror to get the correct child object
+        // the name is split by "." and we use mirror to get the correct child object. If we cannot find
+        // the root object we look up the context stack until we can find one with a matching name. The
+        // stack climbing can be disabled by prefixing the variable name with a "."
         let child: Any?
         if name == "." {
             child = context.stack.last!
         } else if name == "", transform != nil {
             child = context.sequenceContext
+        } else if name.first == "." {
+            let nameSplit = name.split(separator: ".").map { String($0) }
+            child = _getChild(named: nameSplit[...], from: context.stack.last!)
         } else {
             let nameSplit = name.split(separator: ".").map { String($0) }
             child = _getChildInStack(named: nameSplit[...], from: context.stack)

@@ -99,6 +99,16 @@ final class TemplateRendererTests: XCTestCase {
         XCTAssertEqual(template2.render("<>"), "&lt;&gt;")
     }
 
+    func testStopClimbingStack() throws {
+        let template1 = try HBMustacheTemplate(string: "{{#test}}{{name}}{{/test}}")
+        let template2 = try HBMustacheTemplate(string: "{{#test}}{{.name}}{{/test}}")
+        let object: [String: Any] = ["test": [:], "name": "John"]
+        let object2: [String: Any] = ["test": ["name": "Jane"], "name": "John"]
+        XCTAssertEqual(template1.render(object), "John")
+        XCTAssertEqual(template2.render(object), "")
+        XCTAssertEqual(template2.render(object2), "Jane")
+    }
+
     /// variables
     func testMustacheManualExample1() throws {
         let template = try HBMustacheTemplate(string: """
