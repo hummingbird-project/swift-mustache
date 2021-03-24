@@ -23,7 +23,7 @@ and the following mustache template
 let mustache = "{{#wrapped}}{{name}} is awesome.{{/wrapped}}"
 let template = try HBMustacheTemplate(string: mustache)
 ```
-`template.render(john)` will output 
+Then `template.render(person)` will output 
 ```
 <b>John is awesome.</b>
 ```
