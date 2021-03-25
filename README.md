@@ -1,6 +1,6 @@
 # HummingbirdMustache
 
-Package for rendering Mustache templates. Mustache is a logicless templating language commonly used in web and mobile platforms. You can find out more about Mustache [here](http://mustache.github.io/mustache.5.html).
+Package for rendering Mustache templates. Mustache is a "logic-less" templating language commonly used in web and mobile platforms. You can find out more about Mustache [here](http://mustache.github.io/mustache.5.html).
 
 While Hummingbird Mustache has been designed to be used with the Hummingbird server framework it has no dependencies and can be used as a standalone library.
 
@@ -16,20 +16,7 @@ Render an object with a template
 ```swift
 let output = library.render(object, withTemplate: "myTemplate")
 ```
-`HummingbirdMustache` will render both dictionaries and objects via `Mirror` reflection. The following two examples will both produce the same output
-```swift
-let object = ["name": "John Smith", "age": 68]
-let output = library.render(object, withTemplate: "myTemplate")
-```
-and
-```swift
-struct Person {
-    let name: String
-    let age: Int
-}
-let object = Person(name: "John Smith", age: 68)
-let output = library.render(object, withTemplate: "myTemplate")
-```
+`HummingbirdMustache` treats an object as a set of key/value pairs when rendering and will render both dictionaries and objects via `Mirror` reflection. Find out more on how Mustache renders objects [here](https://hummingbird-project.github.io/hummingbird/current/hummingbird-mustache/mustache-syntax.html).
 
 ## Support
 
@@ -37,120 +24,9 @@ Hummingbird Mustache supports all standard Mustache tags and is fully compliant 
 
 ## Additional features
 
-Hummingbird Mustache includes some features that are specific to its implementation. 
+Hummingbird Mustache includes some features that are specific to its implementation. Please follow the links below to find out more.
 
-### Lambda Implementation
-
-The library doesn't provide a lambda implementation but it does provide something akin to the lambda feature. 
-
-Add a `HBMustacheLambda` to the object you want to be rendered and it can be used in a similar way to lambdas are used in Mustache. When you create a section referencing the lambda the contents of the section are passed as a template along with the current object to the lamdba function. This is slightly different from the standard implementation where the unprocessed text is passed to the lambda. 
-
-Given the following mustache template
-```swift
-let mustache = "{{#wrapped}}{{name}} is awesome.{{/wrapped}}"
-let template = try HBMustacheTemplate(string: mustache)
-```
-The following object `john` 
-```swift
-struct Object {
-    let name: String
-    let wrapped: HBMustacheLambda
-}
-let john = Object(
-    name: "John", 
-    wrapped: HBMustacheLambda({ object, template in
-        return "<b>\(template.render(object))</b>"
-    })
-)
-let output = template.render(john)
-```
-Will render as 
-```
-<b>John is awesome.</b>
-```
-
-### Transforms
-
-Transforms are similar to lambdas in that they are functions run on an object but with the difference they return a new object instead of rendered text. Transforms are formatted as a function call inside a tag eg
-```
-{{uppercase(string)}}
-```
-They can be applied to variable, section and inverted section tags. If you apply them to a section or inverted section tag the handler name should be included in the end section tag as well eg
-```
-{{#sorted(array)}}{{.}}{{/sorted(array)}}
-```
-The library comes with a series of transforms for the Swift standard objects.
-- String/Substring
-  - capitalized: Return string with first letter capitalized
-  - lowercase: Return lowercased version of string
-  - uppercase: Return uppercased version of string
-  - reversed: Reverse string
-- Int/UInt/Int8/Int16...
-  - plusone: Add one to integer
-  - minusone: Subtract one from integer
-  - odd: return if integer is odd
-  - even: return if integer is even
-- Array
-  - first: Return first element of array
-  - last: Return last element of array
-  - count: Return number of elements in array
-  - reversed: Reverse array
-  - sorted: If the elements of the array are comparable sort them
-- Dictionary
-  - count: Return number of elements in dictionary
-  - enumerated: Return dictionary as array of key, value pairs
-  - sorted: If the keys are comparable return as array of key, value pairs sorted by key
-
-If a transform is applied to an object that doesn't recognise it then `nil` is returned.
-
-### Sequence context transforms
-
-Sequence context transforms are transforms applied to the current position in the sequence. They are formatted as a function that takes no parameter eg
-```
-{{#first()}}First{{/first()}}
-```
-The following sequence context transforms are available
-- first: Is this the first element of the sequence
-- last: Is this the last element of the sequence
-- index: Returns the index of the element within the sequence
-- odd: Returns if the index of the element is odd
-- even: Returns if the index of the element is even
-
-### Template inheritance
-
-Template inheritance is not part of the Mustache spec yet but it is a commonly implemented feature. Template inheritance allows you to override elements of an included partial. It allows you to create a base page template and override elements of it with your page content. A partial that includes overriding elements is indicated with a `{{<partial}}`. Note this is different from the normal partial reference which uses `>`. This is a section tag so needs a ending tag as well. Inside the section the tagged sections to override are added using the syntax `{{$tag}}contents{{/tag}}`. If your template and partial were as follows
-```
-{{! mypage.mustache }}
-{{<base}}
-{{$head}}<title>My page title</title>{{/head}}
-{{$body}}Hello world{{/body}}
-{{/base}}
-```
-```
-{{! base.mustache }}
-<html>
-<head>
-{{$head}}{{/head}}
-</head>
-<body>
-{{$body}}Default text{{/body}}
-</body>
-</html>
-```
-You would get the following output when rendering `mypage.mustache`.
-```
-<html>
-<head>
-<title>My page title</title>
-</head>
-<body>
-Hello world
-</body>
-```
-Note the `{{$head}}` section in `base.mustache` is replaced with the `{{$head}}` section included inside the `{{<base}}` partial reference from `mypage.mustache`. The same occurs with the `{{$body}}` section. In that case though a default value is supplied for the situation where a `{{$body}}` section is not supplied. 
-
-### Pragma
-
-The syntax `{{% var: value}}` can be used to set template rendering configuration variables specific to Hummingbird Mustache. The only variable you can set at the moment is `CONTENT_TYPE`. This can be set to either to `HTML` or `TEXT` and defines how variables are escaped. A content type of `TEXT` means no variables are escaped and a content type of `HTML` will do HTML escaping of the rendered text. The content type defaults to `HTML`.
-
-Given input object "<>", template `{{%CONTENT_TYPE: HTML}}{{.}}` will render as `&lt;&gt;` and `{{%CONTENT_TYPE: TEXT}}{{.}}` will render as `<>`.
+- [Lambda Implementation](https://hummingbird-project.github.io/hummingbird/current/hummingbird-mustache/lambdas.html)
+- [Transforms](https://hummingbird-project.github.io/hummingbird/current/hummingbird-mustache/transforms.html)
+- [Template Inheritance](https://hummingbird-project.github.io/hummingbird/current/hummingbird-mustache/template-inheritance.html)
+- [Pragmas](https://hummingbird-project.github.io/hummingbird/current/hummingbird-mustache/pragmas.html)
