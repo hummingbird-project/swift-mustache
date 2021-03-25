@@ -1,4 +1,4 @@
-### Lambda Implementation
+# Lambda Implementation
 
 The library doesn't provide a lambda implementation but it does provide something akin to the lambda feature. 
 
