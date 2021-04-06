@@ -122,7 +122,7 @@ final class MustacheSpecTests: XCTestCase {
     }
 
     func testSectionsSpec() throws {
-        try self.testSpec(name: "sections", ignoring: ["Variable test"])
+        try self.testSpec(name: "sections")
     }
 
     func testInheritanceSpec() throws {
