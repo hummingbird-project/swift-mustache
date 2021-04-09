@@ -18,6 +18,26 @@ let output = library.render(object, withTemplate: "myTemplate")
 ```
 `HummingbirdMustache` treats an object as a set of key/value pairs when rendering and will render both dictionaries and objects via `Mirror` reflection. Find out more on how Mustache renders objects [here](https://hummingbird-project.github.io/hummingbird/current/hummingbird-mustache/mustache-syntax.html).
 
+### Using with Hummingbird
+
+HummingbirdMustache doesn't have any integration with Hummingbird as I wanted to keep the library dependency free. But if you are going to use the library with Hummingbird it is recommended you extend `HBApplication` to store an instance of your library.
+
+```swift
+extension HBApplication {
+    var mustache: HBMustacheLibrary {
+        get { self.extensions.get(\.mustache) }
+        set { self.extensions.set(\.mustache, value: newValue) }
+    }
+}
+
+extension HBRequest {
+    var mustache: HBMustacheLibrary { self.application.mustache }
+}
+// load mustache templates from templates folder
+application.mustache = try .init(directory: "templates")
+```
+You can now access your mustache templates via `HBRequest` eg `HBRequest.mustache.render(obj, withTemplate: "myTemplate")`
+
 ## Support
 
 Hummingbird Mustache supports all standard Mustache tags and is fully compliant with the Mustache [spec](https://github.com/mustache/spec) with the exception of the Lambda support.  
