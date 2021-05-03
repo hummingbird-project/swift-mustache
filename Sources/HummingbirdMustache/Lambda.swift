@@ -12,7 +12,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-
 /// Lambda function. Can add this to object being rendered to filter contents of objects.
 ///
 /// See http://mustache.github.io/mustache.5.html for more details on

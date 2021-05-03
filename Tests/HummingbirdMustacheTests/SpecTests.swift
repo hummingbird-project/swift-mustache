@@ -136,9 +136,6 @@ final class MustacheSpecTests: XCTestCase {
     }
 
     func testInheritanceSpec() throws {
-        let url = URL(
-            string: "https://raw.githubusercontent.com/mustache/spec/ab227509e64961943ca374c09c08b63f59da014a/specs/inheritance.json"
-        )!
-        try self.testSpec(url: url)
+        try self.testSpec(name: "~inheritance")
     }
 }
