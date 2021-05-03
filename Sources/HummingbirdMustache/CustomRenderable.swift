@@ -14,7 +14,7 @@
 
 import Foundation
 
-protocol HBMustacheCustomRenderable {
+public protocol HBMustacheCustomRenderable {
     var renderText: String { get }
     var isNull: Bool { get }
 }
