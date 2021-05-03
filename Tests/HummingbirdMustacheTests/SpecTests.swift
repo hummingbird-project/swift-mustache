@@ -22,8 +22,8 @@ import XCTest
 public struct AnyDecodable: Decodable {
     public let value: Any
 
-    public init<T>(_ value: T?) {
-        self.value = value ?? ()
+    public init<T>(_ value: T) {
+        self.value = value
     }
 }
 
@@ -32,11 +32,7 @@ public extension AnyDecodable {
         let container = try decoder.singleValueContainer()
 
         if container.decodeNil() {
-            #if canImport(Foundation)
             self.init(NSNull())
-            #else
-            self.init(Self?.none)
-            #endif
         } else if let bool = try? container.decode(Bool.self) {
             self.init(bool)
         } else if let int = try? container.decode(Int.self) {

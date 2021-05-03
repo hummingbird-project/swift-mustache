@@ -11,6 +11,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 //===----------------------------------------------------------------------===//
+import Foundation
 
 extension HBMustacheTemplate {
     /// Render template using object
@@ -46,13 +47,19 @@ extension HBMustacheTemplate {
             if let child = getChild(named: variable, transform: transform, context: context) {
                 if let template = child as? HBMustacheTemplate {
                     return template.render(context: context)
+                } else if let renderable = child as? HBMustacheCustomRenderable {
+                    return context.contentType.escapeText(renderable.renderText)
                 } else {
                     return context.contentType.escapeText(String(describing: child))
                 }
             }
         case .unescapedVariable(let variable, let transform):
             if let child = getChild(named: variable, transform: transform, context: context) {
-                return String(describing: child)
+                if let renderable = child as? HBMustacheCustomRenderable {
+                    return renderable.renderText
+                } else {
+                    return String(describing: child)
+                }
             }
         case .section(let variable, let transform, let template):
             let child = self.getChild(named: variable, transform: transform, context: context)
@@ -94,6 +101,8 @@ extension HBMustacheTemplate {
             return bool ? template.render(context: context) : ""
         case let lambda as HBMustacheLambda:
             return lambda.run(context.stack.last!, template)
+        case let null as HBMustacheCustomRenderable where null.isNull == true:
+            return ""
         case .some(let value):
             return template.render(context: context.withObject(value))
         case .none:
@@ -113,6 +122,8 @@ extension HBMustacheTemplate {
             return array.renderInvertedSection(with: template, context: context)
         case let bool as Bool:
             return bool ? "" : template.render(context: context)
+        case let null as HBMustacheCustomRenderable where null.isNull == true:
+            return template.render(context: context)
         case .some:
             return ""
         case .none:
