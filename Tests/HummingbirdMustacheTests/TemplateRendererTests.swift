@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-@testable import HummingbirdMustache
+import HummingbirdMustache
 import XCTest
 
 final class TemplateRendererTests: XCTestCase {
@@ -243,6 +243,26 @@ final class TemplateRendererTests: XCTestCase {
         XCTAssertEqual(template.render(object), """
         <h1>Today.</h1>
         """)
+    }
+
+    /// test HBMustacheCustomRenderable
+    func testCustomRenderable() throws {
+        let template = try HBMustacheTemplate(string: "{{.}}")
+        let template1 = try HBMustacheTemplate(string: "{{#.}}not null{{/.}}")
+        let template2 = try HBMustacheTemplate(string: "{{^.}}null{{/.}}")
+        struct Object: HBMustacheCustomRenderable {
+            let value: String
+
+            var renderText: String { self.value.uppercased() }
+            var isNull: Bool { self.value == "null" }
+        }
+        let testObject = Object(value: "test")
+        let nullObject = Object(value: "null")
+        XCTAssertEqual(template.render(testObject), "TEST")
+        XCTAssertEqual(template1.render(testObject), "not null")
+        XCTAssertEqual(template1.render(nullObject), "")
+        XCTAssertEqual(template2.render(testObject), "")
+        XCTAssertEqual(template2.render(nullObject), "null")
     }
 
     func testPerformance() throws {
