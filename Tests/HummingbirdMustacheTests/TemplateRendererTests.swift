@@ -253,8 +253,8 @@ final class TemplateRendererTests: XCTestCase {
         struct Object: HBMustacheCustomRenderable {
             let value: String
 
-            var renderText: String { value.uppercased() }
-            var isNull: Bool { value == "null" }
+            var renderText: String { self.value.uppercased() }
+            var isNull: Bool { self.value == "null" }
         }
         let testObject = Object(value: "test")
         let nullObject = Object(value: "null")
@@ -278,5 +278,4 @@ final class TemplateRendererTests: XCTestCase {
         }
         print(-date.timeIntervalSinceNow)
     }
-
 }
