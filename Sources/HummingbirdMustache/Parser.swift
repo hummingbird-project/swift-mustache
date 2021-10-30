@@ -314,7 +314,7 @@ extension HBParser {
         // count new lines up to this current position
         let buffer = parser.buffer
         let textBefore = buffer[buffer.startIndex..<self.position]
-        let lineNumber = textBefore.filter { $0.isNewline }.count
+        let lineNumber = textBefore.filter(\.isNewline).count
 
         return Context(line: String(line), lineNumber: lineNumber + 1, columnNumber: columnNumber + 1)
     }
