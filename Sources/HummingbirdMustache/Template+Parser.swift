@@ -199,7 +199,7 @@ extension HBMustacheTemplate {
             case ">":
                 // partial
                 parser.unsafeAdvance()
-                let (name, _) = try parseName(&parser, state: state)
+                let name = try parsePartialName(&parser, state: state)
                 if whiteSpaceBefore.count > 0 {
                     tokens.append(.text(String(whiteSpaceBefore)))
                 }
@@ -214,9 +214,7 @@ extension HBMustacheTemplate {
             case "<":
                 // partial with inheritance
                 parser.unsafeAdvance()
-                let (name, transform) = try parseName(&parser, state: state)
-                // ERROR: can't have transform applied to inherited sections
-                guard transform == nil else { throw Error.transformAppliedToInheritanceSection }
+                let name = try parsePartialName(&parser, state: state)
                 var indent: String?
                 if self.isStandalone(&parser, state: state) {
                     setNewLine = true
@@ -225,7 +223,7 @@ extension HBMustacheTemplate {
                     tokens.append(.text(indent!))
                     whiteSpaceBefore = ""
                 }
-                let sectionTokens = try parse(&parser, state: state.withSectionName(name, transform: transform))
+                let sectionTokens = try parse(&parser, state: state.withSectionName(name))
                 var inherit: [String: HBMustacheTemplate] = [:]
                 // parse tokens in section to extract inherited sections
                 for token in sectionTokens {
@@ -321,6 +319,15 @@ extension HBMustacheTemplate {
         }
     }
 
+    /// parse partial name
+    static func parsePartialName(_ parser: inout HBParser, state: ParserState) throws -> String {
+        parser.read(while: \.isWhitespace)
+        let text = String(parser.read(while: self.sectionNameChars))
+        parser.read(while: \.isWhitespace)
+        guard try parser.read(string: state.endDelimiter) else { throw Error.unfinishedName }
+        return text
+    }
+
     static func parseComment(_ parser: inout HBParser, state: ParserState) throws -> String {
         let text = try parser.read(untilString: state.endDelimiter, throwOnOverflow: true, skipToEnd: true)
         return String(text)
@@ -390,6 +397,7 @@ extension HBMustacheTemplate {
         return state.newLine && self.hasLineFinished(&parser)
     }
 
-    private static let sectionNameCharsWithoutBrackets = Set<Character>("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ._?")
-    private static let sectionNameChars = Set<Character>("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ._?()")
+    private static let sectionNameCharsWithoutBrackets = Set<Character>("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.-_?")
+    private static let sectionNameChars = Set<Character>("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.-_?()")
+    private static let partialNameChars = Set<Character>("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.-_()")
 }
