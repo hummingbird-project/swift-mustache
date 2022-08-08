@@ -29,6 +29,24 @@ final class LibraryTests: XCTestCase {
         XCTAssertEqual(library.render(object, withTemplate: "test"), "<test><value>value1</value><value>value2</value></test>")
     }
 
+    func testPartial() throws {
+        let fs = FileManager()
+        try? fs.createDirectory(atPath: "templates", withIntermediateDirectories: false)
+        let mustache = Data("<test>{{#value}}<value>{{.}}</value>{{/value}}</test>".utf8)
+        try mustache.write(to: URL(fileURLWithPath: "templates/test-partial.mustache"))
+        let mustache2 = Data("{{>test-partial}}".utf8)
+        try mustache2.write(to: URL(fileURLWithPath: "templates/test.mustache"))
+        defer {
+            XCTAssertNoThrow(try fs.removeItem(atPath: "templates/test-partial.mustache"))
+            XCTAssertNoThrow(try fs.removeItem(atPath: "templates/test.mustache"))
+            XCTAssertNoThrow(try fs.removeItem(atPath: "templates"))
+        }
+
+        let library = try HBMustacheLibrary(directory: "./templates")
+        let object = ["value": ["value1", "value2"]]
+        XCTAssertEqual(library.render(object, withTemplate: "test"), "<test><value>value1</value><value>value2</value></test>")
+    }
+
     func testLibraryParserError() throws {
         let fs = FileManager()
         try? fs.createDirectory(atPath: "templates", withIntermediateDirectories: false)
