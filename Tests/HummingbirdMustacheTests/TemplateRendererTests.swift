@@ -82,7 +82,7 @@ final class TemplateRendererTests: XCTestCase {
         XCTAssertEqual(template.render(Test(string: nil)), "test ")
     }
 
-    func testOptionalSequence() throws {
+    func testOptionalSection() throws {
         struct Test {
             let string: String?
         }
@@ -92,6 +92,22 @@ final class TemplateRendererTests: XCTestCase {
         let template2 = try HBMustacheTemplate(string: "test {{^string}}*{{/string}}")
         XCTAssertEqual(template2.render(Test(string: "string")), "test ")
         XCTAssertEqual(template2.render(Test(string: nil)), "test *")
+    }
+
+    func testOptionalSequence() throws {
+        struct Test {
+            let string: String?
+        }
+        let template = try HBMustacheTemplate(string: "test {{#.}}{{string}}{{/.}}")
+        XCTAssertEqual(template.render([Test(string: "string")]), "test string")
+    }
+
+    func testOptionalSequenceSection() throws {
+        struct Test {
+            let string: String?
+        }
+        let template = try HBMustacheTemplate(string: "test {{#.}}{{#string}}*{{.}}{{/string}}{{/.}}")
+        XCTAssertEqual(template.render([Test(string: "string")]), "test *string")
     }
 
     func testStructureInStructure() throws {
