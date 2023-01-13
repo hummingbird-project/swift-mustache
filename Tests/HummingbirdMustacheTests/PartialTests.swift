@@ -42,6 +42,41 @@ final class PartialTests: XCTestCase {
         """)
     }
 
+    /// Test where last line of partial generates no content. It should not add a
+    /// tab either
+    func testPartialEmptyLineTabbing() throws {
+        let library = HBMustacheLibrary()
+        let template = try HBMustacheTemplate(string: """
+        <h2>Names</h2>
+        {{#names}}
+          {{> user}}
+        {{/names}}
+        Text after
+
+        """)
+        let template2 = try HBMustacheTemplate(string: """
+        {{^empty(.)}}
+        <strong>{{.}}</strong>
+        {{/empty(.)}}
+        {{#empty(.)}}
+        <strong>empty</strong>
+        {{/empty(.)}}
+
+        """)
+        library.register(template, named: "base")
+        library.register(template2, named: "user")
+
+        let object: [String: Any] = ["names": ["john", "adam", "claire"]]
+        XCTAssertEqual(library.render(object, withTemplate: "base"), """
+        <h2>Names</h2>
+          <strong>john</strong>
+          <strong>adam</strong>
+          <strong>claire</strong>
+        Text after
+
+        """)
+    }
+
     /// Testing dynamic partials
     func testDynamicPartials() throws {
         let library = HBMustacheLibrary()
