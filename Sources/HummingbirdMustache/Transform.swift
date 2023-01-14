@@ -39,6 +39,8 @@ public extension StringProtocol {
     /// - Returns: Result
     func transform(_ name: String) -> Any? {
         switch name {
+        case "empty":
+            return isEmpty
         case "capitalized":
             return capitalized
         case "lowercased":

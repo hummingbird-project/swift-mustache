@@ -27,14 +27,16 @@ extension HBMustacheTemplate {
 
         if let indentation = context.indentation, indentation != "" {
             for token in tokens {
-                if string.last == "\n" {
+                let renderedString = self.renderToken(token, context: &context)
+                if renderedString != "", string.last == "\n" {
                     string += indentation
                 }
-                string += self.renderToken(token, context: &context)
+                string += renderedString
             }
         } else {
             for token in tokens {
-                string += self.renderToken(token, context: &context)
+                let result = self.renderToken(token, context: &context)
+                string += result
             }
         }
         return string
