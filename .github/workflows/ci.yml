@@ -20,7 +20,7 @@ jobs:
     runs-on: macOS-latest
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
     - name: SPM tests
       run: swift test --enable-code-coverage
     - name: Convert coverage files
@@ -28,6 +28,7 @@ jobs:
         xcrun llvm-cov export -format "lcov" \
           .build/debug/hummingbird-mustachePackageTests.xctest/Contents/MacOs/hummingbird-mustachePackageTests \
           -ignore-filename-regex="\/Tests\/" \
+          -ignore-filename-regex="\/Benchmarks\/" \
           -instr-profile=.build/debug/codecov/default.profdata > info.lcov
     - name: Upload to codecov.io
       uses: codecov/codecov-action@v3
@@ -46,7 +47,7 @@ jobs:
       image: ${{ matrix.image }}
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
     - name: Test
       run: |
         swift test --enable-code-coverage
@@ -55,6 +56,7 @@ jobs:
         llvm-cov export -format="lcov" \
           .build/debug/hummingbird-mustachePackageTests.xctest \
           -ignore-filename-regex="\/Tests\/" \
+          -ignore-filename-regex="\/Benchmarks\/" \
           -instr-profile .build/debug/codecov/default.profdata > info.lcov
     - name: Upload to codecov.io
       uses: codecov/codecov-action@v3
