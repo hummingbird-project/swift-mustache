@@ -17,6 +17,6 @@ jobs:
     - name: Install Dependencies
       run: |
         brew install mint
-        mint install NickLockwood/SwiftFormat@0.48.17 --no-link
+        mint install NickLockwood/SwiftFormat@0.51.15 --no-link
     - name: run script
       run: ./scripts/validate.sh
