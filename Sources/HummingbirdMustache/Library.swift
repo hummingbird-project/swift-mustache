@@ -31,11 +31,7 @@ public final class HBMustacheLibrary: Sendable {
     /// - Parameter directory: Directory to look for mustache templates
     /// - Parameter extension: Extension of files to look for
     public init(templates: [String: HBMustacheTemplate]) {
-        self.templates = templates.mapValues { template in
-            var template = template
-            template.setLibrary(templates)
-            return template
-        }
+        self.templates = templates
     }
 
     /// Initialize library with contents of folder.
@@ -45,12 +41,7 @@ public final class HBMustacheLibrary: Sendable {
     /// - Parameter directory: Directory to look for mustache templates
     /// - Parameter extension: Extension of files to look for
     public init(directory: String, withExtension extension: String = "mustache") throws {
-        let templates = try Self.loadTemplates(from: directory, withExtension: `extension`)
-        self.templates = templates.mapValues { template in
-            var template = template
-            template.setLibrary(templates)
-            return template
-        }
+        self.templates = try Self.loadTemplates(from: directory, withExtension: `extension`)
     }
 
     /// Return template registed with name
