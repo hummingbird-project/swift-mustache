@@ -46,6 +46,14 @@ public struct HBMustacheLibrary: Sendable {
 
     /// Register template under name
     /// - Parameters:
+    ///   - template: Template
+    ///   - name: Name of template
+    public mutating func register(_ template: HBMustacheTemplate, named name: String) {
+        self.templates[name] = template
+    }
+
+    /// Register template under name
+    /// - Parameters:
     ///   - mustache: Mustache text
     ///   - name: Name of template
     public mutating func register(_ mustache: String, named name: String) throws {
