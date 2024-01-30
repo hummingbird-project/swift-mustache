@@ -18,7 +18,7 @@
 /// ```
 /// {{#sequence}}{{>entry}}{{/sequence}}
 /// ```
-public final class HBMustacheLibrary: Sendable {
+public struct HBMustacheLibrary: Sendable {
     /// Initialize empty library
     public init() {
         self.templates = [:]
@@ -58,7 +58,7 @@ public final class HBMustacheLibrary: Sendable {
     /// - Returns: Rendered text
     public func render(_ object: Any, withTemplate name: String) -> String? {
         guard let template = templates[name] else { return nil }
-        return template.render(object)
+        return template.render(object, library: self)
     }
 
     /// Error returned by init() when parser fails
@@ -71,5 +71,5 @@ public final class HBMustacheLibrary: Sendable {
         public let error: Error
     }
 
-    private let templates: [String: HBMustacheTemplate]
+    private var templates: [String: HBMustacheTemplate]
 }
