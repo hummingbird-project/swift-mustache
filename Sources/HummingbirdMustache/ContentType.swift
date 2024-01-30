@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 /// Protocol for content types
-public protocol HBMustacheContentType {
+public protocol HBMustacheContentType: Sendable {
     /// escape text for this content type eg for HTML replace "<" with "&lt;"
     func escapeText(_ text: String) -> String
 }

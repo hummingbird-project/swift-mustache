@@ -68,13 +68,14 @@ final class MustacheSpecTests: XCTestCase {
             func run() throws {
                 print("Test: \(self.name)")
                 if let partials = self.partials {
-                    let library = HBMustacheLibrary()
+                    var library = HBMustacheLibrary()
                     let template = try HBMustacheTemplate(string: self.template)
                     library.register(template, named: "__test__")
                     for (key, value) in partials {
                         let template = try HBMustacheTemplate(string: value)
                         library.register(template, named: key)
                     }
+                    library.updatePartials()
                     let result = library.render(self.data.value, withTemplate: "__test__")
                     self.XCTAssertSpecEqual(result, self)
                 } else {
@@ -136,6 +137,7 @@ final class MustacheSpecTests: XCTestCase {
     }
 
     func testInheritanceSpec() throws {
+        try XCTSkipIf(false) // inheritance spec has been updated
         try self.testSpec(name: "~inheritance")
     }
 }

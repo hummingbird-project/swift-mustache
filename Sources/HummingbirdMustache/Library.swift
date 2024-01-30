@@ -18,7 +18,7 @@
 /// ```
 /// {{#sequence}}{{>entry}}{{/sequence}}
 /// ```
-public final class HBMustacheLibrary {
+public final class HBMustacheLibrary: Sendable {
     /// Initialize empty library
     public init() {
         self.templates = [:]
@@ -40,7 +40,6 @@ public final class HBMustacheLibrary {
     ///   - template: Template
     ///   - name: Name of template
     public func register(_ template: HBMustacheTemplate, named name: String) {
-        template.setLibrary(self)
         self.templates[name] = template
     }
 
@@ -50,8 +49,16 @@ public final class HBMustacheLibrary {
     ///   - name: Name of template
     public func register(_ mustache: String, named name: String) throws {
         let template = try HBMustacheTemplate(string: mustache)
-        template.setLibrary(self)
         self.templates[name] = template
+    }
+
+    /// Update partials in templates to reference other templates in the library
+    public func updatePartials() {
+        self.templates = self.templates.mapValues { template in
+            var template = template
+            template.setLibrary(self)
+            return template
+        }
     }
 
     /// Return template registed with name
@@ -83,3 +90,5 @@ public final class HBMustacheLibrary {
 
     private var templates: [String: HBMustacheTemplate]
 }
+
+public final class HBMutable

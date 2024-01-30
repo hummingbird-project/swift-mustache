@@ -13,12 +13,13 @@
 //===----------------------------------------------------------------------===//
 
 /// Class holding Mustache template
-public final class HBMustacheTemplate {
+public struct HBMustacheTemplate: Sendable {
     /// Initialize template
     /// - Parameter string: Template text
     /// - Throws: HBMustacheTemplate.Error
     public init(string: String) throws {
         self.tokens = try Self.parse(string)
+        self.library = nil
     }
 
     /// Render object using this template
@@ -30,23 +31,37 @@ public final class HBMustacheTemplate {
 
     internal init(_ tokens: [Token]) {
         self.tokens = tokens
+        self.library = nil
     }
 
-    internal func setLibrary(_ library: HBMustacheLibrary) {
+    internal mutating func setLibrary(_ library: HBMustacheLibrary) {
         self.library = library
-        for token in self.tokens {
+        for i in 0..<self.tokens.count {
+            let token = self.tokens[i]
             switch token {
-            case .section(_, _, let template), .invertedSection(_, _, let template), .inheritedSection(_, let template):
+            case .section(let name, let transform, var template):
                 template.setLibrary(library)
-            case .partial(_, _, let templates):
-                templates?.forEach { $1.setLibrary(library) }
+                self.tokens[i] = .section(name: name, transform: transform, template: template)
+            case .invertedSection(let name, let transform, var template):
+                template.setLibrary(library)
+                self.tokens[i] = .invertedSection(name: name, transform: transform, template: template)
+            case .inheritedSection(let name, var template):
+                template.setLibrary(library)
+                self.tokens[i] = .inheritedSection(name: name, template: template)
+            case .partial(let name, let indentation, let templates):
+                let templates = templates?.mapValues { template in
+                    var template = template
+                    template.setLibrary(library)
+                    return template
+                }
+                self.tokens[i] = .partial(name, indentation: indentation, inherits: templates)
             default:
                 break
             }
         }
     }
 
-    enum Token {
+    enum Token: Sendable {
         case text(String)
         case variable(name: String, transform: String? = nil)
         case unescapedVariable(name: String, transform: String? = nil)
@@ -57,6 +72,6 @@ public final class HBMustacheTemplate {
         case contentType(HBMustacheContentType)
     }
 
-    let tokens: [Token]
+    var tokens: [Token]
     var library: HBMustacheLibrary?
 }

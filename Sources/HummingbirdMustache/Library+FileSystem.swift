@@ -28,7 +28,7 @@ extension HBMustacheLibrary {
             guard path.hasSuffix(extWithDot) else { continue }
             guard let data = fs.contents(atPath: directory + path) else { continue }
             let string = String(decoding: data, as: Unicode.UTF8.self)
-            let template: HBMustacheTemplate
+            var template: HBMustacheTemplate
             do {
                 template = try HBMustacheTemplate(string: string)
             } catch let error as HBMustacheTemplate.ParserError {
@@ -38,5 +38,6 @@ extension HBMustacheLibrary {
             let name = String(path.dropLast(extWithDot.count))
             register(template, named: name)
         }
+        self.updatePartials()
     }
 }
