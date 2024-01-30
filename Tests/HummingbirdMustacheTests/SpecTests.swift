@@ -68,14 +68,13 @@ final class MustacheSpecTests: XCTestCase {
             func run() throws {
                 print("Test: \(self.name)")
                 if let partials = self.partials {
-                    var library = HBMustacheLibrary()
                     let template = try HBMustacheTemplate(string: self.template)
-                    library.register(template, named: "__test__")
+                    var templates: [String: HBMustacheTemplate] = ["__test__": template]
                     for (key, value) in partials {
                         let template = try HBMustacheTemplate(string: value)
-                        library.register(template, named: key)
+                        templates[key] = template
                     }
-                    library.updatePartials()
+                    let library = HBMustacheLibrary(templates: templates)
                     let result = library.render(self.data.value, withTemplate: "__test__")
                     self.XCTAssertSpecEqual(result, self)
                 } else {

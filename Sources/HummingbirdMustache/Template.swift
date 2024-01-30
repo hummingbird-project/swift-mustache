@@ -19,7 +19,7 @@ public struct HBMustacheTemplate: Sendable {
     /// - Throws: HBMustacheTemplate.Error
     public init(string: String) throws {
         self.tokens = try Self.parse(string)
-        self.library = nil
+        self.partialLookup = [:]
     }
 
     /// Render object using this template
@@ -31,27 +31,27 @@ public struct HBMustacheTemplate: Sendable {
 
     internal init(_ tokens: [Token]) {
         self.tokens = tokens
-        self.library = nil
+        self.partialLookup = [:]
     }
 
-    internal mutating func setLibrary(_ library: HBMustacheLibrary) {
-        self.library = library
+    internal mutating func setLibrary(_ partialLookup: [String: HBMustacheTemplate]) {
+        self.partialLookup = partialLookup
         for i in 0..<self.tokens.count {
             let token = self.tokens[i]
             switch token {
             case .section(let name, let transform, var template):
-                template.setLibrary(library)
+                template.setLibrary(partialLookup)
                 self.tokens[i] = .section(name: name, transform: transform, template: template)
             case .invertedSection(let name, let transform, var template):
-                template.setLibrary(library)
+                template.setLibrary(partialLookup)
                 self.tokens[i] = .invertedSection(name: name, transform: transform, template: template)
             case .inheritedSection(let name, var template):
-                template.setLibrary(library)
+                template.setLibrary(partialLookup)
                 self.tokens[i] = .inheritedSection(name: name, template: template)
             case .partial(let name, let indentation, let templates):
                 let templates = templates?.mapValues { template in
                     var template = template
-                    template.setLibrary(library)
+                    template.setLibrary(partialLookup)
                     return template
                 }
                 self.tokens[i] = .partial(name, indentation: indentation, inherits: templates)
@@ -73,5 +73,5 @@ public struct HBMustacheTemplate: Sendable {
     }
 
     var tokens: [Token]
-    var library: HBMustacheLibrary?
+    var partialLookup: [String: HBMustacheTemplate]
 }

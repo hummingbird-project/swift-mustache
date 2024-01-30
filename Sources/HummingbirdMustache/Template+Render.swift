@@ -80,7 +80,7 @@ extension HBMustacheTemplate {
             }
 
         case .partial(let name, let indentation, let overrides):
-            if let template = library?.getTemplate(named: name) {
+            if let template = partialLookup[name] {
                 return template.render(context: context.withPartial(indented: indentation, inheriting: overrides))
             }
 

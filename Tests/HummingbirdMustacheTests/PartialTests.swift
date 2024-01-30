@@ -18,7 +18,6 @@ import XCTest
 final class PartialTests: XCTestCase {
   /// Testing partials
   func testMustacheManualExample9() throws {
-    var library = HBMustacheLibrary()
     let template = try HBMustacheTemplate(string: """
     <h2>Names</h2>
     {{#names}}
@@ -29,9 +28,7 @@ final class PartialTests: XCTestCase {
     <strong>{{.}}</strong>
 
     """)
-    library.register(template, named: "base")
-    library.register(template2, named: "user")
-    library.updatePartials()
+    let library = HBMustacheLibrary(templates: ["base": template, "user": template2])
 
     let object: [String: Any] = ["names": ["john", "adam", "claire"]]
     XCTAssertEqual(library.render(object, withTemplate: "base"), """
@@ -46,7 +43,6 @@ final class PartialTests: XCTestCase {
   /// Test where last line of partial generates no content. It should not add a
   /// tab either
   func testPartialEmptyLineTabbing() throws {
-    var library = HBMustacheLibrary()
     let template = try HBMustacheTemplate(string: """
     <h2>Names</h2>
     {{#names}}
@@ -64,9 +60,7 @@ final class PartialTests: XCTestCase {
     {{/empty(.)}}
 
     """)
-    library.register(template, named: "base")
-    library.register(template2, named: "user")
-    library.updatePartials()
+    let library = HBMustacheLibrary(templates: ["base": template, "user": template2])
 
     let object: [String: Any] = ["names": ["john", "adam", "claire"]]
     XCTAssertEqual(library.render(object, withTemplate: "base"), """
@@ -81,7 +75,6 @@ final class PartialTests: XCTestCase {
 
   /// Testing dynamic partials
   func testDynamicPartials() throws {
-    var library = HBMustacheLibrary()
     let template = try HBMustacheTemplate(string: """
     <h2>Names</h2>
     {{partial}}
@@ -91,7 +84,7 @@ final class PartialTests: XCTestCase {
       <strong>{{.}}</strong>
     {{/names}}
     """)
-    library.register(template, named: "base")
+    let library = HBMustacheLibrary(templates: ["base": template])
 
     let object: [String: Any] = ["names": ["john", "adam", "claire"], "partial": template2]
     XCTAssertEqual(library.render(object, withTemplate: "base"), """
@@ -105,8 +98,33 @@ final class PartialTests: XCTestCase {
 
   /// test inheritance
   func testInheritance() throws {
-    var library = HBMustacheLibrary()
-    try library.register(
+    let library = try HBMustacheLibrary(templates: [
+      "header": .init(string: """
+        <head>
+        <title>{{$title}}Default title{{/title}}</title>
+        </head>
+
+        """),
+      "base": .init(string: """
+        <html>
+        {{$header}}{{/header}}
+        {{$content}}{{/content}}
+        </html>
+
+        """),
+      "mypage": .init(string: """
+        {{<base}}
+        {{$header}}
+        {{<header}}
+        {{$title}}My page title{{/title}}
+        {{/header}}
+        {{/header}}
+        {{$content}}<h1>Hello world</h1>{{/content}}
+        {{/base}}
+
+        """)
+      ])
+/*    try library.register(
       """
       <head>
       <title>{{$title}}Default title{{/title}}</title>
@@ -138,8 +156,7 @@ final class PartialTests: XCTestCase {
 
       """,
       named: "mypage"
-    )
-    library.updatePartials()
+    )*/
     XCTAssertEqual(library.render({}, withTemplate: "mypage")!, """
     <html>
     <head>

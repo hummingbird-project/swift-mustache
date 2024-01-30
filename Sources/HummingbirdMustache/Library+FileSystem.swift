@@ -16,14 +16,15 @@ import Foundation
 
 extension HBMustacheLibrary {
     /// Load templates from a folder
-    func loadTemplates(from directory: String, withExtension extension: String = "mustache") throws {
+    static func loadTemplates(from directory: String, withExtension extension: String = "mustache") throws -> [String: HBMustacheTemplate] {
         var directory = directory
         if !directory.hasSuffix("/") {
             directory += "/"
         }
         let extWithDot = ".\(`extension`)"
         let fs = FileManager()
-        guard let enumerator = fs.enumerator(atPath: directory) else { return }
+        guard let enumerator = fs.enumerator(atPath: directory) else { return [:] }
+        var templates: [String: HBMustacheTemplate] = [:]
         for case let path as String in enumerator {
             guard path.hasSuffix(extWithDot) else { continue }
             guard let data = fs.contents(atPath: directory + path) else { continue }
@@ -36,8 +37,8 @@ extension HBMustacheLibrary {
             }
             // drop ".mustache" from path to get name
             let name = String(path.dropLast(extWithDot.count))
-            register(template, named: name)
+            templates[name] = template
         }
-        self.updatePartials()
+        return templates
     }
 }

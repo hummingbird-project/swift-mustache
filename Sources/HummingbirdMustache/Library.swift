@@ -30,33 +30,25 @@ public final class HBMustacheLibrary: Sendable {
     /// the folder is recursive and templates in subfolders will be registered with the name `subfolder/template`.
     /// - Parameter directory: Directory to look for mustache templates
     /// - Parameter extension: Extension of files to look for
-    public init(directory: String, withExtension extension: String = "mustache") throws {
-        self.templates = [:]
-        try loadTemplates(from: directory, withExtension: `extension`)
-    }
-
-    /// Register template under name
-    /// - Parameters:
-    ///   - template: Template
-    ///   - name: Name of template
-    public func register(_ template: HBMustacheTemplate, named name: String) {
-        self.templates[name] = template
-    }
-
-    /// Register template under name
-    /// - Parameters:
-    ///   - mustache: Mustache text
-    ///   - name: Name of template
-    public func register(_ mustache: String, named name: String) throws {
-        let template = try HBMustacheTemplate(string: mustache)
-        self.templates[name] = template
-    }
-
-    /// Update partials in templates to reference other templates in the library
-    public func updatePartials() {
-        self.templates = self.templates.mapValues { template in
+    public init(templates: [String: HBMustacheTemplate]) {
+        self.templates = templates.mapValues { template in
             var template = template
-            template.setLibrary(self)
+            template.setLibrary(templates)
+            return template
+        }
+    }
+
+    /// Initialize library with contents of folder.
+    ///
+    /// Each template is registered with the name of the file minus its extension. The search through
+    /// the folder is recursive and templates in subfolders will be registered with the name `subfolder/template`.
+    /// - Parameter directory: Directory to look for mustache templates
+    /// - Parameter extension: Extension of files to look for
+    public init(directory: String, withExtension extension: String = "mustache") throws {
+        let templates = try Self.loadTemplates(from: directory, withExtension: `extension`)
+        self.templates = templates.mapValues { template in
+            var template = template
+            template.setLibrary(templates)
             return template
         }
     }
@@ -88,7 +80,5 @@ public final class HBMustacheLibrary: Sendable {
         public let error: Error
     }
 
-    private var templates: [String: HBMustacheTemplate]
+    private let templates: [String: HBMustacheTemplate]
 }
-
-public final class HBMutable
