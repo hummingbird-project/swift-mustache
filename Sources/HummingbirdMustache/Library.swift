@@ -44,6 +44,15 @@ public struct HBMustacheLibrary: Sendable {
         self.templates = try Self.loadTemplates(from: directory, withExtension: `extension`)
     }
 
+    /// Register template under name
+    /// - Parameters:
+    ///   - mustache: Mustache text
+    ///   - name: Name of template
+    public mutating func register(_ mustache: String, named name: String) throws {
+        let template = try HBMustacheTemplate(string: mustache)
+        self.templates[name] = template
+    }
+
     /// Return template registed with name
     /// - Parameter name: name to search for
     /// - Returns: Template
