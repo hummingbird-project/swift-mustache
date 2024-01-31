@@ -40,8 +40,8 @@ public struct HBMustacheLibrary: Sendable {
     /// the folder is recursive and templates in subfolders will be registered with the name `subfolder/template`.
     /// - Parameter directory: Directory to look for mustache templates
     /// - Parameter extension: Extension of files to look for
-    public init(directory: String, withExtension extension: String = "mustache") throws {
-        self.templates = try Self.loadTemplates(from: directory, withExtension: `extension`)
+    public init(directory: String, withExtension extension: String = "mustache") async throws {
+        self.templates = try await Self.loadTemplates(from: directory, withExtension: `extension`)
     }
 
     /// Register template under name

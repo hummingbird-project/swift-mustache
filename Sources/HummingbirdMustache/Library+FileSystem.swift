@@ -16,7 +16,7 @@ import Foundation
 
 extension HBMustacheLibrary {
     /// Load templates from a folder
-    static func loadTemplates(from directory: String, withExtension extension: String = "mustache") throws -> [String: HBMustacheTemplate] {
+    static func loadTemplates(from directory: String, withExtension extension: String = "mustache") async throws -> [String: HBMustacheTemplate] {
         var directory = directory
         if !directory.hasSuffix("/") {
             directory += "/"
