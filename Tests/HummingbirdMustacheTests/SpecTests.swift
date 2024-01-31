@@ -104,7 +104,7 @@ final class MustacheSpecTests: XCTestCase {
         let data = try Data(contentsOf: url)
         let spec = try JSONDecoder().decode(Spec.self, from: data)
 
-        // print(spec.overview)
+        print(spec.overview)
         let date = Date()
         for test in spec.tests {
             guard !ignoring.contains(test.name) else { continue }
