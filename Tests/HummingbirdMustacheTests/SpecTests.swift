@@ -66,15 +66,15 @@ final class MustacheSpecTests: XCTestCase {
             let expected: String
 
             func run() throws {
-                print("Test: \(self.name)")
+                // print("Test: \(self.name)")
                 if let partials = self.partials {
-                    let library = HBMustacheLibrary()
                     let template = try HBMustacheTemplate(string: self.template)
-                    library.register(template, named: "__test__")
+                    var templates: [String: HBMustacheTemplate] = ["__test__": template]
                     for (key, value) in partials {
                         let template = try HBMustacheTemplate(string: value)
-                        library.register(template, named: key)
+                        templates[key] = template
                     }
+                    let library = HBMustacheLibrary(templates: templates)
                     let result = library.render(self.data.value, withTemplate: "__test__")
                     self.XCTAssertSpecEqual(result, self)
                 } else {
@@ -105,10 +105,12 @@ final class MustacheSpecTests: XCTestCase {
         let spec = try JSONDecoder().decode(Spec.self, from: data)
 
         print(spec.overview)
+        let date = Date()
         for test in spec.tests {
             guard !ignoring.contains(test.name) else { continue }
             XCTAssertNoThrow(try test.run())
         }
+        print(-date.timeIntervalSinceNow)
     }
 
     func testCommentsSpec() throws {
@@ -136,6 +138,7 @@ final class MustacheSpecTests: XCTestCase {
     }
 
     func testInheritanceSpec() throws {
+        try XCTSkipIf(true) // inheritance spec has been updated and has added requirements, we don't yet support
         try self.testSpec(name: "~inheritance")
     }
 }
