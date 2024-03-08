@@ -18,7 +18,7 @@
 /// ```
 /// {{#sequence}}{{>entry}}{{/sequence}}
 /// ```
-public final class HBMustacheLibrary {
+public struct HBMustacheLibrary: Sendable {
     /// Initialize empty library
     public init() {
         self.templates = [:]
@@ -30,17 +30,25 @@ public final class HBMustacheLibrary {
     /// the folder is recursive and templates in subfolders will be registered with the name `subfolder/template`.
     /// - Parameter directory: Directory to look for mustache templates
     /// - Parameter extension: Extension of files to look for
-    public init(directory: String, withExtension extension: String = "mustache") throws {
-        self.templates = [:]
-        try loadTemplates(from: directory, withExtension: `extension`)
+    public init(templates: [String: HBMustacheTemplate]) {
+        self.templates = templates
+    }
+
+    /// Initialize library with contents of folder.
+    ///
+    /// Each template is registered with the name of the file minus its extension. The search through
+    /// the folder is recursive and templates in subfolders will be registered with the name `subfolder/template`.
+    /// - Parameter directory: Directory to look for mustache templates
+    /// - Parameter extension: Extension of files to look for
+    public init(directory: String, withExtension extension: String = "mustache") async throws {
+        self.templates = try await Self.loadTemplates(from: directory, withExtension: `extension`)
     }
 
     /// Register template under name
     /// - Parameters:
     ///   - template: Template
     ///   - name: Name of template
-    public func register(_ template: HBMustacheTemplate, named name: String) {
-        template.setLibrary(self)
+    public mutating func register(_ template: HBMustacheTemplate, named name: String) {
         self.templates[name] = template
     }
 
@@ -48,9 +56,8 @@ public final class HBMustacheLibrary {
     /// - Parameters:
     ///   - mustache: Mustache text
     ///   - name: Name of template
-    public func register(_ mustache: String, named name: String) throws {
+    public mutating func register(_ mustache: String, named name: String) throws {
         let template = try HBMustacheTemplate(string: mustache)
-        template.setLibrary(self)
         self.templates[name] = template
     }
 
@@ -68,7 +75,7 @@ public final class HBMustacheLibrary {
     /// - Returns: Rendered text
     public func render(_ object: Any, withTemplate name: String) -> String? {
         guard let template = templates[name] else { return nil }
-        return template.render(object)
+        return template.render(object, library: self)
     }
 
     /// Error returned by init() when parser fails

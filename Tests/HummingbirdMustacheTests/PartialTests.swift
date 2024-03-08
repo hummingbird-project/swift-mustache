@@ -18,7 +18,6 @@ import XCTest
 final class PartialTests: XCTestCase {
     /// Testing partials
     func testMustacheManualExample9() throws {
-        let library = HBMustacheLibrary()
         let template = try HBMustacheTemplate(string: """
         <h2>Names</h2>
         {{#names}}
@@ -29,8 +28,7 @@ final class PartialTests: XCTestCase {
         <strong>{{.}}</strong>
 
         """)
-        library.register(template, named: "base")
-        library.register(template2, named: "user")
+        let library = HBMustacheLibrary(templates: ["base": template, "user": template2])
 
         let object: [String: Any] = ["names": ["john", "adam", "claire"]]
         XCTAssertEqual(library.render(object, withTemplate: "base"), """
@@ -45,7 +43,6 @@ final class PartialTests: XCTestCase {
     /// Test where last line of partial generates no content. It should not add a
     /// tab either
     func testPartialEmptyLineTabbing() throws {
-        let library = HBMustacheLibrary()
         let template = try HBMustacheTemplate(string: """
         <h2>Names</h2>
         {{#names}}
@@ -63,8 +60,9 @@ final class PartialTests: XCTestCase {
         {{/empty(.)}}
 
         """)
+        var library = HBMustacheLibrary()
         library.register(template, named: "base")
-        library.register(template2, named: "user")
+        library.register(template2, named: "user") // , withTemplate: String)// = HBMustacheLibrary(templates: ["base": template, "user": template2])
 
         let object: [String: Any] = ["names": ["john", "adam", "claire"]]
         XCTAssertEqual(library.render(object, withTemplate: "base"), """
@@ -79,7 +77,6 @@ final class PartialTests: XCTestCase {
 
     /// Testing dynamic partials
     func testDynamicPartials() throws {
-        let library = HBMustacheLibrary()
         let template = try HBMustacheTemplate(string: """
         <h2>Names</h2>
         {{partial}}
@@ -89,7 +86,7 @@ final class PartialTests: XCTestCase {
           <strong>{{.}}</strong>
         {{/names}}
         """)
-        library.register(template, named: "base")
+        let library = HBMustacheLibrary(templates: ["base": template])
 
         let object: [String: Any] = ["names": ["john", "adam", "claire"], "partial": template2]
         XCTAssertEqual(library.render(object, withTemplate: "base"), """
@@ -103,7 +100,7 @@ final class PartialTests: XCTestCase {
 
     /// test inheritance
     func testInheritance() throws {
-        let library = HBMustacheLibrary()
+        var library = HBMustacheLibrary()
         try library.register(
             """
             <head>

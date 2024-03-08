@@ -19,14 +19,16 @@ struct HBMustacheContext {
     let indentation: String?
     let inherited: [String: HBMustacheTemplate]?
     let contentType: HBMustacheContentType
+    let library: HBMustacheLibrary?
 
     /// initialize context with a single objectt
-    init(_ object: Any) {
+    init(_ object: Any, library: HBMustacheLibrary? = nil) {
         self.stack = [object]
         self.sequenceContext = nil
         self.indentation = nil
         self.inherited = nil
         self.contentType = HBHTMLContentType()
+        self.library = library
     }
 
     private init(
@@ -34,13 +36,15 @@ struct HBMustacheContext {
         sequenceContext: HBMustacheSequenceContext?,
         indentation: String?,
         inherited: [String: HBMustacheTemplate]?,
-        contentType: HBMustacheContentType
+        contentType: HBMustacheContentType,
+        library: HBMustacheLibrary? = nil
     ) {
         self.stack = stack
         self.sequenceContext = sequenceContext
         self.indentation = indentation
         self.inherited = inherited
         self.contentType = contentType
+        self.library = library
     }
 
     /// return context with object add to stack
@@ -52,7 +56,8 @@ struct HBMustacheContext {
             sequenceContext: nil,
             indentation: self.indentation,
             inherited: self.inherited,
-            contentType: self.contentType
+            contentType: self.contentType,
+            library: self.library
         )
     }
 
@@ -79,7 +84,8 @@ struct HBMustacheContext {
             sequenceContext: nil,
             indentation: indentation,
             inherited: inherits,
-            contentType: HBHTMLContentType()
+            contentType: HBHTMLContentType(),
+            library: self.library
         )
     }
 
@@ -92,7 +98,8 @@ struct HBMustacheContext {
             sequenceContext: sequenceContext,
             indentation: self.indentation,
             inherited: self.inherited,
-            contentType: self.contentType
+            contentType: self.contentType,
+            library: self.library
         )
     }
 
@@ -103,7 +110,8 @@ struct HBMustacheContext {
             sequenceContext: self.sequenceContext,
             indentation: self.indentation,
             inherited: self.inherited,
-            contentType: contentType
+            contentType: contentType,
+            library: self.library
         )
     }
 }
