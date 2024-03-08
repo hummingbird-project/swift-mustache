@@ -22,7 +22,7 @@ import XCTest
 public struct AnyDecodable: Decodable {
     public let value: Any
 
-    public init<T>(_ value: T) {
+    public init(_ value: some Any) {
         self.value = value
     }
 }
