@@ -63,21 +63,19 @@ struct HBMustacheContext {
 
     /// return context with indent and parameter information for invoking a partial
     func withPartial(indented: String?, inheriting: [String: HBMustacheTemplate]?) -> HBMustacheContext {
-        let indentation: String?
-        if let indented = indented {
-            indentation = (self.indentation ?? "") + indented
+        let indentation: String? = if let indented {
+            (self.indentation ?? "") + indented
         } else {
-            indentation = self.indentation
+            self.indentation
         }
-        let inherits: [String: HBMustacheTemplate]?
-        if let inheriting = inheriting {
+        let inherits: [String: HBMustacheTemplate]? = if let inheriting {
             if let originalInherits = self.inherited {
-                inherits = originalInherits.merging(inheriting) { value, _ in value }
+                originalInherits.merging(inheriting) { value, _ in value }
             } else {
-                inherits = inheriting
+                inheriting
             }
         } else {
-            inherits = self.inherited
+            self.inherited
         }
         return .init(
             stack: self.stack,
