@@ -14,9 +14,9 @@
 
 import Foundation
 
-extension HBMustacheLibrary {
+extension MustacheLibrary {
     /// Load templates from a folder
-    static func loadTemplates(from directory: String, withExtension extension: String = "mustache") async throws -> [String: HBMustacheTemplate] {
+    static func loadTemplates(from directory: String, withExtension extension: String = "mustache") async throws -> [String: MustacheTemplate] {
         var directory = directory
         if !directory.hasSuffix("/") {
             directory += "/"
@@ -24,15 +24,15 @@ extension HBMustacheLibrary {
         let extWithDot = ".\(`extension`)"
         let fs = FileManager()
         guard let enumerator = fs.enumerator(atPath: directory) else { return [:] }
-        var templates: [String: HBMustacheTemplate] = [:]
+        var templates: [String: MustacheTemplate] = [:]
         for case let path as String in enumerator {
             guard path.hasSuffix(extWithDot) else { continue }
             guard let data = fs.contents(atPath: directory + path) else { continue }
             let string = String(decoding: data, as: Unicode.UTF8.self)
-            var template: HBMustacheTemplate
+            var template: MustacheTemplate
             do {
-                template = try HBMustacheTemplate(string: string)
-            } catch let error as HBMustacheTemplate.ParserError {
+                template = try MustacheTemplate(string: string)
+            } catch let error as MustacheTemplate.ParserError {
                 throw ParserError(filename: path, context: error.context, error: error.error)
             }
             // drop ".mustache" from path to get name

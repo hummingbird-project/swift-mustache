@@ -17,14 +17,14 @@ import XCTest
 
 final class ErrorTests: XCTestCase {
     func testSectionCloseNameIncorrect() {
-        XCTAssertThrowsError(try HBMustacheTemplate(string: """
+        XCTAssertThrowsError(try MustacheTemplate(string: """
         {{#test}}
         {{.}}
         {{/test2}}
         """)) { error in
             switch error {
-            case let error as HBMustacheTemplate.ParserError:
-                XCTAssertEqual(error.error as? HBMustacheTemplate.Error, .sectionCloseNameIncorrect)
+            case let error as MustacheTemplate.ParserError:
+                XCTAssertEqual(error.error as? MustacheTemplate.Error, .sectionCloseNameIncorrect)
                 XCTAssertEqual(error.context.line, "{{/test2}}")
                 XCTAssertEqual(error.context.lineNumber, 3)
                 XCTAssertEqual(error.context.columnNumber, 4)
@@ -36,14 +36,14 @@ final class ErrorTests: XCTestCase {
     }
 
     func testUnfinishedName() {
-        XCTAssertThrowsError(try HBMustacheTemplate(string: """
+        XCTAssertThrowsError(try MustacheTemplate(string: """
         {{#test}}
         {{name}
         {{/test2}}
         """)) { error in
             switch error {
-            case let error as HBMustacheTemplate.ParserError:
-                XCTAssertEqual(error.error as? HBMustacheTemplate.Error, .unfinishedName)
+            case let error as MustacheTemplate.ParserError:
+                XCTAssertEqual(error.error as? MustacheTemplate.Error, .unfinishedName)
                 XCTAssertEqual(error.context.line, "{{name}")
                 XCTAssertEqual(error.context.lineNumber, 2)
                 XCTAssertEqual(error.context.columnNumber, 7)
@@ -55,13 +55,13 @@ final class ErrorTests: XCTestCase {
     }
 
     func testExpectedSectionEnd() {
-        XCTAssertThrowsError(try HBMustacheTemplate(string: """
+        XCTAssertThrowsError(try MustacheTemplate(string: """
         {{#test}}
         {{.}}
         """)) { error in
             switch error {
-            case let error as HBMustacheTemplate.ParserError:
-                XCTAssertEqual(error.error as? HBMustacheTemplate.Error, .expectedSectionEnd)
+            case let error as MustacheTemplate.ParserError:
+                XCTAssertEqual(error.error as? MustacheTemplate.Error, .expectedSectionEnd)
                 XCTAssertEqual(error.context.line, "{{.}}")
                 XCTAssertEqual(error.context.lineNumber, 2)
                 XCTAssertEqual(error.context.columnNumber, 6)
@@ -73,14 +73,14 @@ final class ErrorTests: XCTestCase {
     }
 
     func testInvalidSetDelimiter() {
-        XCTAssertThrowsError(try HBMustacheTemplate(string: """
+        XCTAssertThrowsError(try MustacheTemplate(string: """
         {{=<% %>=}}
         <%.%>
         <%={{}}=%>
         """)) { error in
             switch error {
-            case let error as HBMustacheTemplate.ParserError:
-                XCTAssertEqual(error.error as? HBMustacheTemplate.Error, .invalidSetDelimiter)
+            case let error as MustacheTemplate.ParserError:
+                XCTAssertEqual(error.error as? MustacheTemplate.Error, .invalidSetDelimiter)
                 XCTAssertEqual(error.context.line, "<%={{}}=%>")
                 XCTAssertEqual(error.context.lineNumber, 3)
                 XCTAssertEqual(error.context.columnNumber, 4)

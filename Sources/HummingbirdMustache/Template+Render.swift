@@ -14,14 +14,14 @@
 
 import Foundation
 
-extension HBMustacheTemplate {
+extension MustacheTemplate {
     /// Render template using object
     /// - Parameters:
     ///   - stack: Object
     ///   - context: Context that render is occurring in. Contains information about position in sequence
     ///   - indentation: indentation of partial
     /// - Returns: Rendered text
-    func render(context: HBMustacheContext) -> String {
+    func render(context: MustacheContext) -> String {
         var string = ""
         var context = context
 
@@ -42,15 +42,15 @@ extension HBMustacheTemplate {
         return string
     }
 
-    func renderToken(_ token: Token, context: inout HBMustacheContext) -> String {
+    func renderToken(_ token: Token, context: inout MustacheContext) -> String {
         switch token {
         case .text(let text):
             return text
         case .variable(let variable, let transform):
             if let child = getChild(named: variable, transform: transform, context: context) {
-                if let template = child as? HBMustacheTemplate {
+                if let template = child as? MustacheTemplate {
                     return template.render(context: context)
-                } else if let renderable = child as? HBMustacheCustomRenderable {
+                } else if let renderable = child as? MustacheCustomRenderable {
                     return context.contentType.escapeText(renderable.renderText)
                 } else {
                     return context.contentType.escapeText(String(describing: child))
@@ -58,7 +58,7 @@ extension HBMustacheTemplate {
             }
         case .unescapedVariable(let variable, let transform):
             if let child = getChild(named: variable, transform: transform, context: context) {
-                if let renderable = child as? HBMustacheCustomRenderable {
+                if let renderable = child as? MustacheCustomRenderable {
                     return renderable.renderText
                 } else {
                     return String(describing: child)
@@ -96,15 +96,15 @@ extension HBMustacheTemplate {
     ///   - parent: Current object being rendered
     ///   - template: Template to render with
     /// - Returns: Rendered text
-    func renderSection(_ child: Any?, with template: HBMustacheTemplate, context: HBMustacheContext) -> String {
+    func renderSection(_ child: Any?, with template: MustacheTemplate, context: MustacheContext) -> String {
         switch child {
-        case let array as HBMustacheSequence:
+        case let array as MustacheSequence:
             return array.renderSection(with: template, context: context)
         case let bool as Bool:
             return bool ? template.render(context: context) : ""
-        case let lambda as HBMustacheLambda:
+        case let lambda as MustacheLambda:
             return lambda.run(context.stack.last!, template)
-        case let null as HBMustacheCustomRenderable where null.isNull == true:
+        case let null as MustacheCustomRenderable where null.isNull == true:
             return ""
         case .some(let value):
             return template.render(context: context.withObject(value))
@@ -119,13 +119,13 @@ extension HBMustacheTemplate {
     ///   - parent: Current object being rendered
     ///   - template: Template to render with
     /// - Returns: Rendered text
-    func renderInvertedSection(_ child: Any?, with template: HBMustacheTemplate, context: HBMustacheContext) -> String {
+    func renderInvertedSection(_ child: Any?, with template: MustacheTemplate, context: MustacheContext) -> String {
         switch child {
-        case let array as HBMustacheSequence:
+        case let array as MustacheSequence:
             return array.renderInvertedSection(with: template, context: context)
         case let bool as Bool:
             return bool ? "" : template.render(context: context)
-        case let null as HBMustacheCustomRenderable where null.isNull == true:
+        case let null as MustacheCustomRenderable where null.isNull == true:
             return template.render(context: context)
         case .some:
             return ""
@@ -135,9 +135,9 @@ extension HBMustacheTemplate {
     }
 
     /// Get child object from variable name
-    func getChild(named name: String, transform: String?, context: HBMustacheContext) -> Any? {
+    func getChild(named name: String, transform: String?, context: MustacheContext) -> Any? {
         func _getImmediateChild(named name: String, from object: Any) -> Any? {
-            if let customBox = object as? HBMustacheParent {
+            if let customBox = object as? MustacheParent {
                 return customBox.child(named: name)
             } else {
                 let mirror = Mirror(reflecting: object)
@@ -183,7 +183,7 @@ extension HBMustacheTemplate {
         // if we want to run a transform and the current child can have transforms applied to it then
         // run transform on the current child
         if let transform {
-            if let runnable = child as? HBMustacheTransformable {
+            if let runnable = child as? MustacheTransformable {
                 return runnable.transform(transform)
             }
             return nil

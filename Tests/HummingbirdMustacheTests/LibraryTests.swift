@@ -24,7 +24,7 @@ final class LibraryTests: XCTestCase {
         try mustache.write(to: URL(fileURLWithPath: "templates/test.mustache"))
         defer { XCTAssertNoThrow(try fs.removeItem(atPath: "templates/test.mustache")) }
 
-        let library = try await HBMustacheLibrary(directory: "./templates")
+        let library = try await MustacheLibrary(directory: "./templates")
         let object = ["value": ["value1", "value2"]]
         XCTAssertEqual(library.render(object, withTemplate: "test"), "<test><value>value1</value><value>value2</value></test>")
     }
@@ -42,7 +42,7 @@ final class LibraryTests: XCTestCase {
             XCTAssertNoThrow(try fs.removeItem(atPath: "templates"))
         }
 
-        let library = try await HBMustacheLibrary(directory: "./templates")
+        let library = try await MustacheLibrary(directory: "./templates")
         let object = ["value": ["value1", "value2"]]
         XCTAssertEqual(library.render(object, withTemplate: "test"), "<test><value>value1</value><value>value2</value></test>")
     }
@@ -63,8 +63,8 @@ final class LibraryTests: XCTestCase {
         defer { XCTAssertNoThrow(try fs.removeItem(atPath: "templates/error.mustache")) }
 
         do {
-            _ = try await HBMustacheLibrary(directory: "./templates")
-        } catch let parserError as HBMustacheLibrary.ParserError {
+            _ = try await MustacheLibrary(directory: "./templates")
+        } catch let parserError as MustacheLibrary.ParserError {
             XCTAssertEqual(parserError.filename, "error.mustache")
             XCTAssertEqual(parserError.context.line, "{{{name}}")
             XCTAssertEqual(parserError.context.lineNumber, 2)

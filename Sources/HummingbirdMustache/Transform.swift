@@ -27,7 +27,7 @@
 /// ```
 /// {{#reversed(sequence)}}{{.}}{{\reversed(sequence)}}
 /// ```
-public protocol HBMustacheTransformable {
+public protocol MustacheTransformable {
     func transform(_ name: String) -> Any?
 }
 
@@ -55,15 +55,15 @@ public extension StringProtocol {
     }
 }
 
-extension String: HBMustacheTransformable {}
-extension Substring: HBMustacheTransformable {}
+extension String: MustacheTransformable {}
+extension Substring: MustacheTransformable {}
 
 /// Protocol for sequence that can be sorted
-private protocol HBComparableSequence {
+private protocol ComparableSequence {
     func comparableTransform(_ name: String) -> Any?
 }
 
-extension Array: HBMustacheTransformable {
+extension Array: MustacheTransformable {
     /// Transform Array.
     ///
     /// Transforms available are `first`, `last`, `reversed`, `count` and for arrays
@@ -83,7 +83,7 @@ extension Array: HBMustacheTransformable {
         case "empty":
             return isEmpty
         default:
-            if let comparableSeq = self as? HBComparableSequence {
+            if let comparableSeq = self as? ComparableSequence {
                 return comparableSeq.comparableTransform(name)
             }
             return nil
@@ -91,7 +91,7 @@ extension Array: HBMustacheTransformable {
     }
 }
 
-extension Array: HBComparableSequence where Element: Comparable {
+extension Array: ComparableSequence where Element: Comparable {
     func comparableTransform(_ name: String) -> Any? {
         switch name {
         case "sorted":
@@ -102,7 +102,7 @@ extension Array: HBComparableSequence where Element: Comparable {
     }
 }
 
-extension Dictionary: HBMustacheTransformable {
+extension Dictionary: MustacheTransformable {
     /// Transform Dictionary
     ///
     /// Transforms available are `count`, `enumerated` and for dictionaries
@@ -118,7 +118,7 @@ extension Dictionary: HBMustacheTransformable {
         case "enumerated":
             return map { (key: $0.key, value: $0.value) }
         default:
-            if let comparableSeq = self as? HBComparableSequence {
+            if let comparableSeq = self as? ComparableSequence {
                 return comparableSeq.comparableTransform(name)
             }
             return nil
@@ -126,7 +126,7 @@ extension Dictionary: HBMustacheTransformable {
     }
 }
 
-extension Dictionary: HBComparableSequence where Key: Comparable {
+extension Dictionary: ComparableSequence where Key: Comparable {
     func comparableTransform(_ name: String) -> Any? {
         switch name {
         case "sorted":
@@ -161,13 +161,13 @@ public extension FixedWidthInteger {
     }
 }
 
-extension Int: HBMustacheTransformable {}
-extension Int8: HBMustacheTransformable {}
-extension Int16: HBMustacheTransformable {}
-extension Int32: HBMustacheTransformable {}
-extension Int64: HBMustacheTransformable {}
-extension UInt: HBMustacheTransformable {}
-extension UInt8: HBMustacheTransformable {}
-extension UInt16: HBMustacheTransformable {}
-extension UInt32: HBMustacheTransformable {}
-extension UInt64: HBMustacheTransformable {}
+extension Int: MustacheTransformable {}
+extension Int8: MustacheTransformable {}
+extension Int16: MustacheTransformable {}
+extension Int32: MustacheTransformable {}
+extension Int64: MustacheTransformable {}
+extension UInt: MustacheTransformable {}
+extension UInt8: MustacheTransformable {}
+extension UInt16: MustacheTransformable {}
+extension UInt32: MustacheTransformable {}
+extension UInt64: MustacheTransformable {}

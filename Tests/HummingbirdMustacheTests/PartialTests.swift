@@ -16,132 +16,132 @@
 import XCTest
 
 final class PartialTests: XCTestCase {
-    /// Testing partials
-    func testMustacheManualExample9() throws {
-        let template = try HBMustacheTemplate(string: """
-        <h2>Names</h2>
-        {{#names}}
-          {{> user}}
-        {{/names}}
-        """)
-        let template2 = try HBMustacheTemplate(string: """
-        <strong>{{.}}</strong>
+  /// Testing partials
+  func testMustacheManualExample9() throws {
+    let template = try MustacheTemplate(string: """
+    <h2>Names</h2>
+    {{#names}}
+      {{> user}}
+    {{/names}}
+    """)
+    let template2 = try MustacheTemplate(string: """
+    <strong>{{.}}</strong>
 
-        """)
-        let library = HBMustacheLibrary(templates: ["base": template, "user": template2])
+    """)
+    let library = MustacheLibrary(templates: ["base": template, "user": template2])
 
-        let object: [String: Any] = ["names": ["john", "adam", "claire"]]
-        XCTAssertEqual(library.render(object, withTemplate: "base"), """
-        <h2>Names</h2>
-          <strong>john</strong>
-          <strong>adam</strong>
-          <strong>claire</strong>
+    let object: [String: Any] = ["names": ["john", "adam", "claire"]]
+    XCTAssertEqual(library.render(object, withTemplate: "base"), """
+    <h2>Names</h2>
+      <strong>john</strong>
+      <strong>adam</strong>
+      <strong>claire</strong>
 
-        """)
-    }
+    """)
+  }
 
-    /// Test where last line of partial generates no content. It should not add a
-    /// tab either
-    func testPartialEmptyLineTabbing() throws {
-        let template = try HBMustacheTemplate(string: """
-        <h2>Names</h2>
-        {{#names}}
-          {{> user}}
-        {{/names}}
-        Text after
+  /// Test where last line of partial generates no content. It should not add a
+  /// tab either
+  func testPartialEmptyLineTabbing() throws {
+    let template = try MustacheTemplate(string: """
+    <h2>Names</h2>
+    {{#names}}
+      {{> user}}
+    {{/names}}
+    Text after
 
-        """)
-        let template2 = try HBMustacheTemplate(string: """
-        {{^empty(.)}}
-        <strong>{{.}}</strong>
-        {{/empty(.)}}
-        {{#empty(.)}}
-        <strong>empty</strong>
-        {{/empty(.)}}
+    """)
+    let template2 = try MustacheTemplate(string: """
+    {{^empty(.)}}
+    <strong>{{.}}</strong>
+    {{/empty(.)}}
+    {{#empty(.)}}
+    <strong>empty</strong>
+    {{/empty(.)}}
 
-        """)
-        var library = HBMustacheLibrary()
-        library.register(template, named: "base")
-        library.register(template2, named: "user") // , withTemplate: String)// = HBMustacheLibrary(templates: ["base": template, "user": template2])
+    """)
+    var library = MustacheLibrary()
+    library.register(template, named: "base")
+    library.register(template2, named: "user") // , withTemplate: String)// = MustacheLibrary(templates: ["base": template, "user": template2])
 
-        let object: [String: Any] = ["names": ["john", "adam", "claire"]]
-        XCTAssertEqual(library.render(object, withTemplate: "base"), """
-        <h2>Names</h2>
-          <strong>john</strong>
-          <strong>adam</strong>
-          <strong>claire</strong>
-        Text after
+    let object: [String: Any] = ["names": ["john", "adam", "claire"]]
+    XCTAssertEqual(library.render(object, withTemplate: "base"), """
+    <h2>Names</h2>
+      <strong>john</strong>
+      <strong>adam</strong>
+      <strong>claire</strong>
+    Text after
 
-        """)
-    }
+    """)
+  }
 
-    /// Testing dynamic partials
-    func testDynamicPartials() throws {
-        let template = try HBMustacheTemplate(string: """
-        <h2>Names</h2>
-        {{partial}}
-        """)
-        let template2 = try HBMustacheTemplate(string: """
-        {{#names}}
-          <strong>{{.}}</strong>
-        {{/names}}
-        """)
-        let library = HBMustacheLibrary(templates: ["base": template])
+  /// Testing dynamic partials
+  func testDynamicPartials() throws {
+    let template = try MustacheTemplate(string: """
+    <h2>Names</h2>
+    {{partial}}
+    """)
+    let template2 = try MustacheTemplate(string: """
+    {{#names}}
+      <strong>{{.}}</strong>
+    {{/names}}
+    """)
+    let library = MustacheLibrary(templates: ["base": template])
 
-        let object: [String: Any] = ["names": ["john", "adam", "claire"], "partial": template2]
-        XCTAssertEqual(library.render(object, withTemplate: "base"), """
-        <h2>Names</h2>
-          <strong>john</strong>
-          <strong>adam</strong>
-          <strong>claire</strong>
+    let object: [String: Any] = ["names": ["john", "adam", "claire"], "partial": template2]
+    XCTAssertEqual(library.render(object, withTemplate: "base"), """
+    <h2>Names</h2>
+      <strong>john</strong>
+      <strong>adam</strong>
+      <strong>claire</strong>
 
-        """)
-    }
+    """)
+  }
 
-    /// test inheritance
-    func testInheritance() throws {
-        var library = HBMustacheLibrary()
-        try library.register(
-            """
-            <head>
-            <title>{{$title}}Default title{{/title}}</title>
-            </head>
+  /// test inheritance
+  func testInheritance() throws {
+    var library = MustacheLibrary()
+    try library.register(
+      """
+      <head>
+      <title>{{$title}}Default title{{/title}}</title>
+      </head>
 
-            """,
-            named: "header"
-        )
-        try library.register(
-            """
-            <html>
-            {{$header}}{{/header}}
-            {{$content}}{{/content}}
-            </html>
+      """,
+      named: "header"
+    )
+    try library.register(
+      """
+      <html>
+      {{$header}}{{/header}}
+      {{$content}}{{/content}}
+      </html>
 
-            """,
-            named: "base"
-        )
-        try library.register(
-            """
-            {{<base}}
-            {{$header}}
-            {{<header}}
-            {{$title}}My page title{{/title}}
-            {{/header}}
-            {{/header}}
-            {{$content}}<h1>Hello world</h1>{{/content}}
-            {{/base}}
+      """,
+      named: "base"
+    )
+    try library.register(
+      """
+      {{<base}}
+      {{$header}}
+      {{<header}}
+      {{$title}}My page title{{/title}}
+      {{/header}}
+      {{/header}}
+      {{$content}}<h1>Hello world</h1>{{/content}}
+      {{/base}}
 
-            """,
-            named: "mypage"
-        )
-        XCTAssertEqual(library.render({}, withTemplate: "mypage")!, """
-        <html>
-        <head>
-        <title>My page title</title>
-        </head>
-        <h1>Hello world</h1>
-        </html>
+      """,
+      named: "mypage"
+    )
+    XCTAssertEqual(library.render({}, withTemplate: "mypage")!, """
+    <html>
+    <head>
+    <title>My page title</title>
+    </head>
+    <h1>Hello world</h1>
+    </html>
 
-        """)
-    }
+    """)
+  }
 }

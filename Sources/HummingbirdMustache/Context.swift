@@ -13,31 +13,31 @@
 //===----------------------------------------------------------------------===//
 
 /// Context while rendering mustache tokens
-struct HBMustacheContext {
+struct MustacheContext {
     let stack: [Any]
-    let sequenceContext: HBMustacheSequenceContext?
+    let sequenceContext: MustacheSequenceContext?
     let indentation: String?
-    let inherited: [String: HBMustacheTemplate]?
-    let contentType: HBMustacheContentType
-    let library: HBMustacheLibrary?
+    let inherited: [String: MustacheTemplate]?
+    let contentType: MustacheContentType
+    let library: MustacheLibrary?
 
     /// initialize context with a single objectt
-    init(_ object: Any, library: HBMustacheLibrary? = nil) {
+    init(_ object: Any, library: MustacheLibrary? = nil) {
         self.stack = [object]
         self.sequenceContext = nil
         self.indentation = nil
         self.inherited = nil
-        self.contentType = HBHTMLContentType()
+        self.contentType = HTMLContentType()
         self.library = library
     }
 
     private init(
         stack: [Any],
-        sequenceContext: HBMustacheSequenceContext?,
+        sequenceContext: MustacheSequenceContext?,
         indentation: String?,
-        inherited: [String: HBMustacheTemplate]?,
-        contentType: HBMustacheContentType,
-        library: HBMustacheLibrary? = nil
+        inherited: [String: MustacheTemplate]?,
+        contentType: MustacheContentType,
+        library: MustacheLibrary? = nil
     ) {
         self.stack = stack
         self.sequenceContext = sequenceContext
@@ -48,7 +48,7 @@ struct HBMustacheContext {
     }
 
     /// return context with object add to stack
-    func withObject(_ object: Any) -> HBMustacheContext {
+    func withObject(_ object: Any) -> MustacheContext {
         var stack = self.stack
         stack.append(object)
         return .init(
@@ -62,13 +62,13 @@ struct HBMustacheContext {
     }
 
     /// return context with indent and parameter information for invoking a partial
-    func withPartial(indented: String?, inheriting: [String: HBMustacheTemplate]?) -> HBMustacheContext {
+    func withPartial(indented: String?, inheriting: [String: MustacheTemplate]?) -> MustacheContext {
         let indentation: String? = if let indented {
             (self.indentation ?? "") + indented
         } else {
             self.indentation
         }
-        let inherits: [String: HBMustacheTemplate]? = if let inheriting {
+        let inherits: [String: MustacheTemplate]? = if let inheriting {
             if let originalInherits = self.inherited {
                 originalInherits.merging(inheriting) { value, _ in value }
             } else {
@@ -82,13 +82,13 @@ struct HBMustacheContext {
             sequenceContext: nil,
             indentation: indentation,
             inherited: inherits,
-            contentType: HBHTMLContentType(),
+            contentType: HTMLContentType(),
             library: self.library
         )
     }
 
     /// return context with sequence info and sequence element added to stack
-    func withSequence(_ object: Any, sequenceContext: HBMustacheSequenceContext) -> HBMustacheContext {
+    func withSequence(_ object: Any, sequenceContext: MustacheSequenceContext) -> MustacheContext {
         var stack = self.stack
         stack.append(object)
         return .init(
@@ -102,7 +102,7 @@ struct HBMustacheContext {
     }
 
     /// return context with sequence info and sequence element added to stack
-    func withContentType(_ contentType: HBMustacheContentType) -> HBMustacheContext {
+    func withContentType(_ contentType: MustacheContentType) -> MustacheContext {
         return .init(
             stack: self.stack,
             sequenceContext: self.sequenceContext,

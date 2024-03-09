@@ -21,30 +21,30 @@
 /// ```
 /// struct Object {
 ///     let name: String
-///     let wrapped: HBMustacheLambda
+///     let wrapped: MustacheLambda
 /// }
 /// let willy = Object(name: "Willy", wrapped: .init({ object, template in
 ///     return "<b>\(template.render(object))</b>"
 /// }))
 /// let mustache = "{{#wrapped}}{{name}} is awesome.{{/wrapped}}"
-/// let template = try HBMustacheTemplate(string: mustache)
+/// let template = try MustacheTemplate(string: mustache)
 /// let output = template.render(willy)
 /// print(output) // <b>Willy is awesome</b>
 /// ```
 ///
-public struct HBMustacheLambda {
+public struct MustacheLambda {
     /// lambda callback
-    public typealias Callback = (Any, HBMustacheTemplate) -> String
+    public typealias Callback = (Any, MustacheTemplate) -> String
 
     let callback: Callback
 
-    /// Initialize `HBMustacheLambda`
+    /// Initialize `MustacheLambda`
     /// - Parameter cb: function to be called by lambda
     public init(_ cb: @escaping Callback) {
         self.callback = cb
     }
 
-    internal func run(_ object: Any, _ template: HBMustacheTemplate) -> String {
+    internal func run(_ object: Any, _ template: MustacheTemplate) -> String {
         return self.callback(object, template)
     }
 }
