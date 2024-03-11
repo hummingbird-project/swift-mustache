@@ -13,10 +13,10 @@
 //===----------------------------------------------------------------------===//
 
 /// Class holding Mustache template
-public struct HBMustacheTemplate: Sendable {
+public struct MustacheTemplate: Sendable {
     /// Initialize template
     /// - Parameter string: Template text
-    /// - Throws: HBMustacheTemplate.Error
+    /// - Throws: MustacheTemplate.Error
     public init(string: String) throws {
         self.tokens = try Self.parse(string)
     }
@@ -24,7 +24,7 @@ public struct HBMustacheTemplate: Sendable {
     /// Render object using this template
     /// - Parameter object: Object to render
     /// - Returns: Rendered text
-    public func render(_ object: Any, library: HBMustacheLibrary? = nil) -> String {
+    public func render(_ object: Any, library: MustacheLibrary? = nil) -> String {
         self.render(context: .init(object, library: library))
     }
 
@@ -36,11 +36,11 @@ public struct HBMustacheTemplate: Sendable {
         case text(String)
         case variable(name: String, transform: String? = nil)
         case unescapedVariable(name: String, transform: String? = nil)
-        case section(name: String, transform: String? = nil, template: HBMustacheTemplate)
-        case invertedSection(name: String, transform: String? = nil, template: HBMustacheTemplate)
-        case inheritedSection(name: String, template: HBMustacheTemplate)
-        case partial(String, indentation: String?, inherits: [String: HBMustacheTemplate]?)
-        case contentType(HBMustacheContentType)
+        case section(name: String, transform: String? = nil, template: MustacheTemplate)
+        case invertedSection(name: String, transform: String? = nil, template: MustacheTemplate)
+        case inheritedSection(name: String, template: MustacheTemplate)
+        case partial(String, indentation: String?, inherits: [String: MustacheTemplate]?)
+        case contentType(MustacheContentType)
     }
 
     var tokens: [Token]

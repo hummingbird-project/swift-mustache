@@ -18,7 +18,7 @@
 /// ```
 /// {{#sequence}}{{>entry}}{{/sequence}}
 /// ```
-public struct HBMustacheLibrary: Sendable {
+public struct MustacheLibrary: Sendable {
     /// Initialize empty library
     public init() {
         self.templates = [:]
@@ -30,7 +30,7 @@ public struct HBMustacheLibrary: Sendable {
     /// the folder is recursive and templates in subfolders will be registered with the name `subfolder/template`.
     /// - Parameter directory: Directory to look for mustache templates
     /// - Parameter extension: Extension of files to look for
-    public init(templates: [String: HBMustacheTemplate]) {
+    public init(templates: [String: MustacheTemplate]) {
         self.templates = templates
     }
 
@@ -48,7 +48,7 @@ public struct HBMustacheLibrary: Sendable {
     /// - Parameters:
     ///   - template: Template
     ///   - name: Name of template
-    public mutating func register(_ template: HBMustacheTemplate, named name: String) {
+    public mutating func register(_ template: MustacheTemplate, named name: String) {
         self.templates[name] = template
     }
 
@@ -57,14 +57,14 @@ public struct HBMustacheLibrary: Sendable {
     ///   - mustache: Mustache text
     ///   - name: Name of template
     public mutating func register(_ mustache: String, named name: String) throws {
-        let template = try HBMustacheTemplate(string: mustache)
+        let template = try MustacheTemplate(string: mustache)
         self.templates[name] = template
     }
 
     /// Return template registed with name
     /// - Parameter name: name to search for
     /// - Returns: Template
-    public func getTemplate(named name: String) -> HBMustacheTemplate? {
+    public func getTemplate(named name: String) -> MustacheTemplate? {
         self.templates[name]
     }
 
@@ -83,10 +83,10 @@ public struct HBMustacheLibrary: Sendable {
         /// File error occurred in
         public let filename: String
         /// Context (line, linenumber and column number)
-        public let context: HBParser.Context
+        public let context: MustacheParserContext
         /// Actual error that occurred
         public let error: Error
     }
 
-    private var templates: [String: HBMustacheTemplate]
+    private var templates: [String: MustacheTemplate]
 }

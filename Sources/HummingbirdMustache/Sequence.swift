@@ -13,18 +13,18 @@
 //===----------------------------------------------------------------------===//
 
 /// Protocol for objects that can be rendered as a sequence in Mustache
-protocol HBMustacheSequence {
+protocol MustacheSequence {
     /// Render section using template
-    func renderSection(with template: HBMustacheTemplate, context: HBMustacheContext) -> String
+    func renderSection(with template: MustacheTemplate, context: MustacheContext) -> String
     /// Render inverted section using template
-    func renderInvertedSection(with template: HBMustacheTemplate, context: HBMustacheContext) -> String
+    func renderInvertedSection(with template: MustacheTemplate, context: MustacheContext) -> String
 }
 
 extension Sequence {
     /// Render section using template
-    func renderSection(with template: HBMustacheTemplate, context: HBMustacheContext) -> String {
+    func renderSection(with template: MustacheTemplate, context: MustacheContext) -> String {
         var string = ""
-        var sequenceContext = HBMustacheSequenceContext(first: true)
+        var sequenceContext = MustacheSequenceContext(first: true)
 
         var iterator = makeIterator()
         guard var currentObject = iterator.next() else { return "" }
@@ -43,7 +43,7 @@ extension Sequence {
     }
 
     /// Render inverted section using template
-    func renderInvertedSection(with template: HBMustacheTemplate, context: HBMustacheContext) -> String {
+    func renderInvertedSection(with template: MustacheTemplate, context: MustacheContext) -> String {
         var iterator = makeIterator()
         if iterator.next() == nil {
             return template.render(context: context.withObject(self))
@@ -52,6 +52,6 @@ extension Sequence {
     }
 }
 
-extension Array: HBMustacheSequence {}
-extension Set: HBMustacheSequence {}
-extension ReversedCollection: HBMustacheSequence {}
+extension Array: MustacheSequence {}
+extension Set: MustacheSequence {}
+extension ReversedCollection: MustacheSequence {}

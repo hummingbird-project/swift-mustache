@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 /// Context that current object inside a sequence is being rendered in. Only relevant when rendering a sequence
-struct HBMustacheSequenceContext: HBMustacheTransformable {
+struct MustacheSequenceContext: MustacheTransformable {
     var first: Bool
     var last: Bool
     var index: Int
@@ -24,7 +24,7 @@ struct HBMustacheSequenceContext: HBMustacheTransformable {
         self.index = 0
     }
 
-    /// Transform `HBMustacheContext`. These are available when processing elements
+    /// Transform `MustacheContext`. These are available when processing elements
     /// of a sequence.
     ///
     /// Format your mustache as follows to accept them. They look like a function without any arguments

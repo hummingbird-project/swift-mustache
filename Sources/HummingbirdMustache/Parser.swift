@@ -15,7 +15,7 @@
 import Foundation
 
 /// Reader object for parsing String buffers
-public struct HBParser {
+struct Parser {
     enum Error: Swift.Error {
         case overflow
     }
@@ -42,12 +42,12 @@ public struct HBParser {
     private(set) var position: String.Index
 }
 
-extension HBParser {
+extension Parser {
     /// Return current character
     /// - Throws: .overflow
     /// - Returns: Current character
     mutating func character() throws -> Character {
-        guard !self.reachedEnd() else { throw HBParser.Error.overflow }
+        guard !self.reachedEnd() else { throw Parser.Error.overflow }
         let c = unsafeCurrent()
         unsafeAdvance()
         return c
@@ -93,7 +93,7 @@ extension HBParser {
     /// - Throws: .overflow
     /// - Returns: The string read from the buffer
     mutating func read(count: Int) throws -> Substring {
-        guard self.buffer.distance(from: self.position, to: self.buffer.endIndex) >= count else { throw HBParser.Error.overflow }
+        guard self.buffer.distance(from: self.position, to: self.buffer.endIndex) >= count else { throw Parser.Error.overflow }
         let end = self.buffer.index(self.position, offsetBy: count)
         let subString = self.buffer[self.position..<end]
         unsafeAdvance(by: count)
@@ -114,7 +114,7 @@ extension HBParser {
         }
         if throwOnOverflow {
             unsafeSetPosition(startIndex)
-            throw HBParser.Error.overflow
+            throw Parser.Error.overflow
         }
         return self.buffer[startIndex..<self.position]
     }
@@ -170,7 +170,7 @@ extension HBParser {
         }
         if throwOnOverflow {
             unsafeSetPosition(startIndex)
-            throw HBParser.Error.overflow
+            throw Parser.Error.overflow
         }
         return self.buffer[startIndex..<self.position]
     }
@@ -287,16 +287,16 @@ extension HBParser {
     }
 }
 
-extension HBParser {
-    /// context used in parser error
-    public struct Context {
-        public let line: String
-        public let lineNumber: Int
-        public let columnNumber: Int
-    }
+/// context used in parser error
+public struct MustacheParserContext {
+    public let line: String
+    public let lineNumber: Int
+    public let columnNumber: Int
+}
 
+extension Parser {
     /// Return context of current position (line, lineNumber, columnNumber)
-    func getContext() -> Context {
+    func getContext() -> MustacheParserContext {
         var parser = self
         var columnNumber = 0
         while !parser.atStart() {
@@ -316,12 +316,12 @@ extension HBParser {
         let textBefore = buffer[buffer.startIndex..<self.position]
         let lineNumber = textBefore.filter(\.isNewline).count
 
-        return Context(line: String(line), lineNumber: lineNumber + 1, columnNumber: columnNumber + 1)
+        return MustacheParserContext(line: String(line), lineNumber: lineNumber + 1, columnNumber: columnNumber + 1)
     }
 }
 
-/// Public versions of internal functions which include tests for overflow
-extension HBParser {
+/// versions of internal functions which include tests for overflow
+extension Parser {
     /// Return the character at the current position
     /// - Throws: .overflow
     /// - Returns: Character
@@ -333,14 +333,14 @@ extension HBParser {
     /// Move forward one character
     /// - Throws: .overflow
     mutating func advance() throws {
-        guard !self.reachedEnd() else { throw HBParser.Error.overflow }
+        guard !self.reachedEnd() else { throw Parser.Error.overflow }
         return unsafeAdvance()
     }
 
     /// Move back one character
     /// - Throws: .overflow
     mutating func retreat() throws {
-        guard self.position != self.buffer.startIndex else { throw HBParser.Error.overflow }
+        guard self.position != self.buffer.startIndex else { throw Parser.Error.overflow }
         return unsafeRetreat()
     }
 
@@ -348,7 +348,7 @@ extension HBParser {
     /// - Parameter amount: number of characters to move forward
     /// - Throws: .overflow
     mutating func advance(by amount: Int) throws {
-        guard self.buffer.distance(from: self.position, to: self.buffer.endIndex) >= amount else { throw HBParser.Error.overflow }
+        guard self.buffer.distance(from: self.position, to: self.buffer.endIndex) >= amount else { throw Parser.Error.overflow }
         return unsafeAdvance(by: amount)
     }
 
@@ -356,18 +356,18 @@ extension HBParser {
     /// - Parameter amount: number of characters to move back
     /// - Throws: .overflow
     mutating func retreat(by amount: Int) throws {
-        guard self.buffer.distance(from: self.buffer.startIndex, to: self.position) >= amount else { throw HBParser.Error.overflow }
+        guard self.buffer.distance(from: self.buffer.startIndex, to: self.position) >= amount else { throw Parser.Error.overflow }
         return unsafeRetreat(by: amount)
     }
 
     mutating func setPosition(_ position: String.Index) throws {
-        guard position <= self.buffer.endIndex else { throw HBParser.Error.overflow }
+        guard position <= self.buffer.endIndex else { throw Parser.Error.overflow }
         unsafeSetPosition(position)
     }
 }
 
 // unsafe versions without checks
-extension HBParser {
+extension Parser {
     func unsafeCurrent() -> Character {
         return self.buffer[self.position]
     }

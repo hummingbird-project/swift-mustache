@@ -17,7 +17,7 @@ import XCTest
 
 final class TransformTests: XCTestCase {
     func testLowercased() throws {
-        let template = try HBMustacheTemplate(string: """
+        let template = try MustacheTemplate(string: """
         {{ lowercased(name) }}
         """)
         let object: [String: Any] = ["name": "Test"]
@@ -25,7 +25,7 @@ final class TransformTests: XCTestCase {
     }
 
     func testUppercased() throws {
-        let template = try HBMustacheTemplate(string: """
+        let template = try MustacheTemplate(string: """
         {{ uppercased(name) }}
         """)
         let object: [String: Any] = ["name": "Test"]
@@ -33,7 +33,7 @@ final class TransformTests: XCTestCase {
     }
 
     func testNewline() throws {
-        let template = try HBMustacheTemplate(string: """
+        let template = try MustacheTemplate(string: """
         {{#repo}}
         <b>{{name}}</b>
         {{/repo}}
@@ -49,7 +49,7 @@ final class TransformTests: XCTestCase {
     }
 
     func testFirstLast() throws {
-        let template = try HBMustacheTemplate(string: """
+        let template = try MustacheTemplate(string: """
         {{#repo}}
         <b>{{#first()}}first: {{/first()}}{{#last()}}last: {{/last()}}{{ name }}</b>
         {{/repo}}
@@ -65,7 +65,7 @@ final class TransformTests: XCTestCase {
     }
 
     func testIndex() throws {
-        let template = try HBMustacheTemplate(string: """
+        let template = try MustacheTemplate(string: """
         {{#repo}}
         <b>{{#index()}}{{plusone(.)}}{{/index()}}) {{ name }}</b>
         {{/repo}}
@@ -81,7 +81,7 @@ final class TransformTests: XCTestCase {
     }
 
     func testEvenOdd() throws {
-        let template = try HBMustacheTemplate(string: """
+        let template = try MustacheTemplate(string: """
         {{#repo}}
         <b>{{index()}}) {{#even()}}even {{/even()}}{{#odd()}}odd {{/odd()}}{{ name }}</b>
         {{/repo}}
@@ -97,7 +97,7 @@ final class TransformTests: XCTestCase {
     }
 
     func testReversed() throws {
-        let template = try HBMustacheTemplate(string: """
+        let template = try MustacheTemplate(string: """
         {{#reversed(repo)}}
           <b>{{ name }}</b>
         {{/reversed(repo)}}
@@ -113,7 +113,7 @@ final class TransformTests: XCTestCase {
     }
 
     func testArrayIndex() throws {
-        let template = try HBMustacheTemplate(string: """
+        let template = try MustacheTemplate(string: """
         {{#repo}}
           <b>{{ index() }}) {{ name }}</b>
         {{/repo}}
@@ -128,7 +128,7 @@ final class TransformTests: XCTestCase {
     }
 
     func testArraySorted() throws {
-        let template = try HBMustacheTemplate(string: """
+        let template = try MustacheTemplate(string: """
         {{#sorted(repo)}}
           <b>{{ index() }}) {{ . }}</b>
         {{/sorted(repo)}}
@@ -143,7 +143,7 @@ final class TransformTests: XCTestCase {
     }
 
     func testDictionaryEmpty() throws {
-        let template = try HBMustacheTemplate(string: """
+        let template = try MustacheTemplate(string: """
         {{#empty(array)}}Array{{/empty(array)}}{{#empty(dictionary)}}Dictionary{{/empty(dictionary)}}
         """)
         let object: [String: Any] = ["array": [], "dictionary": [:]]
@@ -152,12 +152,12 @@ final class TransformTests: XCTestCase {
 
     func testListOutput() throws {
         let object = [1, 2, 3, 4]
-        let template = try HBMustacheTemplate(string: "{{#.}}{{.}}{{^last()}}, {{/last()}}{{/.}}")
+        let template = try MustacheTemplate(string: "{{#.}}{{.}}{{^last()}}, {{/last()}}{{/.}}")
         XCTAssertEqual(template.render(object), "1, 2, 3, 4")
     }
 
     func testDictionaryEnumerated() throws {
-        let template = try HBMustacheTemplate(string: """
+        let template = try MustacheTemplate(string: """
         {{#enumerated(.)}}<b>{{ key }} = {{ value }}</b>{{/enumerated(.)}}
         """)
         let object: [String: Any] = ["one": 1, "two": 2]
@@ -166,7 +166,7 @@ final class TransformTests: XCTestCase {
     }
 
     func testDictionarySortedByKey() throws {
-        let template = try HBMustacheTemplate(string: """
+        let template = try MustacheTemplate(string: """
         {{#sorted(.)}}<b>{{ key }} = {{ value }}</b>{{/sorted(.)}}
         """)
         let object: [String: Any] = ["one": 1, "two": 2, "three": 3]

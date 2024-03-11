@@ -17,50 +17,50 @@ import XCTest
 
 final class TemplateRendererTests: XCTestCase {
     func testText() throws {
-        let template = try HBMustacheTemplate(string: "test text")
+        let template = try MustacheTemplate(string: "test text")
         XCTAssertEqual(template.render("test"), "test text")
     }
 
     func testStringVariable() throws {
-        let template = try HBMustacheTemplate(string: "test {{.}}")
+        let template = try MustacheTemplate(string: "test {{.}}")
         XCTAssertEqual(template.render("text"), "test text")
     }
 
     func testIntegerVariable() throws {
-        let template = try HBMustacheTemplate(string: "test {{.}}")
+        let template = try MustacheTemplate(string: "test {{.}}")
         XCTAssertEqual(template.render(101), "test 101")
     }
 
     func testDictionary() throws {
-        let template = try HBMustacheTemplate(string: "test {{value}} {{bool}}")
+        let template = try MustacheTemplate(string: "test {{value}} {{bool}}")
         XCTAssertEqual(template.render(["value": "test2", "bool": true]), "test test2 true")
     }
 
     func testArraySection() throws {
-        let template = try HBMustacheTemplate(string: "test {{#value}}*{{.}}{{/value}}")
+        let template = try MustacheTemplate(string: "test {{#value}}*{{.}}{{/value}}")
         XCTAssertEqual(template.render(["value": ["test2", "bool"]]), "test *test2*bool")
         XCTAssertEqual(template.render(["value": ["test2"]]), "test *test2")
         XCTAssertEqual(template.render(["value": []]), "test ")
     }
 
     func testBooleanSection() throws {
-        let template = try HBMustacheTemplate(string: "test {{#.}}Yep{{/.}}")
+        let template = try MustacheTemplate(string: "test {{#.}}Yep{{/.}}")
         XCTAssertEqual(template.render(true), "test Yep")
         XCTAssertEqual(template.render(false), "test ")
     }
 
     func testIntegerSection() throws {
-        let template = try HBMustacheTemplate(string: "test {{#.}}{{.}}{{/.}}")
+        let template = try MustacheTemplate(string: "test {{#.}}{{.}}{{/.}}")
         XCTAssertEqual(template.render(23), "test 23")
     }
 
     func testStringSection() throws {
-        let template = try HBMustacheTemplate(string: "test {{#.}}{{.}}{{/.}}")
+        let template = try MustacheTemplate(string: "test {{#.}}{{.}}{{/.}}")
         XCTAssertEqual(template.render("Hello"), "test Hello")
     }
 
     func testInvertedSection() throws {
-        let template = try HBMustacheTemplate(string: "test {{^.}}Inverted{{/.}}")
+        let template = try MustacheTemplate(string: "test {{^.}}Inverted{{/.}}")
         XCTAssertEqual(template.render(true), "test ")
         XCTAssertEqual(template.render(false), "test Inverted")
     }
@@ -69,7 +69,7 @@ final class TemplateRendererTests: XCTestCase {
         struct Test {
             let string: String
         }
-        let template = try HBMustacheTemplate(string: "test {{string}}")
+        let template = try MustacheTemplate(string: "test {{string}}")
         XCTAssertEqual(template.render(Test(string: "string")), "test string")
     }
 
@@ -77,7 +77,7 @@ final class TemplateRendererTests: XCTestCase {
         struct Test {
             let string: String?
         }
-        let template = try HBMustacheTemplate(string: "test {{string}}")
+        let template = try MustacheTemplate(string: "test {{string}}")
         XCTAssertEqual(template.render(Test(string: "string")), "test string")
         XCTAssertEqual(template.render(Test(string: nil)), "test ")
     }
@@ -86,10 +86,10 @@ final class TemplateRendererTests: XCTestCase {
         struct Test {
             let string: String?
         }
-        let template = try HBMustacheTemplate(string: "test {{#string}}*{{.}}{{/string}}")
+        let template = try MustacheTemplate(string: "test {{#string}}*{{.}}{{/string}}")
         XCTAssertEqual(template.render(Test(string: "string")), "test *string")
         XCTAssertEqual(template.render(Test(string: nil)), "test ")
-        let template2 = try HBMustacheTemplate(string: "test {{^string}}*{{/string}}")
+        let template2 = try MustacheTemplate(string: "test {{^string}}*{{/string}}")
         XCTAssertEqual(template2.render(Test(string: "string")), "test ")
         XCTAssertEqual(template2.render(Test(string: nil)), "test *")
     }
@@ -98,7 +98,7 @@ final class TemplateRendererTests: XCTestCase {
         struct Test {
             let string: String?
         }
-        let template = try HBMustacheTemplate(string: "test {{#.}}{{string}}{{/.}}")
+        let template = try MustacheTemplate(string: "test {{#.}}{{string}}{{/.}}")
         XCTAssertEqual(template.render([Test(string: "string")]), "test string")
     }
 
@@ -106,7 +106,7 @@ final class TemplateRendererTests: XCTestCase {
         struct Test {
             let string: String?
         }
-        let template = try HBMustacheTemplate(string: "test {{#.}}{{#string}}*{{.}}{{/string}}{{/.}}")
+        let template = try MustacheTemplate(string: "test {{#.}}{{#string}}*{{.}}{{/string}}{{/.}}")
         XCTAssertEqual(template.render([Test(string: "string")]), "test *string")
     }
 
@@ -118,20 +118,20 @@ final class TemplateRendererTests: XCTestCase {
             let test: SubTest
         }
 
-        let template = try HBMustacheTemplate(string: "test {{test.string}}")
+        let template = try MustacheTemplate(string: "test {{test.string}}")
         XCTAssertEqual(template.render(Test(test: .init(string: "sub"))), "test sub")
     }
 
     func testTextEscaping() throws {
-        let template1 = try HBMustacheTemplate(string: "{{% CONTENT_TYPE:TEXT}}{{.}}")
+        let template1 = try MustacheTemplate(string: "{{% CONTENT_TYPE:TEXT}}{{.}}")
         XCTAssertEqual(template1.render("<>"), "<>")
-        let template2 = try HBMustacheTemplate(string: "{{% CONTENT_TYPE:HTML}}{{.}}")
+        let template2 = try MustacheTemplate(string: "{{% CONTENT_TYPE:HTML}}{{.}}")
         XCTAssertEqual(template2.render("<>"), "&lt;&gt;")
     }
 
     func testStopClimbingStack() throws {
-        let template1 = try HBMustacheTemplate(string: "{{#test}}{{name}}{{/test}}")
-        let template2 = try HBMustacheTemplate(string: "{{#test}}{{.name}}{{/test}}")
+        let template1 = try MustacheTemplate(string: "{{#test}}{{name}}{{/test}}")
+        let template2 = try MustacheTemplate(string: "{{#test}}{{.name}}{{/test}}")
         let object: [String: Any] = ["test": [:], "name": "John"]
         let object2: [String: Any] = ["test": ["name": "Jane"], "name": "John"]
         XCTAssertEqual(template1.render(object), "John")
@@ -141,7 +141,7 @@ final class TemplateRendererTests: XCTestCase {
 
     /// variables
     func testMustacheManualExample1() throws {
-        let template = try HBMustacheTemplate(string: """
+        let template = try MustacheTemplate(string: """
         Hello {{name}}
         You have just won {{value}} dollars!
         {{#in_ca}}
@@ -159,7 +159,7 @@ final class TemplateRendererTests: XCTestCase {
 
     /// test esacped and unescaped text
     func testMustacheManualExample2() throws {
-        let template = try HBMustacheTemplate(string: """
+        let template = try MustacheTemplate(string: """
         *{{name}}
         *{{age}}
         *{{company}}
@@ -176,7 +176,7 @@ final class TemplateRendererTests: XCTestCase {
 
     /// test boolean
     func testMustacheManualExample3() throws {
-        let template = try HBMustacheTemplate(string: """
+        let template = try MustacheTemplate(string: """
         Shown.
         {{#person}}
           Never shown!
@@ -191,7 +191,7 @@ final class TemplateRendererTests: XCTestCase {
 
     /// test non-empty lists
     func testMustacheManualExample4() throws {
-        let template = try HBMustacheTemplate(string: """
+        let template = try MustacheTemplate(string: """
         {{#repo}}
           <b>{{name}}</b>
         {{/repo}}
@@ -207,13 +207,13 @@ final class TemplateRendererTests: XCTestCase {
 
     /// test lambdas
     func testMustacheManualExample5() throws {
-        let template = try HBMustacheTemplate(string: """
+        let template = try MustacheTemplate(string: """
         {{#wrapped}}{{name}} is awesome.{{/wrapped}}
         """)
-        func wrapped(object: Any, template: HBMustacheTemplate) -> String {
+        func wrapped(object: Any, template: MustacheTemplate) -> String {
             return "<b>\(template.render(object))</b>"
         }
-        let object: [String: Any] = ["name": "Willy", "wrapped": HBMustacheLambda(wrapped)]
+        let object: [String: Any] = ["name": "Willy", "wrapped": MustacheLambda(wrapped)]
         XCTAssertEqual(template.render(object), """
         <b>Willy is awesome.</b>
         """)
@@ -221,7 +221,7 @@ final class TemplateRendererTests: XCTestCase {
 
     /// test setting context object
     func testMustacheManualExample6() throws {
-        let template = try HBMustacheTemplate(string: """
+        let template = try MustacheTemplate(string: """
         {{#person?}}
           Hi {{name}}!
         {{/person?}}
@@ -235,7 +235,7 @@ final class TemplateRendererTests: XCTestCase {
 
     /// test inverted sections
     func testMustacheManualExample7() throws {
-        let template = try HBMustacheTemplate(string: """
+        let template = try MustacheTemplate(string: """
         {{#repo}}
           <b>{{name}}</b>
         {{/repo}}
@@ -252,7 +252,7 @@ final class TemplateRendererTests: XCTestCase {
 
     /// test comments
     func testMustacheManualExample8() throws {
-        let template = try HBMustacheTemplate(string: """
+        let template = try MustacheTemplate(string: """
         <h1>Today{{! ignore me }}.</h1>
         """)
         let object: [String: Any] = ["repo": []]
@@ -261,12 +261,12 @@ final class TemplateRendererTests: XCTestCase {
         """)
     }
 
-    /// test HBMustacheCustomRenderable
+    /// test MustacheCustomRenderable
     func testCustomRenderable() throws {
-        let template = try HBMustacheTemplate(string: "{{.}}")
-        let template1 = try HBMustacheTemplate(string: "{{#.}}not null{{/.}}")
-        let template2 = try HBMustacheTemplate(string: "{{^.}}null{{/.}}")
-        struct Object: HBMustacheCustomRenderable {
+        let template = try MustacheTemplate(string: "{{.}}")
+        let template1 = try MustacheTemplate(string: "{{#.}}not null{{/.}}")
+        let template2 = try MustacheTemplate(string: "{{^.}}null{{/.}}")
+        struct Object: MustacheCustomRenderable {
             let value: String
 
             var renderText: String { self.value.uppercased() }
@@ -282,7 +282,7 @@ final class TemplateRendererTests: XCTestCase {
     }
 
     func testPerformance() throws {
-        let template = try HBMustacheTemplate(string: """
+        let template = try MustacheTemplate(string: """
         {{#repo}}
           <b>{{name}}</b>
         {{/repo}}

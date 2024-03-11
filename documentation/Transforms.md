@@ -52,9 +52,9 @@ The following sequence context transforms are available
 
 ## Custom transforms
 
-You can add transforms to your own objects. Conform the object to `HBMustacheTransformable` and provide an implementation of the function `transform`. eg 
+You can add transforms to your own objects. Conform the object to `MustacheTransformable` and provide an implementation of the function `transform`. eg 
 ```swift 
-struct Object: HBMustacheTransformable {
+struct Object: MustacheTransformable {
     let either: Bool
     let or: Bool
     
