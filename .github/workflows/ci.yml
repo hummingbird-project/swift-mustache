@@ -29,7 +29,7 @@ jobs:
     - name: Convert coverage files
       run: |
         llvm-cov export -format="lcov" \
-          .build/debug/hummingbird-mustachePackageTests.xctest \
+          .build/debug/swift-mustachePackageTests.xctest \
           -ignore-filename-regex="\/Tests\/" \
           -ignore-filename-regex="\/Benchmarks\/" \
           -instr-profile .build/debug/codecov/default.profdata > info.lcov
