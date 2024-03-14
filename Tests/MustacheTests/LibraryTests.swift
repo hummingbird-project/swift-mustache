@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-@testable import HummingbirdMustache
+@testable import Mustache
 import XCTest
 
 final class LibraryTests: XCTestCase {

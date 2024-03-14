@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-import HummingbirdMustache
+import Mustache
 import XCTest
 
 final class TemplateRendererTests: XCTestCase {
