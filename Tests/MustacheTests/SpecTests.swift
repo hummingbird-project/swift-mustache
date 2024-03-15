@@ -16,7 +16,7 @@ import Foundation
 #if os(Linux)
 import FoundationNetworking
 #endif
-import HummingbirdMustache
+import Mustache
 import XCTest
 
 public struct AnyDecodable: Decodable {

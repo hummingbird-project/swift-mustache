@@ -4,14 +4,14 @@
 import PackageDescription
 
 let package = Package(
-    name: "hummingbird-mustache",
+    name: "swift-mustache",
     platforms: [.macOS(.v10_15), .iOS(.v13), .tvOS(.v13), .watchOS(.v6)],
     products: [
-        .library(name: "HummingbirdMustache", targets: ["HummingbirdMustache"]),
+        .library(name: "Mustache", targets: ["Mustache"]),
     ],
     dependencies: [],
     targets: [
-        .target(name: "HummingbirdMustache", dependencies: []),
-        .testTarget(name: "HummingbirdMustacheTests", dependencies: ["HummingbirdMustache"]),
+        .target(name: "Mustache", dependencies: []),
+        .testTarget(name: "MustacheTests", dependencies: ["Mustache"]),
     ]
 )
