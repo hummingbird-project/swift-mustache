@@ -15,7 +15,7 @@ Render an object with a template
 ```swift
 let output = library.render(object, withTemplate: "myTemplate")
 ```
-`Swift-Mustache` treats an object as a set of key/value pairs when rendering and will render both dictionaries and objects via `Mirror` reflection. Find out more on how Mustache renders objects [here](https://hummingbird-project.github.io/hummingbird/current/hummingbird-mustache/mustache-syntax.html).
+`Swift-Mustache` treats an object as a set of key/value pairs when rendering and will render both dictionaries and objects via `Mirror` reflection. Find out more on how Mustache renders objects [here](https://docs.hummingbird.codes/2.0/documentation/hummingbird/mustachesyntax).
 
 ## Support
 
@@ -25,7 +25,11 @@ Swift-Mustache supports all standard Mustache tags and is fully compliant with t
 
 Swift-Mustache includes some features that are specific to its implementation. Please follow the links below to find out more.
 
-- [Lambda Implementation](https://hummingbird-project.github.io/hummingbird/current/hummingbird-mustache/lambdas.html)
-- [Transforms](https://hummingbird-project.github.io/hummingbird/current/hummingbird-mustache/transforms.html)
-- [Template Inheritance](https://hummingbird-project.github.io/hummingbird/current/hummingbird-mustache/template-inheritance.html)
-- [Pragmas](https://hummingbird-project.github.io/hummingbird/current/hummingbird-mustache/pragmas.html)
+- [Lambda Implementation](https://docs.hummingbird.codes/2.0/documentation/hummingbird/lambdas)
+- [Transforms](https://https://docs.hummingbird.codes/2.0/documentation/hummingbird/transforms)
+- [Template Inheritance](https://docs.hummingbird.codes/2.0/documentation/hummingbird/templateinheritance)
+- [Pragmas](https://docs.hummingbird.codes/2.0/documentation/hummingbird/pragmas)
+
+## Documentation
+
+Reference documentation for swift-mustache can be found [here](https://docs.hummingbird.codes/2.0/documentation/mustache)
