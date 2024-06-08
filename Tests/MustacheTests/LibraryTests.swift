@@ -71,6 +71,7 @@ final class LibraryTests: XCTestCase {
             XCTAssertEqual(parserError.context.columnNumber, 10)
         }
     }
+
     #if DEBUG
     func testReload() async throws {
         let fs = FileManager()

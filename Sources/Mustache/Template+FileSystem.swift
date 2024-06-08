@@ -15,7 +15,7 @@
 import Foundation
 
 extension MustacheTemplate {
-        /// Initialize template
+    /// Initialize template
     /// - Parameters
     ///   - string: Template text
     ///   - filename: File template was loaded from

@@ -53,6 +53,7 @@ public struct MustacheTemplate: Sendable {
         #endif
         return self.render(context: .init(object, library: library))
     }
+
     internal init(_ tokens: [Token]) {
         self.tokens = tokens
         self.filename = nil

@@ -31,7 +31,7 @@ extension MustacheLibrary {
                 guard let template = try MustacheTemplate(filename: directory + path) else { continue }
                 // drop ".mustache" from path to get name
                 let name = String(path.dropLast(extWithDot.count))
-            templates[name] = template
+                templates[name] = template
             } catch let error as MustacheTemplate.ParserError {
                 throw ParserError(filename: path, context: error.context, error: error.error)
             }

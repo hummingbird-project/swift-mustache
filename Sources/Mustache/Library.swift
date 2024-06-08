@@ -77,6 +77,7 @@ public struct MustacheLibrary: Sendable {
         guard let template = templates[name] else { return nil }
         return template.render(object, library: self)
     }
+
     #if DEBUG
     /// Render object using templated with name
     /// - Parameters:
