@@ -85,6 +85,7 @@ extension MustacheTemplate {
 
         case .partial(let name, let indentation, let overrides):
             if var template = context.library?.getTemplate(named: name) {
+                #if DEBUG
                 if context.reloadPartials {
                     guard let filename = template.filename else {
                         preconditionFailure("Can only use reload if template was generated from a file")
@@ -96,6 +97,7 @@ extension MustacheTemplate {
                         return "\(error)"
                     }
                 }
+                #endif
                 return template.render(context: context.withPartial(indented: indentation, inheriting: overrides))
             }
 

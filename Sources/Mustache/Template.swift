@@ -37,6 +37,7 @@ public struct MustacheTemplate: Sendable {
     ///   - library: library template uses to access partials
     ///   - reload: Should I reload this template when rendering
     /// - Returns: Rendered text
+    #if DEBUG
     public func render(_ object: Any, library: MustacheLibrary? = nil, reload: Bool) -> String {
         if reload {
             guard let filename else {
@@ -52,7 +53,7 @@ public struct MustacheTemplate: Sendable {
             return self.render(context: .init(object, library: library))
         }
     }
-
+    #endif
     internal init(_ tokens: [Token]) {
         self.tokens = tokens
         self.filename = nil

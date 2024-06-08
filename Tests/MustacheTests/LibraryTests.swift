@@ -71,7 +71,7 @@ final class LibraryTests: XCTestCase {
             XCTAssertEqual(parserError.context.columnNumber, 10)
         }
     }
-
+    #if DEBUG
     func testReload() async throws {
         let fs = FileManager()
         try? fs.createDirectory(atPath: "templates", withIntermediateDirectories: false)
@@ -108,4 +108,5 @@ final class LibraryTests: XCTestCase {
         try mustache3.write(to: URL(fileURLWithPath: "templates/test-partial.mustache"))
         XCTAssertEqual(library.render(object, withTemplate: "test", reload: true), "<test2><value>value1</value><value>value2</value></test2>")
     }
+    #endif
 }
