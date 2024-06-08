@@ -35,10 +35,10 @@ public struct MustacheTemplate: Sendable {
     /// - Parameters
     ///   - object: Object to render
     ///   - library: library template uses to access partials
-    ///   - reload: Should I reload this template when rendering
+    ///   - reload: Should I reload this template when rendering. This is only available in debug builds
     /// - Returns: Rendered text
-    #if DEBUG
     public func render(_ object: Any, library: MustacheLibrary? = nil, reload: Bool) -> String {
+        #if DEBUG
         if reload {
             guard let filename else {
                 preconditionFailure("Can only use reload if template was generated from a file")
@@ -49,11 +49,10 @@ public struct MustacheTemplate: Sendable {
             } catch {
                 return "\(error)"
             }
-        } else {
-            return self.render(context: .init(object, library: library))
         }
+        #endif
+        return self.render(context: .init(object, library: library))
     }
-    #endif
     internal init(_ tokens: [Token]) {
         self.tokens = tokens
         self.filename = nil
