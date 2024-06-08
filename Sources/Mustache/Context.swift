@@ -2,7 +2,7 @@
 //
 // This source file is part of the Hummingbird server framework project
 //
-// Copyright (c) 2021-2021 the Hummingbird authors
+// Copyright (c) 2021-2024 the Hummingbird authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -20,15 +20,17 @@ struct MustacheContext {
     let inherited: [String: MustacheTemplate]?
     let contentType: MustacheContentType
     let library: MustacheLibrary?
+    let reloadPartials: Bool
 
     /// initialize context with a single objectt
-    init(_ object: Any, library: MustacheLibrary? = nil) {
+    init(_ object: Any, library: MustacheLibrary? = nil, reloadPartials: Bool = false) {
         self.stack = [object]
         self.sequenceContext = nil
         self.indentation = nil
         self.inherited = nil
         self.contentType = HTMLContentType()
         self.library = library
+        self.reloadPartials = reloadPartials
     }
 
     private init(
@@ -37,7 +39,8 @@ struct MustacheContext {
         indentation: String?,
         inherited: [String: MustacheTemplate]?,
         contentType: MustacheContentType,
-        library: MustacheLibrary? = nil
+        library: MustacheLibrary? = nil,
+        reloadPartials: Bool
     ) {
         self.stack = stack
         self.sequenceContext = sequenceContext
@@ -45,6 +48,7 @@ struct MustacheContext {
         self.inherited = inherited
         self.contentType = contentType
         self.library = library
+        self.reloadPartials = reloadPartials
     }
 
     /// return context with object add to stack
@@ -57,7 +61,8 @@ struct MustacheContext {
             indentation: self.indentation,
             inherited: self.inherited,
             contentType: self.contentType,
-            library: self.library
+            library: self.library,
+            reloadPartials: self.reloadPartials
         )
     }
 
@@ -83,7 +88,8 @@ struct MustacheContext {
             indentation: indentation,
             inherited: inherits,
             contentType: HTMLContentType(),
-            library: self.library
+            library: self.library,
+            reloadPartials: self.reloadPartials
         )
     }
 
@@ -114,7 +120,8 @@ struct MustacheContext {
             indentation: self.indentation,
             inherited: self.inherited,
             contentType: self.contentType,
-            library: self.library
+            library: self.library,
+            reloadPartials: self.reloadPartials
         )
     }
 
@@ -126,7 +133,8 @@ struct MustacheContext {
             indentation: self.indentation,
             inherited: self.inherited,
             contentType: contentType,
-            library: self.library
+            library: self.library,
+            reloadPartials: self.reloadPartials
         )
     }
 }

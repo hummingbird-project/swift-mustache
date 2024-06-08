@@ -2,7 +2,7 @@
 //
 // This source file is part of the Hummingbird server framework project
 //
-// Copyright (c) 2021-2021 the Hummingbird authors
+// Copyright (c) 2021-2024 the Hummingbird authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -70,5 +70,42 @@ final class LibraryTests: XCTestCase {
             XCTAssertEqual(parserError.context.lineNumber, 2)
             XCTAssertEqual(parserError.context.columnNumber, 10)
         }
+    }
+
+    func testReload() async throws {
+        let fs = FileManager()
+        try? fs.createDirectory(atPath: "templates", withIntermediateDirectories: false)
+        defer { XCTAssertNoThrow(try fs.removeItem(atPath: "templates")) }
+        let mustache = Data("<test>{{#value}}<value>{{.}}</value>{{/value}}</test>".utf8)
+        try mustache.write(to: URL(fileURLWithPath: "templates/test.mustache"))
+        defer { XCTAssertNoThrow(try fs.removeItem(atPath: "templates/test.mustache")) }
+
+        let library = try await MustacheLibrary(directory: "./templates")
+        let object = ["value": ["value1", "value2"]]
+        XCTAssertEqual(library.render(object, withTemplate: "test"), "<test><value>value1</value><value>value2</value></test>")
+        let mustache2 = Data("<test2>{{#value}}<value>{{.}}</value>{{/value}}</test2>".utf8)
+        try mustache2.write(to: URL(fileURLWithPath: "templates/test.mustache"))
+        XCTAssertEqual(library.render(object, withTemplate: "test", reload: true), "<test2><value>value1</value><value>value2</value></test2>")
+    }
+
+    func testReloadPartial() async throws {
+        let fs = FileManager()
+        try? fs.createDirectory(atPath: "templates", withIntermediateDirectories: false)
+        let mustache = Data("<test>{{#value}}<value>{{.}}</value>{{/value}}</test>".utf8)
+        try mustache.write(to: URL(fileURLWithPath: "templates/test-partial.mustache"))
+        let mustache2 = Data("{{>test-partial}}".utf8)
+        try mustache2.write(to: URL(fileURLWithPath: "templates/test.mustache"))
+        defer {
+            XCTAssertNoThrow(try fs.removeItem(atPath: "templates/test-partial.mustache"))
+            XCTAssertNoThrow(try fs.removeItem(atPath: "templates/test.mustache"))
+            XCTAssertNoThrow(try fs.removeItem(atPath: "templates"))
+        }
+
+        let library = try await MustacheLibrary(directory: "./templates")
+        let object = ["value": ["value1", "value2"]]
+        XCTAssertEqual(library.render(object, withTemplate: "test"), "<test><value>value1</value><value>value2</value></test>")
+        let mustache3 = Data("<test2>{{#value}}<value>{{.}}</value>{{/value}}</test2>".utf8)
+        try mustache3.write(to: URL(fileURLWithPath: "templates/test-partial.mustache"))
+        XCTAssertEqual(library.render(object, withTemplate: "test", reload: true), "<test2><value>value1</value><value>value2</value></test2>")
     }
 }

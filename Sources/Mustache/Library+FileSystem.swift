@@ -2,7 +2,7 @@
 //
 // This source file is part of the Hummingbird server framework project
 //
-// Copyright (c) 2021-2021 the Hummingbird authors
+// Copyright (c) 2021-2024 the Hummingbird authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -27,17 +27,14 @@ extension MustacheLibrary {
         var templates: [String: MustacheTemplate] = [:]
         for case let path as String in enumerator {
             guard path.hasSuffix(extWithDot) else { continue }
-            guard let data = fs.contents(atPath: directory + path) else { continue }
-            let string = String(decoding: data, as: Unicode.UTF8.self)
-            var template: MustacheTemplate
             do {
-                template = try MustacheTemplate(string: string)
+                guard let template = try MustacheTemplate(filename: directory + path) else { continue }
+                // drop ".mustache" from path to get name
+                let name = String(path.dropLast(extWithDot.count))
+            templates[name] = template
             } catch let error as MustacheTemplate.ParserError {
                 throw ParserError(filename: path, context: error.context, error: error.error)
             }
-            // drop ".mustache" from path to get name
-            let name = String(path.dropLast(extWithDot.count))
-            templates[name] = template
         }
         return templates
     }
