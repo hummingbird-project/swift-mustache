@@ -82,6 +82,7 @@ public struct MustacheLibrary: Sendable {
     /// - Parameters:
     ///   - object: Object to render
     ///   - name: Name of template
+    ///   - reload: Reload templates when rendering
     /// - Returns: Rendered text
     public func render(_ object: Any, withTemplate name: String, reload: Bool) -> String? {
         guard let template = templates[name] else { return nil }
