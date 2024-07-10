@@ -50,7 +50,8 @@ extension MustacheTemplate {
             }
 
             static var newLine: Self { .init(rawValue: 1 << 0) }
-            static var partialDefintion: Self { .init(rawValue: 1 << 1) }
+            static var isPartialDefinition: Self { .init(rawValue: 1 << 1) }
+            static var isPartialDefinitionTopLevel: Self { .init(rawValue: 1 << 2) }
         }
 
         var sectionName: String?
@@ -77,18 +78,21 @@ extension MustacheTemplate {
             self.endDelimiter = "}}"
         }
 
-        func withSectionName(_ name: String, transforms: [String] = []) -> ParserState {
+        func withSectionName(_ name: String, newLine: Bool, transforms: [String] = []) -> ParserState {
             var newValue = self
             newValue.sectionName = name
             newValue.sectionTransforms = transforms
-            newValue.flags.remove(.partialDefintion)
+            newValue.flags.remove(.isPartialDefinitionTopLevel)
+            if !newLine {
+                newValue.flags.remove(.newLine)
+            }
             return newValue
         }
 
         func withInheritancePartial(_ name: String) -> ParserState {
             var newValue = self
             newValue.sectionName = name
-            newValue.flags.insert(.partialDefintion)
+            newValue.flags.insert([.newLine, .isPartialDefinition, .isPartialDefinitionTopLevel])
             return newValue
         }
 
@@ -96,7 +100,7 @@ extension MustacheTemplate {
             var newValue = self
             newValue.startDelimiter = start
             newValue.endDelimiter = end
-            newValue.flags.remove(.partialDefintion)
+            newValue.flags.remove(.isPartialDefinitionTopLevel)
             return newValue
         }
     }
@@ -119,7 +123,10 @@ extension MustacheTemplate {
         while !parser.reachedEnd() {
             // if new line read whitespace
             if state.newLine {
-                whiteSpaceBefore = parser.read(while: Set(" \t"))
+                let whiteSpace = parser.read(while: Set(" \t"))
+                if !state.flags.contains(.isPartialDefinition) {
+                    whiteSpaceBefore = whiteSpace
+                }
             }
             let text = try readUntilDelimiterOrNewline(&parser, state: state)
             // if we hit a newline add text
@@ -152,7 +159,7 @@ extension MustacheTemplate {
                     tokens.append(.text(String(whiteSpaceBefore)))
                     whiteSpaceBefore = ""
                 }
-                let sectionTokens = try parse(&parser, state: state.withSectionName(name, transforms: transforms))
+                let sectionTokens = try parse(&parser, state: state.withSectionName(name, newLine: setNewLine, transforms: transforms))
                 tokens.append(.section(name: name, transforms: transforms, template: MustacheTemplate(sectionTokens)))
 
             case "^":
@@ -165,7 +172,7 @@ extension MustacheTemplate {
                     tokens.append(.text(String(whiteSpaceBefore)))
                     whiteSpaceBefore = ""
                 }
-                let sectionTokens = try parse(&parser, state: state.withSectionName(name, transforms: transforms))
+                let sectionTokens = try parse(&parser, state: state.withSectionName(name, newLine: setNewLine, transforms: transforms))
                 tokens.append(.invertedSection(name: name, transforms: transforms, template: MustacheTemplate(sectionTokens)))
 
             case "/":
@@ -253,29 +260,21 @@ extension MustacheTemplate {
                 let (name, transforms) = try parseName(&parser, state: state)
                 // ERROR: can't have transforms applied to inherited sections
                 guard transforms.isEmpty else { throw Error.transformAppliedToInheritanceSection }
-                if state.flags.contains(.partialDefintion) {
-                    if self.isStandalone(&parser, state: state) {
+                if state.flags.contains(.isPartialDefinitionTopLevel) {
+                    let standAlone = self.isStandalone(&parser, state: state)
+                    if standAlone {
                         setNewLine = true
-                    } else if whiteSpaceBefore.count > 0 {
-                        // tokens.append(.text(String(whiteSpaceBefore)))
-                        whiteSpaceBefore = ""
                     }
-                    let sectionTokens = try parse(&parser, state: state.withSectionName(name, transforms: transforms))
+                    let sectionTokens = try parse(&parser, state: state.withSectionName(name, newLine: setNewLine))
                     tokens.append(.blockDefinition(name: name, template: MustacheTemplate(sectionTokens)))
 
                 } else {
                     if self.isStandalone(&parser, state: state) {
                         setNewLine = true
-                    } else if whiteSpaceBefore.count > 0 {
-                        tokens.append(.text(String(whiteSpaceBefore)))
-                        whiteSpaceBefore = ""
-                    }
-                    let sectionTokens = try parse(&parser, state: state.withSectionName(name, transforms: transforms))
-                    if setNewLine {
-                        tokens.append(.blockExpansion(name: name, default: MustacheTemplate(sectionTokens), indentation: String(whiteSpaceBefore)))
-                    } else {
-                        tokens.append(.blockExpansion(name: name, default: MustacheTemplate(sectionTokens), indentation: nil))
-                    }
+                    } else if whiteSpaceBefore.count > 0 {}
+                    let sectionTokens = try parse(&parser, state: state.withSectionName(name, newLine: setNewLine))
+                    tokens.append(.blockExpansion(name: name, default: MustacheTemplate(sectionTokens), indentation: String(whiteSpaceBefore)))
+                    whiteSpaceBefore = ""
                 }
 
             case "=":

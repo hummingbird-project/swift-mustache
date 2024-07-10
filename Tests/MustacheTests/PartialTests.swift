@@ -21,7 +21,7 @@ final class PartialTests: XCTestCase {
         let template = try MustacheTemplate(string: """
         <h2>Names</h2>
         {{#names}}
-          {{> user}}
+            {{> user}}
         {{/names}}
         """)
         let template2 = try MustacheTemplate(string: """
@@ -33,9 +33,9 @@ final class PartialTests: XCTestCase {
         let object: [String: Any] = ["names": ["john", "adam", "claire"]]
         XCTAssertEqual(library.render(object, withTemplate: "base"), """
         <h2>Names</h2>
-          <strong>john</strong>
-          <strong>adam</strong>
-          <strong>claire</strong>
+            <strong>john</strong>
+            <strong>adam</strong>
+            <strong>claire</strong>
 
         """)
     }
@@ -106,7 +106,6 @@ final class PartialTests: XCTestCase {
             <head>
             <title>{{$title}}Default title{{/title}}</title>
             </head>
-
             """,
             named: "header"
         )
