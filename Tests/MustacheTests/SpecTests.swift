@@ -154,7 +154,7 @@ final class MustacheSpecTests: XCTestCase {
     }
 
     func testInvertedSpec() throws {
-        try self.testSpec(name: "inverted", only: ["Standalone Line Endings"])
+        try self.testSpec(name: "inverted")
     }
 
     func testPartialsSpec() throws {
@@ -162,7 +162,7 @@ final class MustacheSpecTests: XCTestCase {
     }
 
     func testSectionsSpec() throws {
-        try self.testSpec(name: "sections", only: ["Standalone Line Endings"])
+        try self.testSpec(name: "sections")
     }
 
     func testInheritanceSpec() throws {
