@@ -38,7 +38,8 @@ public struct MustacheTemplate: Sendable {
         case unescapedVariable(name: String, transform: String? = nil)
         case section(name: String, transform: String? = nil, template: MustacheTemplate)
         case invertedSection(name: String, transform: String? = nil, template: MustacheTemplate)
-        case inheritedSection(name: String, template: MustacheTemplate)
+        case blockDefinition(name: String, template: MustacheTemplate)
+        case blockExpansion(name: String, default: MustacheTemplate, indentation: String?)
         case partial(String, indentation: String?, inherits: [String: MustacheTemplate]?)
         case contentType(MustacheContentType)
     }

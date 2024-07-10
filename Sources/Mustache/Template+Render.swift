@@ -28,7 +28,8 @@ extension MustacheTemplate {
         if let indentation = context.indentation, indentation != "" {
             for token in tokens {
                 let renderedString = self.renderToken(token, context: &context)
-                if renderedString != "", string.last == "\n" {
+                // if rendered string is not empty and we are on a new line
+                if renderedString.count > 0, string.last == "\n" || string.count == 0 {
                     string += indentation
                 }
                 string += renderedString
@@ -46,6 +47,7 @@ extension MustacheTemplate {
         switch token {
         case .text(let text):
             return text
+
         case .variable(let variable, let transform):
             if let child = getChild(named: variable, transform: transform, context: context) {
                 if let template = child as? MustacheTemplate {
@@ -56,6 +58,7 @@ extension MustacheTemplate {
                     return context.contentType.escapeText(String(describing: child))
                 }
             }
+
         case .unescapedVariable(let variable, let transform):
             if let child = getChild(named: variable, transform: transform, context: context) {
                 if let renderable = child as? MustacheCustomRenderable {
@@ -64,6 +67,7 @@ extension MustacheTemplate {
                     return String(describing: child)
                 }
             }
+
         case .section(let variable, let transform, let template):
             let child = self.getChild(named: variable, transform: transform, context: context)
             return self.renderSection(child, with: template, context: context)
@@ -72,11 +76,11 @@ extension MustacheTemplate {
             let child = self.getChild(named: variable, transform: transform, context: context)
             return self.renderInvertedSection(child, with: template, context: context)
 
-        case .inheritedSection(let name, let template):
+        case .blockExpansion(let name, let defaultTemplate, let indented):
             if let override = context.inherited?[name] {
-                return override.render(context: context)
+                return override.render(context: context.withInheritanceBlock(indented: indented))
             } else {
-                return template.render(context: context)
+                return defaultTemplate.render(context: context.withInheritanceBlock(indented: indented))
             }
 
         case .partial(let name, let indentation, let overrides):
@@ -86,6 +90,9 @@ extension MustacheTemplate {
 
         case .contentType(let contentType):
             context = context.withContentType(contentType)
+
+        case .blockDefinition:
+            fatalError("Should not be rendering block definitions")
         }
         return ""
     }
