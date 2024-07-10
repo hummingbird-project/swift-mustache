@@ -166,7 +166,6 @@ final class MustacheSpecTests: XCTestCase {
     }
 
     func testInheritanceSpec() throws {
-        // try self.testSpec(name: "~inheritance", only: ["Nested block reindentation"])
         try self.testSpec(
             name: "~inheritance",
             ignoring: [

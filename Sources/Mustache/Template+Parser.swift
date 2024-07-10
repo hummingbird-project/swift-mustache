@@ -223,6 +223,9 @@ extension MustacheTemplate {
                 // partial
                 parser.unsafeAdvance()
                 let name = try parsePartialName(&parser, state: state)
+                if whiteSpaceBefore.count > 0 {
+                    tokens.append(.text(String(whiteSpaceBefore)))
+                }
                 if self.isStandalone(&parser, state: state) {
                     setNewLine = true
                     tokens.append(.partial(name, indentation: String(whiteSpaceBefore), inherits: nil))
@@ -235,6 +238,9 @@ extension MustacheTemplate {
                 // partial with inheritance
                 parser.unsafeAdvance()
                 let name = try parsePartialName(&parser, state: state)
+                if whiteSpaceBefore.count > 0 {
+                    tokens.append(.text(String(whiteSpaceBefore)))
+                }
                 if self.isStandalone(&parser, state: state) {
                     setNewLine = true
                 }
@@ -269,6 +275,9 @@ extension MustacheTemplate {
                     tokens.append(.blockDefinition(name: name, template: MustacheTemplate(sectionTokens)))
 
                 } else {
+                    if whiteSpaceBefore.count > 0 {
+                        tokens.append(.text(String(whiteSpaceBefore)))
+                    }
                     if self.isStandalone(&parser, state: state) {
                         setNewLine = true
                     } else if whiteSpaceBefore.count > 0 {}

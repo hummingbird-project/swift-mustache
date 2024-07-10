@@ -29,7 +29,7 @@ extension MustacheTemplate {
             for token in tokens {
                 let renderedString = self.renderToken(token, context: &context)
                 // if rendered string is not empty and we are on a new line
-                if renderedString.count > 0, string.last == "\n" || string.count == 0 {
+                if renderedString.count > 0, string.last == "\n" {
                     string += indentation
                 }
                 string += renderedString
