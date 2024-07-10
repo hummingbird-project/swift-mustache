@@ -62,8 +62,7 @@ final class PartialTests: XCTestCase {
         """)
         var library = MustacheLibrary()
         library.register(template, named: "base")
-        library.register(template2, named: "user") // , withTemplate: String)// = MustacheLibrary(templates: ["base": template, "user": template2])
-
+        library.register(template2, named: "user")
         let object: [String: Any] = ["names": ["john", "adam", "claire"]]
         XCTAssertEqual(library.render(object, withTemplate: "base"), """
         <h2>Names</h2>
