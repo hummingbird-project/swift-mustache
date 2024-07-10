@@ -78,9 +78,9 @@ extension MustacheTemplate {
 
         case .blockExpansion(let name, let defaultTemplate, let indented):
             if let override = context.inherited?[name] {
-                return override.render(context: context.withInheritanceBlock(indented: indented))
+                return override.render(context: context.withBlockExpansion(indented: indented))
             } else {
-                return defaultTemplate.render(context: context.withInheritanceBlock(indented: indented))
+                return defaultTemplate.render(context: context.withBlockExpansion(indented: indented))
             }
 
         case .partial(let name, let indentation, let overrides):

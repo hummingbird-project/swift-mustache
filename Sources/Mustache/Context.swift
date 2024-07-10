@@ -88,7 +88,7 @@ struct MustacheContext {
     }
 
     /// return context with indent information for invoking an inheritance block
-    func withInheritanceBlock(indented: String?) -> MustacheContext {
+    func withBlockExpansion(indented: String?) -> MustacheContext {
         let indentation: String? = if let indented {
             (self.indentation ?? "") + indented
         } else {
