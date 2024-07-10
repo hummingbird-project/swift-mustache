@@ -75,6 +75,37 @@ final class PartialTests: XCTestCase {
         """)
     }
 
+    func testTrailingNewLines() throws {
+        let template1 = try MustacheTemplate(string: """
+        {{> withNewLine }}
+        >> {{> withNewLine }}
+        [ {{> withNewLine }} ]
+        """)
+        let template2 = try MustacheTemplate(string: """
+        {{> withoutNewLine }}
+        >> {{> withoutNewLine }}
+        [ {{> withoutNewLine }} ]
+        """)
+        let withNewLine = try MustacheTemplate(string: """
+        {{#things}}{{.}}, {{/things}}
+
+        """)
+        let withoutNewLine = try MustacheTemplate(string: "{{#things}}{{.}}, {{/things}}")
+        let library = MustacheLibrary(templates: ["base1": template1, "base2": template2, "withNewLine": withNewLine, "withoutNewLine": withoutNewLine])
+        let object = ["things": [1, 2, 3, 4, 5]]
+        XCTAssertEqual(library.render(object, withTemplate: "base1"), """
+        1, 2, 3, 4, 5, 
+        >> 1, 2, 3, 4, 5, 
+
+        [ 1, 2, 3, 4, 5, 
+         ]
+        """)
+        XCTAssertEqual(library.render(object, withTemplate: "base2"), """
+        1, 2, 3, 4, 5, >> 1, 2, 3, 4, 5, 
+        [ 1, 2, 3, 4, 5,  ]
+        """)
+    }
+
     /// Testing dynamic partials
     func testDynamicPartials() throws {
         let template = try MustacheTemplate(string: """
