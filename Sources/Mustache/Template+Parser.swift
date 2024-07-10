@@ -42,15 +42,37 @@ extension MustacheTemplate {
     }
 
     struct ParserState {
+        struct Flags: OptionSet {
+            let rawValue: Int
+
+            init(rawValue: Int) {
+                self.rawValue = rawValue
+            }
+
+            static var newLine: Self { .init(rawValue: 1 << 0) }
+            static var partialDefintion: Self { .init(rawValue: 1 << 1) }
+        }
+
         var sectionName: String?
         var sectionTransforms: [String] = []
-        var newLine: Bool
+        var flags: Flags
         var startDelimiter: String
         var endDelimiter: String
 
+        var newLine: Bool {
+            get { self.flags.contains(.newLine) }
+            set {
+                if newValue {
+                    self.flags.insert(.newLine)
+                } else {
+                    self.flags.remove(.newLine)
+                }
+            }
+        }
+
         init() {
             self.sectionName = nil
-            self.newLine = true
+            self.flags = .newLine
             self.startDelimiter = "{{"
             self.endDelimiter = "}}"
         }
@@ -59,6 +81,14 @@ extension MustacheTemplate {
             var newValue = self
             newValue.sectionName = name
             newValue.sectionTransforms = transforms
+            newValue.flags.remove(.partialDefintion)
+            return newValue
+        }
+
+        func withInheritancePartial(_ name: String) -> ParserState {
+            var newValue = self
+            newValue.sectionName = name
+            newValue.flags.insert(.partialDefintion)
             return newValue
         }
 
@@ -66,6 +96,7 @@ extension MustacheTemplate {
             var newValue = self
             newValue.startDelimiter = start
             newValue.endDelimiter = end
+            newValue.flags.remove(.partialDefintion)
             return newValue
         }
     }
@@ -137,21 +168,6 @@ extension MustacheTemplate {
                 let sectionTokens = try parse(&parser, state: state.withSectionName(name, transforms: transforms))
                 tokens.append(.invertedSection(name: name, transforms: transforms, template: MustacheTemplate(sectionTokens)))
 
-            case "$":
-                // inherited section
-                parser.unsafeAdvance()
-                let (name, transforms) = try parseName(&parser, state: state)
-                // ERROR: can't have transform applied to inherited sections
-                guard transforms.isEmpty else { throw Error.transformAppliedToInheritanceSection }
-                if self.isStandalone(&parser, state: state) {
-                    setNewLine = true
-                } else if whiteSpaceBefore.count > 0 {
-                    tokens.append(.text(String(whiteSpaceBefore)))
-                    whiteSpaceBefore = ""
-                }
-                let sectionTokens = try parse(&parser, state: state.withSectionName(name, transforms: transforms))
-                tokens.append(.inheritedSection(name: name, template: MustacheTemplate(sectionTokens)))
-
             case "/":
                 // end of section
                 parser.unsafeAdvance()
@@ -200,9 +216,6 @@ extension MustacheTemplate {
                 // partial
                 parser.unsafeAdvance()
                 let name = try parsePartialName(&parser, state: state)
-                if whiteSpaceBefore.count > 0 {
-                    tokens.append(.text(String(whiteSpaceBefore)))
-                }
                 if self.isStandalone(&parser, state: state) {
                     setNewLine = true
                     tokens.append(.partial(name, indentation: String(whiteSpaceBefore), inherits: nil))
@@ -215,20 +228,15 @@ extension MustacheTemplate {
                 // partial with inheritance
                 parser.unsafeAdvance()
                 let name = try parsePartialName(&parser, state: state)
-                var indent: String?
                 if self.isStandalone(&parser, state: state) {
                     setNewLine = true
-                } else if whiteSpaceBefore.count > 0 {
-                    indent = String(whiteSpaceBefore)
-                    tokens.append(.text(indent!))
-                    whiteSpaceBefore = ""
                 }
-                let sectionTokens = try parse(&parser, state: state.withSectionName(name))
+                let sectionTokens = try parse(&parser, state: state.withInheritancePartial(name))
                 var inherit: [String: MustacheTemplate] = [:]
                 // parse tokens in section to extract inherited sections
                 for token in sectionTokens {
                     switch token {
-                    case .inheritedSection(let name, let template):
+                    case .blockDefinition(let name, let template):
                         inherit[name] = template
                     case .text:
                         break
@@ -236,7 +244,39 @@ extension MustacheTemplate {
                         throw Error.illegalTokenInsideInheritSection
                     }
                 }
-                tokens.append(.partial(name, indentation: indent, inherits: inherit))
+                tokens.append(.partial(name, indentation: String(whiteSpaceBefore), inherits: inherit))
+                whiteSpaceBefore = ""
+
+            case "$":
+                // inherited section
+                parser.unsafeAdvance()
+                let (name, transforms) = try parseName(&parser, state: state)
+                // ERROR: can't have transforms applied to inherited sections
+                guard transforms.isEmpty else { throw Error.transformAppliedToInheritanceSection }
+                if state.flags.contains(.partialDefintion) {
+                    if self.isStandalone(&parser, state: state) {
+                        setNewLine = true
+                    } else if whiteSpaceBefore.count > 0 {
+                        // tokens.append(.text(String(whiteSpaceBefore)))
+                        whiteSpaceBefore = ""
+                    }
+                    let sectionTokens = try parse(&parser, state: state.withSectionName(name, transforms: transforms))
+                    tokens.append(.blockDefinition(name: name, template: MustacheTemplate(sectionTokens)))
+
+                } else {
+                    if self.isStandalone(&parser, state: state) {
+                        setNewLine = true
+                    } else if whiteSpaceBefore.count > 0 {
+                        tokens.append(.text(String(whiteSpaceBefore)))
+                        whiteSpaceBefore = ""
+                    }
+                    let sectionTokens = try parse(&parser, state: state.withSectionName(name, transforms: transforms))
+                    if setNewLine {
+                        tokens.append(.blockExpansion(name: name, default: MustacheTemplate(sectionTokens), indentation: String(whiteSpaceBefore)))
+                    } else {
+                        tokens.append(.blockExpansion(name: name, default: MustacheTemplate(sectionTokens), indentation: nil))
+                    }
+                }
 
             case "=":
                 // set delimiter

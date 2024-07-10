@@ -87,6 +87,23 @@ struct MustacheContext {
         )
     }
 
+    /// return context with indent information for invoking an inheritance block
+    func withInheritanceBlock(indented: String?) -> MustacheContext {
+        let indentation: String? = if let indented {
+            (self.indentation ?? "") + indented
+        } else {
+            self.indentation
+        }
+        return .init(
+            stack: self.stack,
+            sequenceContext: nil,
+            indentation: indentation,
+            inherited: self.inherited,
+            contentType: self.contentType,
+            library: self.library
+        )
+    }
+
     /// return context with sequence info and sequence element added to stack
     func withSequence(_ object: Any, sequenceContext: MustacheSequenceContext) -> MustacheContext {
         var stack = self.stack
