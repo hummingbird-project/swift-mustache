@@ -173,4 +173,32 @@ final class PartialTests: XCTestCase {
 
         """)
     }
+
+    func testInheritanceIndentation() throws {
+        var library = MustacheLibrary()
+        try library.register(
+            """
+            Hi,
+               {{$block}}{{/block}}
+            """,
+            named: "parent"
+        )
+        try library.register(
+            """
+            {{<parent}}
+            {{$block}}
+              one
+               two
+            {{/block}}
+            {{/parent}}
+            """,
+            named: "template"
+        )
+        XCTAssertEqual(library.render({}, withTemplate: "template"), """
+        Hi,
+           one
+            two
+
+        """)
+    }
 }

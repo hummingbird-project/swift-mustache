@@ -59,6 +59,7 @@ extension MustacheTemplate {
         var flags: Flags
         var startDelimiter: String
         var endDelimiter: String
+        var partialDefinitionIndent: Substring?
 
         var newLine: Bool {
             get { self.flags.contains(.newLine) }
@@ -124,7 +125,16 @@ extension MustacheTemplate {
             // if new line read whitespace
             if state.newLine {
                 let whiteSpace = parser.read(while: Set(" \t"))
-                if !state.flags.contains(.isPartialDefinition) {
+                // If inside a partial block definition
+                if state.flags.contains(.isPartialDefinition), !state.flags.contains(.isPartialDefinitionTopLevel) {
+                    // if definition indent has been set then remove it from current whitespace otherwise set the
+                    // indent as this is the first line of the partial definition
+                    if let partialDefinitionIndent = state.partialDefinitionIndent {
+                        whiteSpaceBefore = whiteSpace.dropFirst(partialDefinitionIndent.count)
+                    } else {
+                        state.partialDefinitionIndent = whiteSpace
+                    }
+                } else {
                     whiteSpaceBefore = whiteSpace
                 }
             }
