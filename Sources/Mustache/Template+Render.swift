@@ -88,6 +88,15 @@ extension MustacheTemplate {
                 return template.render(context: context.withPartial(indented: indentation, inheriting: overrides))
             }
 
+        case .dynamicNamePartial(let name, let indentation):
+            let child = self.getChild(named: name, transform: nil, context: context)
+            guard let childName = child as? String else {
+                return ""
+            }
+            if let template = context.library?.getTemplate(named: childName) {
+                return template.render(context: context.withPartial(indented: indentation, inheriting: nil))
+            }
+
         case .contentType(let contentType):
             context = context.withContentType(contentType)
 
