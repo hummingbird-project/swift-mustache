@@ -107,7 +107,7 @@ final class TransformTests: XCTestCase {
         """)
     }
 
-    func testNestedTransformWorks() throws {
+    func testMultipleTransformWorks() throws {
         let template = try MustacheTemplate(string: """
         {{#repo}}
         {{minusone(plusone(last(reversed(numbers))))}}
@@ -121,7 +121,7 @@ final class TransformTests: XCTestCase {
         """)
     }
 
-    func testDoubleTransformWorks() throws {
+    func testNestedTransformWorks() throws {
         let template = try MustacheTemplate(string: """
         {{#repo}}
         {{#uppercased(string)}}{{reversed(.)}}{{/uppercased(string)}}
