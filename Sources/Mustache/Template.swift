@@ -34,10 +34,10 @@ public struct MustacheTemplate: Sendable {
 
     enum Token: Sendable {
         case text(String)
-        case variable(name: String, transform: String? = nil)
-        case unescapedVariable(name: String, transform: String? = nil)
-        case section(name: String, transform: String? = nil, template: MustacheTemplate)
-        case invertedSection(name: String, transform: String? = nil, template: MustacheTemplate)
+        case variable(name: String, transforms: [String] = [])
+        case unescapedVariable(name: String, transforms: [String] = [])
+        case section(name: String, transforms: [String] = [], template: MustacheTemplate)
+        case invertedSection(name: String, transforms: [String] = [], template: MustacheTemplate)
         case inheritedSection(name: String, template: MustacheTemplate)
         case partial(String, indentation: String?, inherits: [String: MustacheTemplate]?)
         case contentType(MustacheContentType)

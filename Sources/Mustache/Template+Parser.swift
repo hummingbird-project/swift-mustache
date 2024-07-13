@@ -43,7 +43,7 @@ extension MustacheTemplate {
 
     struct ParserState {
         var sectionName: String?
-        var sectionTransform: String?
+        var sectionTransforms: [String] = []
         var newLine: Bool
         var startDelimiter: String
         var endDelimiter: String
@@ -55,10 +55,10 @@ extension MustacheTemplate {
             self.endDelimiter = "}}"
         }
 
-        func withSectionName(_ name: String, transform: String? = nil) -> ParserState {
+        func withSectionName(_ name: String, transforms: [String] = []) -> ParserState {
             var newValue = self
             newValue.sectionName = name
-            newValue.sectionTransform = transform
+            newValue.sectionTransforms = transforms
             return newValue
         }
 
@@ -114,50 +114,50 @@ extension MustacheTemplate {
             case "#":
                 // section
                 parser.unsafeAdvance()
-                let (name, transform) = try parseName(&parser, state: state)
+                let (name, transforms) = try parseName(&parser, state: state)
                 if self.isStandalone(&parser, state: state) {
                     setNewLine = true
                 } else if whiteSpaceBefore.count > 0 {
                     tokens.append(.text(String(whiteSpaceBefore)))
                     whiteSpaceBefore = ""
                 }
-                let sectionTokens = try parse(&parser, state: state.withSectionName(name, transform: transform))
-                tokens.append(.section(name: name, transform: transform, template: MustacheTemplate(sectionTokens)))
+                let sectionTokens = try parse(&parser, state: state.withSectionName(name, transforms: transforms))
+                tokens.append(.section(name: name, transforms: transforms, template: MustacheTemplate(sectionTokens)))
 
             case "^":
                 // inverted section
                 parser.unsafeAdvance()
-                let (name, transform) = try parseName(&parser, state: state)
+                let (name, transforms) = try parseName(&parser, state: state)
                 if self.isStandalone(&parser, state: state) {
                     setNewLine = true
                 } else if whiteSpaceBefore.count > 0 {
                     tokens.append(.text(String(whiteSpaceBefore)))
                     whiteSpaceBefore = ""
                 }
-                let sectionTokens = try parse(&parser, state: state.withSectionName(name, transform: transform))
-                tokens.append(.invertedSection(name: name, transform: transform, template: MustacheTemplate(sectionTokens)))
+                let sectionTokens = try parse(&parser, state: state.withSectionName(name, transforms: transforms))
+                tokens.append(.invertedSection(name: name, transforms: transforms, template: MustacheTemplate(sectionTokens)))
 
             case "$":
                 // inherited section
                 parser.unsafeAdvance()
-                let (name, transform) = try parseName(&parser, state: state)
+                let (name, transforms) = try parseName(&parser, state: state)
                 // ERROR: can't have transform applied to inherited sections
-                guard transform == nil else { throw Error.transformAppliedToInheritanceSection }
+                guard transforms.isEmpty else { throw Error.transformAppliedToInheritanceSection }
                 if self.isStandalone(&parser, state: state) {
                     setNewLine = true
                 } else if whiteSpaceBefore.count > 0 {
                     tokens.append(.text(String(whiteSpaceBefore)))
                     whiteSpaceBefore = ""
                 }
-                let sectionTokens = try parse(&parser, state: state.withSectionName(name, transform: transform))
+                let sectionTokens = try parse(&parser, state: state.withSectionName(name, transforms: transforms))
                 tokens.append(.inheritedSection(name: name, template: MustacheTemplate(sectionTokens)))
 
             case "/":
                 // end of section
                 parser.unsafeAdvance()
                 let position = parser.position
-                let (name, transform) = try parseName(&parser, state: state)
-                guard name == state.sectionName, transform == state.sectionTransform else {
+                let (name, transforms) = try parseName(&parser, state: state)
+                guard name == state.sectionName, transforms == state.sectionTransforms else {
                     parser.unsafeSetPosition(position)
                     throw Error.sectionCloseNameIncorrect
                 }
@@ -182,9 +182,9 @@ extension MustacheTemplate {
                     whiteSpaceBefore = ""
                 }
                 parser.unsafeAdvance()
-                let (name, transform) = try parseName(&parser, state: state)
+                let (name, transforms) = try parseName(&parser, state: state)
                 guard try parser.read("}") else { throw Error.unfinishedName }
-                tokens.append(.unescapedVariable(name: name, transform: transform))
+                tokens.append(.unescapedVariable(name: name, transforms: transforms))
 
             case "&":
                 // unescaped variable
@@ -193,8 +193,8 @@ extension MustacheTemplate {
                     whiteSpaceBefore = ""
                 }
                 parser.unsafeAdvance()
-                let (name, transform) = try parseName(&parser, state: state)
-                tokens.append(.unescapedVariable(name: name, transform: transform))
+                let (name, transforms) = try parseName(&parser, state: state)
+                tokens.append(.unescapedVariable(name: name, transforms: transforms))
 
             case ">":
                 // partial
@@ -258,8 +258,8 @@ extension MustacheTemplate {
                     tokens.append(.text(String(whiteSpaceBefore)))
                     whiteSpaceBefore = ""
                 }
-                let (name, transform) = try parseName(&parser, state: state)
-                tokens.append(.variable(name: name, transform: transform))
+                let (name, transforms) = try parseName(&parser, state: state)
+                tokens.append(.variable(name: name, transforms: transforms))
             }
             state.newLine = setNewLine
         }
@@ -296,7 +296,7 @@ extension MustacheTemplate {
     }
 
     /// parse variable name
-    static func parseName(_ parser: inout Parser, state: ParserState) throws -> (String, String?) {
+    static func parseName(_ parser: inout Parser, state: ParserState) throws -> (String, [String]) {
         parser.read(while: \.isWhitespace)
         let text = String(parser.read(while: self.sectionNameChars))
         parser.read(while: \.isWhitespace)
@@ -306,16 +306,44 @@ extension MustacheTemplate {
         var nameParser = Parser(String(text))
         let string = nameParser.read(while: self.sectionNameCharsWithoutBrackets)
         if nameParser.reachedEnd() {
-            return (text, nil)
+            return (text, [])
         } else {
+            var transforms: [Substring] = [string]
+            var parameterName: Substring?
+
+            func parseTransforms() throws {
+                if let previous = parameterName {
+                    transforms.append(previous)
+                }
+                parameterName = nameParser.read(while: self.sectionNameCharsWithoutBrackets)
+                switch nameParser.current() {
+                case ")":
+                    // Transforms are ending
+                    nameParser.unsafeAdvance()
+                    // We need to have a `)` for each transform that we've parsed
+                    var endCount = 1
+                    while endCount < transforms.count {
+                        guard nameParser.current() == ")" else { throw Error.unfinishedName }
+                        nameParser.unsafeAdvance()
+                        endCount += 1
+                    }
+                case "(":
+                    // Parse the next transform
+                    nameParser.unsafeAdvance()
+                    try parseTransforms()
+                default:
+                    throw Error.unfinishedName
+                }
+            }
+
             // parse function parameter, as we have just parsed a function name
             guard nameParser.current() == "(" else { throw Error.unfinishedName }
             nameParser.unsafeAdvance()
-            let string2 = nameParser.read(while: self.sectionNameCharsWithoutBrackets)
-            guard nameParser.current() == ")" else { throw Error.unfinishedName }
-            nameParser.unsafeAdvance()
+            try parseTransforms()
+
             guard nameParser.reachedEnd() else { throw Error.unfinishedName }
-            return (String(string2), String(string))
+            /// force-unwrap: guaranteed parameterName is not nil
+            return (String(parameterName!), transforms.map(String.init))
         }
     }
 
