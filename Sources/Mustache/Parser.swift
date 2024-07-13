@@ -223,7 +223,7 @@ extension Parser {
 
     /// Read while character at current position is the one supplied
     /// - Parameter while: Character to check against
-    /// - Returns: String read from buffer
+    /// - Returns: The count of string read from buffer
     @discardableResult mutating func read(while: Character) -> Int {
         var count = 0
         while !self.reachedEnd(),

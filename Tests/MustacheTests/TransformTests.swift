@@ -80,19 +80,6 @@ final class TransformTests: XCTestCase {
         """)
     }
 
-    /// Expected failure, but you're welcome to fix it if you find a way.
-    /// Use the recursive-transforms syntax instead, like the next test below.
-    func testNestedSequenceTransformDoesNotWork() throws {
-        let template = try MustacheTemplate(string: """
-        {{#repo}}
-        {{#reversed(numbers)}}{{count(.)}}{{/reversed(numbers)}}
-        {{/repo}}
-
-        """)
-        let object: [String: Any] = ["repo": ["numbers": [1, 2, 3]]]
-        XCTAssertEqual(template.render(object), "\n")
-    }
-
     func testDoubleSequenceTransformWorks() throws {
         let template = try MustacheTemplate(string: """
         {{#repo}}

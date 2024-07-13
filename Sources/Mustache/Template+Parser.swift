@@ -25,7 +25,7 @@ extension MustacheTemplate {
         case sectionCloseNameIncorrect
         /// tag was badly formatted
         case unfinishedName
-        /// was not expecting a section end
+        /// was expecting a section end
         case expectedSectionEnd
         /// set delimiter tag badly formatted
         case invalidSetDelimiter
@@ -321,11 +321,8 @@ extension MustacheTemplate {
                     // Transforms are ending
                     nameParser.unsafeAdvance()
                     // We need to have a `)` for each transform that we've parsed
-                    var endCount = 1
-                    while endCount < transforms.count {
-                        guard nameParser.current() == ")" else { throw Error.unfinishedName }
-                        nameParser.unsafeAdvance()
-                        endCount += 1
+                    guard nameParser.read(while: ")") + 1 == transforms.count else {
+                        throw Error.unfinishedName
                     }
                 case "(":
                     // Parse the next transform
