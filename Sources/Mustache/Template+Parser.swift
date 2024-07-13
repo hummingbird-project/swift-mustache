@@ -308,9 +308,13 @@ extension MustacheTemplate {
         if nameParser.reachedEnd() {
             return (text, [])
         } else {
+            // parse function parameter, as we have just parsed a function name
+            guard nameParser.current() == "(" else { throw Error.unfinishedName }
+            nameParser.unsafeAdvance()
+
             var transforms: [Substring] = [string]
             var parameterName: Substring?
-
+            
             func parseTransforms() throws {
                 // at this point, the parameter-name must have been a transform, so append
                 // it to the array
@@ -335,10 +339,6 @@ extension MustacheTemplate {
                     throw Error.unfinishedName
                 }
             }
-
-            // parse function parameter, as we have just parsed a function name
-            guard nameParser.current() == "(" else { throw Error.unfinishedName }
-            nameParser.unsafeAdvance()
             try parseTransforms()
 
             guard nameParser.reachedEnd() else { throw Error.unfinishedName }
