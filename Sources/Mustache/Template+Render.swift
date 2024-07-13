@@ -190,7 +190,8 @@ extension MustacheTemplate {
         // run transform on the current child
         for transform in transforms.reversed() {
             if let runnable = child as? MustacheTransformable,
-               let transformed = runnable.transform(transform) {
+               let transformed = runnable.transform(transform) 
+            {
                 child = transformed
                 continue
             }
