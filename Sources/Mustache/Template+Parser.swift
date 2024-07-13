@@ -312,9 +312,12 @@ extension MustacheTemplate {
             var parameterName: Substring?
 
             func parseTransforms() throws {
+                // at this point, the parameter-name must have been a transform, so append
+                // it to the array
                 if let previous = parameterName {
                     transforms.append(previous)
                 }
+                // read the next parameter-name candidate
                 parameterName = nameParser.read(while: self.sectionNameCharsWithoutBrackets)
                 switch nameParser.current() {
                 case ")":
