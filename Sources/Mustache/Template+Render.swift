@@ -101,7 +101,7 @@ extension MustacheTemplate {
     /// - Returns: Rendered text
     func renderSection(_ child: Any?, with template: MustacheTemplate, context: MustacheContext) -> String {
         switch child {
-        case let array as MustacheSequence:
+        case let array as any MustacheSequence:
             return array.renderSection(with: template, context: context)
         case let bool as Bool:
             return bool ? template.render(context: context) : ""
@@ -124,7 +124,7 @@ extension MustacheTemplate {
     /// - Returns: Rendered text
     func renderInvertedSection(_ child: Any?, with template: MustacheTemplate, context: MustacheContext) -> String {
         switch child {
-        case let array as MustacheSequence:
+        case let array as any MustacheSequence:
             return array.renderInvertedSection(with: template, context: context)
         case let bool as Bool:
             return bool ? "" : template.render(context: context)

@@ -13,14 +13,9 @@
 //===----------------------------------------------------------------------===//
 
 /// Protocol for objects that can be rendered as a sequence in Mustache
-protocol MustacheSequence {
-    /// Render section using template
-    func renderSection(with template: MustacheTemplate, context: MustacheContext) -> String
-    /// Render inverted section using template
-    func renderInvertedSection(with template: MustacheTemplate, context: MustacheContext) -> String
-}
+public protocol MustacheSequence: Sequence {}
 
-extension Sequence {
+extension MustacheSequence {
     /// Render section using template
     func renderSection(with template: MustacheTemplate, context: MustacheContext) -> String {
         var string = ""
