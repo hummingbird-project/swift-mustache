@@ -80,6 +80,48 @@ final class TransformTests: XCTestCase {
         """)
     }
 
+    func testDoubleSequenceTransformWorks() throws {
+        let template = try MustacheTemplate(string: """
+        {{#repo}}
+        {{count(reversed(numbers))}}
+        {{/repo}}
+
+        """)
+        let object: [String: Any] = ["repo": ["numbers": [1, 2, 3]]]
+        XCTAssertEqual(template.render(object), """
+        3
+
+        """)
+    }
+
+    func testMultipleTransformWorks() throws {
+        let template = try MustacheTemplate(string: """
+        {{#repo}}
+        {{minusone(plusone(last(reversed(numbers))))}}
+        {{/repo}}
+
+        """)
+        let object: [String: Any] = ["repo": ["numbers": [5, 4, 3]]]
+        XCTAssertEqual(template.render(object), """
+        5
+
+        """)
+    }
+
+    func testNestedTransformWorks() throws {
+        let template = try MustacheTemplate(string: """
+        {{#repo}}
+        {{#uppercased(string)}}{{reversed(.)}}{{/uppercased(string)}}
+        {{/repo}}
+
+        """)
+        let object: [String: Any] = ["repo": ["string": "a123a"]]
+        XCTAssertEqual(template.render(object), """
+        A321A
+
+        """)
+    }
+
     func testEvenOdd() throws {
         let template = try MustacheTemplate(string: """
         {{#repo}}

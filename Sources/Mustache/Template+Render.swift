@@ -46,8 +46,9 @@ extension MustacheTemplate {
         switch token {
         case .text(let text):
             return text
-        case .variable(let variable, let transform):
-            if let child = getChild(named: variable, transform: transform, context: context) {
+
+        case .variable(let variable, let transforms):
+            if let child = getChild(named: variable, transforms: transforms, context: context) {
                 if let template = child as? MustacheTemplate {
                     return template.render(context: context)
                 } else if let renderable = child as? MustacheCustomRenderable {
@@ -56,20 +57,22 @@ extension MustacheTemplate {
                     return context.contentType.escapeText(String(describing: child))
                 }
             }
-        case .unescapedVariable(let variable, let transform):
-            if let child = getChild(named: variable, transform: transform, context: context) {
+
+        case .unescapedVariable(let variable, let transforms):
+            if let child = getChild(named: variable, transforms: transforms, context: context) {
                 if let renderable = child as? MustacheCustomRenderable {
                     return renderable.renderText
                 } else {
                     return String(describing: child)
                 }
             }
-        case .section(let variable, let transform, let template):
-            let child = self.getChild(named: variable, transform: transform, context: context)
+
+        case .section(let variable, let transforms, let template):
+            let child = self.getChild(named: variable, transforms: transforms, context: context)
             return self.renderSection(child, with: template, context: context)
 
-        case .invertedSection(let variable, let transform, let template):
-            let child = self.getChild(named: variable, transform: transform, context: context)
+        case .invertedSection(let variable, let transforms, let template):
+            let child = self.getChild(named: variable, transforms: transforms, context: context)
             return self.renderInvertedSection(child, with: template, context: context)
 
         case .inheritedSection(let name, let template):
@@ -135,7 +138,7 @@ extension MustacheTemplate {
     }
 
     /// Get child object from variable name
-    func getChild(named name: String, transform: String?, context: MustacheContext) -> Any? {
+    func getChild(named name: String, transforms: [String], context: MustacheContext) -> Any? {
         func _getImmediateChild(named name: String, from object: Any) -> Any? {
             if let customBox = object as? MustacheParent {
                 return customBox.child(named: name)
@@ -171,7 +174,7 @@ extension MustacheTemplate {
         let child: Any?
         if name == "." {
             child = context.stack.last!
-        } else if name == "", transform != nil {
+        } else if name == "", !transforms.isEmpty {
             child = context.sequenceContext
         } else if name.first == "." {
             let nameSplit = name.split(separator: ".").map { String($0) }
@@ -180,14 +183,26 @@ extension MustacheTemplate {
             let nameSplit = name.split(separator: ".").map { String($0) }
             child = _getChildInStack(named: nameSplit[...], from: context.stack)
         }
-        // if we want to run a transform and the current child can have transforms applied to it then
-        // run transform on the current child
-        if let transform {
-            if let runnable = child as? MustacheTransformable {
-                return runnable.transform(transform)
-            }
+
+        // skip transforms if child is already nil
+        guard var child else {
             return nil
         }
+
+        // if we want to run a transform and the current child can have transforms applied to it then
+        // run transform on the current child
+        for transform in transforms.reversed() {
+            if let runnable = child as? MustacheTransformable,
+               let transformed = runnable.transform(transform)
+            {
+                child = transformed
+                continue
+            }
+
+            // return nil if transform is unsuccessful or has returned nil
+            return nil
+        }
+
         return child
     }
 }
