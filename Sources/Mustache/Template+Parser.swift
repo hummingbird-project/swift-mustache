@@ -311,39 +311,34 @@ extension MustacheTemplate {
             // parse function parameter, as we have just parsed a function name
             guard nameParser.current() == "(" else { throw Error.unfinishedName }
             nameParser.unsafeAdvance()
-
-            var transforms: [Substring] = [string]
-            var parameterName: Substring?
             
-            func parseTransforms() throws {
-                // at this point, the parameter-name must have been a transform, so append
-                // it to the array
-                if let previous = parameterName {
-                    transforms.append(previous)
-                }
+            func parseTransforms(existing: [Substring]) throws -> (Substring, [Substring]) {
                 // read the next parameter-name candidate
-                parameterName = nameParser.read(while: self.sectionNameCharsWithoutBrackets)
+                let name = nameParser.read(while: self.sectionNameCharsWithoutBrackets)
                 switch nameParser.current() {
                 case ")":
                     // Transforms are ending
                     nameParser.unsafeAdvance()
                     // We need to have a `)` for each transform that we've parsed
-                    guard nameParser.read(while: ")") + 1 == transforms.count else {
+                    guard nameParser.read(while: ")") + 1 == existing.count else {
                         throw Error.unfinishedName
                     }
+                    return (name, existing)
                 case "(":
                     // Parse the next transform
                     nameParser.unsafeAdvance()
-                    try parseTransforms()
+                    var transforms = existing
+                    transforms.append(name)
+                    return try parseTransforms(existing: transforms)
                 default:
                     throw Error.unfinishedName
                 }
             }
-            try parseTransforms()
+            let (parameterName, transforms) = try parseTransforms(existing: [string])
 
             guard nameParser.reachedEnd() else { throw Error.unfinishedName }
             /// force-unwrap: guaranteed parameterName is not nil
-            return (String(parameterName!), transforms.map(String.init))
+            return (String(parameterName), transforms.map(String.init))
         }
     }
 
