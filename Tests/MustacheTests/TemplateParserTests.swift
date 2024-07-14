@@ -62,7 +62,7 @@ private func isEqual(lhs: MustacheTemplate, rhs: MustacheTemplate) -> Bool {
     lhs.tokens == rhs.tokens
 }
 
-#if compiler(>=6.0)
+#if hasFeature(RetroactiveAttribute)
 extension MustacheTemplate: @retroactive Equatable {
     public static func == (lhs: MustacheTemplate, rhs: MustacheTemplate) -> Bool {
         isEqual(lhs: lhs, rhs: rhs)
@@ -95,7 +95,7 @@ private func isEqual(lhs: MustacheTemplate.Token, rhs: MustacheTemplate.Token) -
     }
 }
 
-#if compiler(>=6.0)
+#if hasFeature(RetroactiveAttribute)
 extension MustacheTemplate.Token: @retroactive Equatable {
     public static func == (lhs: MustacheTemplate.Token, rhs: MustacheTemplate.Token) -> Bool {
         isEqual(lhs: lhs, rhs: rhs)
