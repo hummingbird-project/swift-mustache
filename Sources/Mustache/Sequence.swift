@@ -28,14 +28,14 @@
 /// /// Receive the automatically-synthesized conformance to `MustacheSequence` for free.
 /// extension MyCustomMustacheSequence: MustacheSequence {}
 /// ```
-public protocol MustacheSequence {
+public protocol MustacheSequence: Sequence {
     /// Render section using template
     func renderSection(with template: MustacheTemplate, context: MustacheContext) -> String
     /// Render inverted section using template
     func renderInvertedSection(with template: MustacheTemplate, context: MustacheContext) -> String
 }
 
-extension Sequence {
+extension MustacheSequence {
     /// Render section using template
     public func renderSection(with template: MustacheTemplate, context: MustacheContext) -> String {
         var string = ""
