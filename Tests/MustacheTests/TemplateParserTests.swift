@@ -58,13 +58,19 @@ final class TemplateParserTests: XCTestCase {
     }
 }
 
-extension MustacheTemplate: Equatable {
+extension MustacheTemplate {
     public static func == (lhs: MustacheTemplate, rhs: MustacheTemplate) -> Bool {
         lhs.tokens == rhs.tokens
     }
 }
 
-extension MustacheTemplate.Token: Equatable {
+#if hasFeature(RetroactiveAttribute)
+extension MustacheTemplate: @retroactive Equatable {}
+#else
+extension MustacheTemplate: Equatable {}
+#endif
+
+extension MustacheTemplate.Token {
     public static func == (lhs: MustacheTemplate.Token, rhs: MustacheTemplate.Token) -> Bool {
         switch (lhs, rhs) {
         case (.text(let lhs), .text(let rhs)):
@@ -84,3 +90,9 @@ extension MustacheTemplate.Token: Equatable {
         }
     }
 }
+
+#if hasFeature(RetroactiveAttribute)
+extension MustacheTemplate.Token: @retroactive Equatable {}
+#else
+extension MustacheTemplate.Token: Equatable {}
+#endif
