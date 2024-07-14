@@ -13,7 +13,22 @@
 //===----------------------------------------------------------------------===//
 
 /// Protocol for objects that can be rendered as a sequence in Mustache
-protocol MustacheSequence {
+///
+/// You're not supposed to manually conform to this protocol.
+/// Instead, conform your type to `Sequence`, and then declare conformance to `MustacheSequence` too.
+/// This way you'll get the automatically-synthesized conformance of `Sequence` to `MustacheSequence`.
+///
+/// ```swift
+/// import Mustache
+///
+/// struct MyCustomMustacheSequence: Sequence {
+/// /// Provide necessary declarations so the type conforms to `Sequence`
+/// }
+///
+/// /// Receive the automatically-synthesized conformance to `MustacheSequence` for free.
+/// extension MyCustomMustacheSequence: MustacheSequence {}
+/// ```
+public protocol MustacheSequence {
     /// Render section using template
     func renderSection(with template: MustacheTemplate, context: MustacheContext) -> String
     /// Render inverted section using template
@@ -22,7 +37,7 @@ protocol MustacheSequence {
 
 extension Sequence {
     /// Render section using template
-    func renderSection(with template: MustacheTemplate, context: MustacheContext) -> String {
+    public func renderSection(with template: MustacheTemplate, context: MustacheContext) -> String {
         var string = ""
         var sequenceContext = MustacheSequenceContext(first: true)
 
@@ -43,7 +58,7 @@ extension Sequence {
     }
 
     /// Render inverted section using template
-    func renderInvertedSection(with template: MustacheTemplate, context: MustacheContext) -> String {
+    public func renderInvertedSection(with template: MustacheTemplate, context: MustacheContext) -> String {
         var iterator = makeIterator()
         if iterator.next() == nil {
             return template.render(context: context.withObject(self))
