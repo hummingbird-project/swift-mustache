@@ -58,60 +58,53 @@ final class TemplateParserTests: XCTestCase {
     }
 }
 
+private func isEqual(lhs: MustacheTemplate, rhs: MustacheTemplate) -> Bool {
+    lhs.tokens == rhs.tokens
+}
+
 #if compiler(>=6.0)
 extension MustacheTemplate: @retroactive Equatable {
     public static func == (lhs: MustacheTemplate, rhs: MustacheTemplate) -> Bool {
-        lhs.tokens == rhs.tokens
+        isEqual(lhs: lhs, rhs: rhs)
     }
 }
 #else
 extension MustacheTemplate: Equatable {
     public static func == (lhs: MustacheTemplate, rhs: MustacheTemplate) -> Bool {
-        lhs.tokens == rhs.tokens
+        isEqual(lhs: lhs, rhs: rhs)
     }
 }
 #endif
 
+private func isEqual(lhs: MustacheTemplate.Token, rhs: MustacheTemplate.Token) -> Bool {
+    switch (lhs, rhs) {
+    case (.text(let lhs), .text(let rhs)):
+        return lhs == rhs
+    case (.variable(let lhs, let lhs2), .variable(let rhs, let rhs2)):
+        return lhs == rhs && lhs2 == rhs2
+    case (.section(let lhs1, let lhs2, let lhs3), .section(let rhs1, let rhs2, let rhs3)):
+        return lhs1 == rhs1 && lhs2 == rhs2 && lhs3 == rhs3
+    case (.invertedSection(let lhs1, let lhs2, let lhs3), .invertedSection(let rhs1, let rhs2, let rhs3)):
+        return lhs1 == rhs1 && lhs2 == rhs2 && lhs3 == rhs3
+    case (.partial(let name1, let indent1, _), .partial(let name2, let indent2, _)):
+        return name1 == name2 && indent1 == indent2
+    case (.contentType(let contentType), .contentType(let contentType2)):
+        return type(of: contentType) == type(of: contentType2)
+    default:
+        return false
+    }
+}
+
 #if compiler(>=6.0)
 extension MustacheTemplate.Token: @retroactive Equatable {
     public static func == (lhs: MustacheTemplate.Token, rhs: MustacheTemplate.Token) -> Bool {
-        switch (lhs, rhs) {
-        case (.text(let lhs), .text(let rhs)):
-            return lhs == rhs
-        case (.variable(let lhs, let lhs2), .variable(let rhs, let rhs2)):
-            return lhs == rhs && lhs2 == rhs2
-        case (.section(let lhs1, let lhs2, let lhs3), .section(let rhs1, let rhs2, let rhs3)):
-            return lhs1 == rhs1 && lhs2 == rhs2 && lhs3 == rhs3
-        case (.invertedSection(let lhs1, let lhs2, let lhs3), .invertedSection(let rhs1, let rhs2, let rhs3)):
-            return lhs1 == rhs1 && lhs2 == rhs2 && lhs3 == rhs3
-        case (.partial(let name1, let indent1, _), .partial(let name2, let indent2, _)):
-            return name1 == name2 && indent1 == indent2
-        case (.contentType(let contentType), .contentType(let contentType2)):
-            return type(of: contentType) == type(of: contentType2)
-        default:
-            return false
-        }
+        isEqual(lhs: lhs, rhs: rhs)
     }
 }
 #else
 extension MustacheTemplate.Token: Equatable {
     public static func == (lhs: MustacheTemplate.Token, rhs: MustacheTemplate.Token) -> Bool {
-        switch (lhs, rhs) {
-        case (.text(let lhs), .text(let rhs)):
-            return lhs == rhs
-        case (.variable(let lhs, let lhs2), .variable(let rhs, let rhs2)):
-            return lhs == rhs && lhs2 == rhs2
-        case (.section(let lhs1, let lhs2, let lhs3), .section(let rhs1, let rhs2, let rhs3)):
-            return lhs1 == rhs1 && lhs2 == rhs2 && lhs3 == rhs3
-        case (.invertedSection(let lhs1, let lhs2, let lhs3), .invertedSection(let rhs1, let rhs2, let rhs3)):
-            return lhs1 == rhs1 && lhs2 == rhs2 && lhs3 == rhs3
-        case (.partial(let name1, let indent1, _), .partial(let name2, let indent2, _)):
-            return name1 == name2 && indent1 == indent2
-        case (.contentType(let contentType), .contentType(let contentType2)):
-            return type(of: contentType) == type(of: contentType2)
-        default:
-            return false
-        }
+        isEqual(lhs: lhs, rhs: rhs)
     }
 }
 #endif
