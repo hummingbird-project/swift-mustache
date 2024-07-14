@@ -311,7 +311,7 @@ extension MustacheTemplate {
             // parse function parameter, as we have just parsed a function name
             guard nameParser.current() == "(" else { throw Error.unfinishedName }
             nameParser.unsafeAdvance()
-            
+
             func parseTransforms(existing: [Substring]) throws -> (Substring, [Substring]) {
                 let name = nameParser.read(while: self.sectionNameCharsWithoutBrackets)
                 switch nameParser.current() {
@@ -320,7 +320,8 @@ extension MustacheTemplate {
                     nameParser.unsafeAdvance()
                     // We need to have a `)` for each transform that we've parsed
                     guard nameParser.read(while: ")") + 1 == existing.count,
-                          nameParser.reachedEnd() else {
+                          nameParser.reachedEnd() 
+                    else {
                         throw Error.unfinishedName
                     }
                     return (name, existing)

@@ -182,7 +182,7 @@ extension MustacheTemplate {
         }
 
         // skip transforms if child is already nil
-        guard var child = child else {
+        guard var child else {
             return nil
         }
 
