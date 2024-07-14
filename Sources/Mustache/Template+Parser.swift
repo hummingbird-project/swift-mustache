@@ -313,20 +313,21 @@ extension MustacheTemplate {
             nameParser.unsafeAdvance()
             
             func parseTransforms(existing: [Substring]) throws -> (Substring, [Substring]) {
-                // read the next parameter-name candidate
                 let name = nameParser.read(while: self.sectionNameCharsWithoutBrackets)
                 switch nameParser.current() {
                 case ")":
                     // Transforms are ending
                     nameParser.unsafeAdvance()
                     // We need to have a `)` for each transform that we've parsed
-                    guard nameParser.read(while: ")") + 1 == existing.count else {
+                    guard nameParser.read(while: ")") + 1 == existing.count,
+                          nameParser.reachedEnd() else {
                         throw Error.unfinishedName
                     }
                     return (name, existing)
                 case "(":
                     // Parse the next transform
                     nameParser.unsafeAdvance()
+
                     var transforms = existing
                     transforms.append(name)
                     return try parseTransforms(existing: transforms)
@@ -336,8 +337,6 @@ extension MustacheTemplate {
             }
             let (parameterName, transforms) = try parseTransforms(existing: [string])
 
-            guard nameParser.reachedEnd() else { throw Error.unfinishedName }
-            /// force-unwrap: guaranteed parameterName is not nil
             return (String(parameterName), transforms.map(String.init))
         }
     }
