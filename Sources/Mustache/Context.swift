@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 /// Context while rendering mustache tokens
-public struct MustacheContext {
+struct MustacheContext {
     let stack: [Any]
     let sequenceContext: MustacheSequenceContext?
     let indentation: String?
