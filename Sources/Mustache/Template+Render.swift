@@ -46,6 +46,7 @@ extension MustacheTemplate {
         switch token {
         case .text(let text):
             return text
+
         case .variable(let variable, let transforms):
             if let child = getChild(named: variable, transforms: transforms, context: context) {
                 if let template = child as? MustacheTemplate {
@@ -56,6 +57,7 @@ extension MustacheTemplate {
                     return context.contentType.escapeText(String(describing: child))
                 }
             }
+
         case .unescapedVariable(let variable, let transforms):
             if let child = getChild(named: variable, transforms: transforms, context: context) {
                 if let renderable = child as? MustacheCustomRenderable {
@@ -64,6 +66,7 @@ extension MustacheTemplate {
                     return String(describing: child)
                 }
             }
+
         case .section(let variable, let transforms, let template):
             let child = self.getChild(named: variable, transforms: transforms, context: context)
             return self.renderSection(child, with: template, context: context)
@@ -190,7 +193,7 @@ extension MustacheTemplate {
         // run transform on the current child
         for transform in transforms.reversed() {
             if let runnable = child as? MustacheTransformable,
-               let transformed = runnable.transform(transform) 
+               let transformed = runnable.transform(transform)
             {
                 child = transformed
                 continue

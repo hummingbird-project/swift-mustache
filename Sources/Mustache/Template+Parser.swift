@@ -320,7 +320,7 @@ extension MustacheTemplate {
                     nameParser.unsafeAdvance()
                     // We need to have a `)` for each transform that we've parsed
                     guard nameParser.read(while: ")") + 1 == existing.count,
-                          nameParser.reachedEnd() 
+                          nameParser.reachedEnd()
                     else {
                         throw Error.unfinishedName
                     }
