@@ -86,7 +86,19 @@ final class MustacheSpecTests: XCTestCase {
 
             func XCTAssertSpecEqual(_ result: String?, _ test: Spec.Test) {
                 if result != test.expected {
-                    XCTFail("\n\(test.desc)result:\n\(result ?? "nil")\nexpected:\n\(test.expected)")
+                    XCTFail("""
+                    \(test.name)
+                    \(test.desc)
+                    template:
+                    \(test.template)
+                    data:
+                    \(test.data.value)
+                    \(test.partials.map { "partials:\n\($0)" } ?? "")
+                    result:
+                    \(result ?? "nil")
+                    expected:
+                    \(test.expected)
+                    """)
                 }
             }
         }
@@ -104,10 +116,26 @@ final class MustacheSpecTests: XCTestCase {
         let data = try Data(contentsOf: url)
         let spec = try JSONDecoder().decode(Spec.self, from: data)
 
-        print(spec.overview)
         let date = Date()
         for test in spec.tests {
             guard !ignoring.contains(test.name) else { continue }
+            XCTAssertNoThrow(try test.run())
+        }
+        print(-date.timeIntervalSinceNow)
+    }
+
+    func testSpec(name: String, only: [String]) throws {
+        let url = URL(string: "https://raw.githubusercontent.com/mustache/spec/master/specs/\(name).json")!
+        try testSpec(url: url, only: only)
+    }
+
+    func testSpec(url: URL, only: [String]) throws {
+        let data = try Data(contentsOf: url)
+        let spec = try JSONDecoder().decode(Spec.self, from: data)
+
+        let date = Date()
+        for test in spec.tests {
+            guard only.contains(test.name) else { continue }
             XCTAssertNoThrow(try test.run())
         }
         print(-date.timeIntervalSinceNow)
@@ -138,7 +166,12 @@ final class MustacheSpecTests: XCTestCase {
     }
 
     func testInheritanceSpec() throws {
-        try XCTSkipIf(true) // inheritance spec has been updated and has added requirements, we don't yet support
-        try self.testSpec(name: "~inheritance")
+        try self.testSpec(
+            name: "~inheritance",
+            ignoring: [
+                "Intrinsic indentation",
+                "Nested block reindentation",
+            ]
+        )
     }
 }
