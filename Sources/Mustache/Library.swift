@@ -78,7 +78,6 @@ public struct MustacheLibrary: Sendable {
         return template.render(object, library: self)
     }
 
-    #if DEBUG
     /// Render object using templated with name
     /// - Parameters:
     ///   - object: Object to render
@@ -87,9 +86,12 @@ public struct MustacheLibrary: Sendable {
     /// - Returns: Rendered text
     public func render(_ object: Any, withTemplate name: String, reload: Bool) -> String? {
         guard let template = templates[name] else { return nil }
+        #if DEBUG
         return template.render(object, library: self, reload: reload)
+        #else
+        return template.render(object, library: self)
+        #endif
     }
-    #endif
 
     /// Error returned by init() when parser fails
     public struct ParserError: Swift.Error {
