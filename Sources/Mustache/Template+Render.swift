@@ -2,7 +2,7 @@
 //
 // This source file is part of the Hummingbird server framework project
 //
-// Copyright (c) 2021-2021 the Hummingbird authors
+// Copyright (c) 2021-2024 the Hummingbird authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -84,7 +84,20 @@ extension MustacheTemplate {
             }
 
         case .partial(let name, let indentation, let overrides):
-            if let template = context.library?.getTemplate(named: name) {
+            if var template = context.library?.getTemplate(named: name) {
+                #if DEBUG
+                if context.reloadPartials {
+                    guard let filename = template.filename else {
+                        preconditionFailure("Can only use reload if template was generated from a file")
+                    }
+                    do {
+                        guard let partialTemplate = try MustacheTemplate(filename: filename) else { return "Cannot find template at \(filename)" }
+                        template = partialTemplate
+                    } catch {
+                        return "\(error)"
+                    }
+                }
+                #endif
                 return template.render(context: context.withPartial(indented: indentation, inheriting: overrides))
             }
 

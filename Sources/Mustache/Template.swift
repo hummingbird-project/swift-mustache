@@ -2,7 +2,7 @@
 //
 // This source file is part of the Hummingbird server framework project
 //
-// Copyright (c) 2021-2021 the Hummingbird authors
+// Copyright (c) 2021-2024 the Hummingbird authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -19,17 +19,44 @@ public struct MustacheTemplate: Sendable {
     /// - Throws: MustacheTemplate.Error
     public init(string: String) throws {
         self.tokens = try Self.parse(string)
+        self.filename = nil
     }
 
     /// Render object using this template
-    /// - Parameter object: Object to render
+    /// - Parameters
+    ///   - object: Object to render
+    ///   - library: library template uses to access partials
     /// - Returns: Rendered text
     public func render(_ object: Any, library: MustacheLibrary? = nil) -> String {
         self.render(context: .init(object, library: library))
     }
 
+    /// Render object using this template
+    /// - Parameters
+    ///   - object: Object to render
+    ///   - library: library template uses to access partials
+    ///   - reload: Should I reload this template when rendering. This is only available in debug builds
+    /// - Returns: Rendered text
+    public func render(_ object: Any, library: MustacheLibrary? = nil, reload: Bool) -> String {
+        #if DEBUG
+        if reload {
+            guard let filename else {
+                preconditionFailure("Can only use reload if template was generated from a file")
+            }
+            do {
+                guard let template = try MustacheTemplate(filename: filename) else { return "Cannot find template at \(filename)" }
+                return template.render(context: .init(object, library: library, reloadPartials: reload))
+            } catch {
+                return "\(error)"
+            }
+        }
+        #endif
+        return self.render(context: .init(object, library: library))
+    }
+
     internal init(_ tokens: [Token]) {
         self.tokens = tokens
+        self.filename = nil
     }
 
     enum Token: Sendable {
@@ -45,4 +72,5 @@ public struct MustacheTemplate: Sendable {
     }
 
     var tokens: [Token]
+    let filename: String?
 }

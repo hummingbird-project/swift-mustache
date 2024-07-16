@@ -2,7 +2,7 @@
 //
 // This source file is part of the Hummingbird server framework project
 //
-// Copyright (c) 2021-2021 the Hummingbird authors
+// Copyright (c) 2021-2024 the Hummingbird authors
 // Licensed under Apache License v2.0
 //
 // See LICENSE.txt for license information
@@ -76,6 +76,21 @@ public struct MustacheLibrary: Sendable {
     public func render(_ object: Any, withTemplate name: String) -> String? {
         guard let template = templates[name] else { return nil }
         return template.render(object, library: self)
+    }
+
+    /// Render object using templated with name
+    /// - Parameters:
+    ///   - object: Object to render
+    ///   - name: Name of template
+    ///   - reload: Reload templates when rendering. This is only available in debug builds
+    /// - Returns: Rendered text
+    public func render(_ object: Any, withTemplate name: String, reload: Bool) -> String? {
+        guard let template = templates[name] else { return nil }
+        #if DEBUG
+        return template.render(object, library: self, reload: reload)
+        #else
+        return template.render(object, library: self)
+        #endif
     }
 
     /// Error returned by init() when parser fails
