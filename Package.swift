@@ -7,6 +7,7 @@ let package = Package(
     name: "swift-mustache",
     platforms: [.macOS(.v10_15), .iOS(.v13), .tvOS(.v13), .watchOS(.v6)],
     products: [
+        .executable(name: "mustache", targets: ["CommandLineApp"]),
         .library(name: "Mustache", targets: ["Mustache"]),
     ],
     dependencies: [
@@ -16,13 +17,12 @@ let package = Package(
     targets: [
         .target(name: "Mustache", dependencies: []),
         .executableTarget(
-            name: "mustache",
+            name: "CommandLineApp",
             dependencies: [
                 "Mustache",
                 .product(name: "ArgumentParser", package: "swift-argument-parser"),
                 .product(name: "Yams", package: "yams"),
-            ],
-            path: "Sources/MustacheApp"
+            ]
         ),
         .testTarget(name: "MustacheTests", dependencies: ["Mustache"]),
     ]
