@@ -9,9 +9,21 @@ let package = Package(
     products: [
         .library(name: "Mustache", targets: ["Mustache"]),
     ],
-    dependencies: [],
+    dependencies: [
+        .package(url: "https://github.com/apple/swift-argument-parser", from: "1.4.0"),
+        .package(url: "https://github.com/jpsim/yams", from: "5.1.0"),
+    ],
     targets: [
         .target(name: "Mustache", dependencies: []),
+        .executableTarget(
+            name: "mustache",
+            dependencies: [
+                "Mustache",
+                .product(name: "ArgumentParser", package: "swift-argument-parser"),
+                .product(name: "Yams", package: "yams"),
+            ],
+            path: "Sources/MustacheApp"
+        ),
         .testTarget(name: "MustacheTests", dependencies: ["Mustache"]),
     ]
 )
