@@ -106,7 +106,8 @@ struct MustacheContext {
             indentation: indentation,
             inherited: self.inherited,
             contentType: self.contentType,
-            library: self.library
+            library: self.library,
+            reloadPartials: self.reloadPartials
         )
     }
 
