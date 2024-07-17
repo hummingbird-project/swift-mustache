@@ -3,11 +3,37 @@ import Foundation
 import Mustache
 import Yams
 
+struct MustacheAppError: Error, CustomStringConvertible {
+    let description: String
+
+    init(_ description: String) {
+        self.description = description
+    }
+}
+
 @main
 struct MustacheApp: ParsableCommand {
-    var configuration: CommandConfiguration {
-        .init(commandName: "mustache")
-    }
+    static let configuration = CommandConfiguration(
+        commandName: "mustache",
+        abstract: """
+        Mustache is a logic-less templating system for rendering
+        text files.
+        """,
+        usage: """
+        mustache <context-filename> <template-filename>
+        mustache - <template-filename>
+        """,
+        discussion: """
+        The mustache command processes a Mustache template with a context 
+        defined in YAML/JSON. While the template is always loaded from a file
+        the context can be supplied to the process either from a file or from
+        stdin.
+
+        Examples:
+        mustache context.yml template.mustache
+        cat context.yml | mustache - template.mustache
+        """
+    )
 
     @Argument(help: "Context file")
     var contextFile: String
@@ -17,7 +43,7 @@ struct MustacheApp: ParsableCommand {
 
     func run() throws {
         guard let templateString = loadString(filename: self.templateFile) else {
-            fatalError("Failed to load template file \(self.templateFile)")
+            throw MustacheAppError("Failed to load template file \(self.templateFile)")
         }
         let template = try MustacheTemplate(string: templateString)
         let context = try loadYaml(filename: self.contextFile)
@@ -25,23 +51,20 @@ struct MustacheApp: ParsableCommand {
         print(rendered)
     }
 
+    /// Load file into string
     func loadString(filename: String) -> String? {
         guard let data = FileManager.default.contents(atPath: filename) else { return nil }
         return String(decoding: data, as: Unicode.UTF8.self)
     }
 
+    /// Pass stdin into a string
     func loadStdin() -> String {
-        let input = AnyIterator { readLine() }.joined(separator: "\n")
+        let input = AnyIterator { readLine(strippingNewline: false) }.joined(separator: "")
         return input
     }
 
     func loadContext(filename: String) throws -> Any {
-        let pathExtension = URL(fileURLWithPath: filename).pathExtension
-        if pathExtension == "json" {
-            return try self.loadJSON(filename: filename)
-        } else {
-            return try self.loadYaml(filename: filename)
-        }
+        return try self.loadYaml(filename: filename)
     }
 
     func loadYaml(filename: String) throws -> Any {
@@ -58,30 +81,13 @@ struct MustacheApp: ParsableCommand {
             yamlString = self.loadStdin()
         } else {
             guard let string = loadString(filename: filename) else {
-                fatalError("Failed to load context file \(filename)")
+                throw MustacheAppError("Failed to load context file \(filename)")
             }
             yamlString = string
         }
         guard let yaml = try Yams.load(yaml: yamlString) else {
-            fatalError("YAML context file is empty\(filename)")
+            throw MustacheAppError("YAML context file is empty\(filename)")
         }
         return convertObject(yaml)
-    }
-
-    func loadJSON(filename: String) throws -> Any {
-        func convertObject(_ object: Any) -> Any {
-            guard var dictionary = object as? [String: Any] else { return object }
-            for (key, value) in dictionary {
-                dictionary[key] = convertObject(value)
-            }
-            return dictionary
-        }
-
-        guard let jsonData = FileManager.default.contents(atPath: filename) else {
-            fatalError("Failed to load json file \(filename)")
-        }
-        let json = try JSONSerialization.jsonObject(with: jsonData)
-
-        return json
     }
 }
