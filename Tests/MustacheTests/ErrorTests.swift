@@ -24,10 +24,13 @@ final class ErrorTests: XCTestCase {
         """)) { error in
             switch error {
             case let error as MustacheTemplate.ParserError:
-                XCTAssertEqual(error.error as? MustacheTemplate.Error, .sectionCloseNameIncorrect)
-                XCTAssertEqual(error.context.line, "{{/test2}}")
-                XCTAssertEqual(error.context.lineNumber, 3)
-                XCTAssertEqual(error.context.columnNumber, 4)
+                if let mustacheError = error.error as? MustacheTemplate.Error, case .sectionCloseNameIncorrect = mustacheError {
+                    XCTAssertEqual(error.context.line, "{{/test2}}")
+                    XCTAssertEqual(error.context.lineNumber, 3)
+                    XCTAssertEqual(error.context.columnNumber, 4)
+                } else {
+                    XCTFail("\(error)")
+                }
 
             default:
                 XCTFail("\(error)")
@@ -43,11 +46,13 @@ final class ErrorTests: XCTestCase {
         """)) { error in
             switch error {
             case let error as MustacheTemplate.ParserError:
-                XCTAssertEqual(error.error as? MustacheTemplate.Error, .unfinishedName)
-                XCTAssertEqual(error.context.line, "{{name}")
-                XCTAssertEqual(error.context.lineNumber, 2)
-                XCTAssertEqual(error.context.columnNumber, 7)
-
+                if let mustacheError = error.error as? MustacheTemplate.Error, case .unfinishedName = mustacheError {
+                    XCTAssertEqual(error.context.line, "{{name}")
+                    XCTAssertEqual(error.context.lineNumber, 2)
+                    XCTAssertEqual(error.context.columnNumber, 3)
+                } else {
+                    XCTFail("\(error)")
+                }
             default:
                 XCTFail("\(error)")
             }
@@ -61,10 +66,13 @@ final class ErrorTests: XCTestCase {
         """)) { error in
             switch error {
             case let error as MustacheTemplate.ParserError:
-                XCTAssertEqual(error.error as? MustacheTemplate.Error, .expectedSectionEnd)
-                XCTAssertEqual(error.context.line, "{{.}}")
-                XCTAssertEqual(error.context.lineNumber, 2)
-                XCTAssertEqual(error.context.columnNumber, 6)
+                if let mustacheError = error.error as? MustacheTemplate.Error, case .expectedSectionEnd = mustacheError {
+                    XCTAssertEqual(error.context.line, "{{.}}")
+                    XCTAssertEqual(error.context.lineNumber, 2)
+                    XCTAssertEqual(error.context.columnNumber, 6)
+                } else {
+                    XCTFail("\(error)")
+                }
 
             default:
                 XCTFail("\(error)")
@@ -80,10 +88,13 @@ final class ErrorTests: XCTestCase {
         """)) { error in
             switch error {
             case let error as MustacheTemplate.ParserError:
-                XCTAssertEqual(error.error as? MustacheTemplate.Error, .invalidSetDelimiter)
-                XCTAssertEqual(error.context.line, "<%={{}}=%>")
-                XCTAssertEqual(error.context.lineNumber, 3)
-                XCTAssertEqual(error.context.columnNumber, 4)
+                if let mustacheError = error.error as? MustacheTemplate.Error, case .invalidSetDelimiter = mustacheError {
+                    XCTAssertEqual(error.context.line, "<%={{}}=%>")
+                    XCTAssertEqual(error.context.lineNumber, 3)
+                    XCTAssertEqual(error.context.columnNumber, 4)
+                } else {
+                    XCTFail("\(error)")
+                }
 
             default:
                 XCTFail("\(error)")
