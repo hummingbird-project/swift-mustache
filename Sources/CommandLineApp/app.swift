@@ -48,7 +48,7 @@ struct MustacheApp: ParsableCommand {
         let template = try MustacheTemplate(string: templateString)
         let context = try loadYaml(filename: self.contextFile)
         let rendered = template.render(context)
-        print(rendered)
+        print(rendered, terminator: "")
     }
 
     /// Load file into string
