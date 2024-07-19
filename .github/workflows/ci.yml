@@ -11,6 +11,25 @@ on:
   workflow_dispatch:
 
 jobs:
+  macOS:
+    runs-on: macos-14
+    timeout-minutes: 15
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: SPM tests
+      run: swift test --enable-code-coverage
+    - name: Convert coverage files
+      run: |
+        xcrun llvm-cov export -format "lcov" \
+          .build/debug/swift-mustachePackageTests.xctest/Contents/MacOs/swift-mustachePackageTests \
+          -ignore-filename-regex="\/Tests\/" \
+          -ignore-filename-regex="\/Benchmarks\/" \
+          -instr-profile=.build/debug/codecov/default.profdata > info.lcov
+    - name: Upload to codecov.io
+      uses: codecov/codecov-action@v4
+      with:
+        file: info.lcov
   linux:
     runs-on: ubuntu-latest
     timeout-minutes: 15
