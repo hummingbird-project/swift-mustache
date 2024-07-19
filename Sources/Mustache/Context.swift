@@ -97,10 +97,11 @@ struct MustacheContext {
 
     /// return context with indent information for invoking an inheritance block
     func withBlockExpansion(indented: String?) -> MustacheContext {
-        let indentation: String? = if let indented {
-            (self.indentation ?? "") + indented
+        let indentation: String?
+        if let indented {
+            indentation = (self.indentation ?? "") + indented
         } else {
-            self.indentation
+            indentation = self.indentation
         }
         return .init(
             stack: self.stack,
