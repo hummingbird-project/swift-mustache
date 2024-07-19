@@ -68,19 +68,21 @@ struct MustacheContext {
 
     /// return context with indent and parameter information for invoking a partial
     func withPartial(indented: String?, inheriting: [String: MustacheTemplate]?) -> MustacheContext {
-        let indentation: String? = if let indented {
-            (self.indentation ?? "") + indented
+        let indentation: String?
+        if let indented {
+            indentation = (self.indentation ?? "") + indented
         } else {
-            self.indentation
+            indentation = self.indentation
         }
-        let inherits: [String: MustacheTemplate]? = if let inheriting {
+        let inherits: [String: MustacheTemplate]?
+        if let inheriting {
             if let originalInherits = self.inherited {
-                originalInherits.merging(inheriting) { value, _ in value }
+                inherits = originalInherits.merging(inheriting) { value, _ in value }
             } else {
-                inheriting
+                inherits = inheriting
             }
         } else {
-            self.inherited
+            inherits = self.inherited
         }
         return .init(
             stack: self.stack,
