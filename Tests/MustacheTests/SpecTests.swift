@@ -13,11 +13,12 @@
 //===----------------------------------------------------------------------===//
 
 import Foundation
+import Mustache
+import XCTest
+
 #if os(Linux) || os(Windows)
 import FoundationNetworking
 #endif
-import Mustache
-import XCTest
 
 public struct AnyDecodable: Decodable {
     public let value: Any
@@ -27,8 +28,8 @@ public struct AnyDecodable: Decodable {
     }
 }
 
-public extension AnyDecodable {
-    init(from decoder: Decoder) throws {
+extension AnyDecodable {
+    public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
 
         if container.decodeNil() {
@@ -48,7 +49,9 @@ public extension AnyDecodable {
         } else if let dictionary = try? container.decode([String: AnyDecodable].self) {
             self.init(dictionary.mapValues { $0.value })
         } else {
-            throw DecodingError.dataCorruptedError(in: container, debugDescription: "AnyDecodable value cannot be decoded")
+            throw DecodingError.dataCorruptedError(
+                in: container, debugDescription: "AnyDecodable value cannot be decoded"
+            )
         }
     }
 }
@@ -86,19 +89,20 @@ final class MustacheSpecTests: XCTestCase {
 
             func XCTAssertSpecEqual(_ result: String?, _ test: Spec.Test) {
                 if result != test.expected {
-                    XCTFail("""
-                    \(test.name)
-                    \(test.desc)
-                    template:
-                    \(test.template)
-                    data:
-                    \(test.data.value)
-                    \(test.partials.map { "partials:\n\($0)" } ?? "")
-                    result:
-                    \(result ?? "nil")
-                    expected:
-                    \(test.expected)
-                    """)
+                    XCTFail(
+                        """
+                        \(test.name)
+                        \(test.desc)
+                        template:
+                        \(test.template)
+                        data:
+                        \(test.data.value)
+                        \(test.partials.map { "partials:\n\($0)" } ?? "")
+                        result:
+                        \(result ?? "nil")
+                        expected:
+                        \(test.expected)
+                        """)
                 }
             }
         }
@@ -107,13 +111,18 @@ final class MustacheSpecTests: XCTestCase {
         let tests: [Test]
     }
 
-    func testSpec(name: String, ignoring: [String] = []) throws {
-        let url = URL(string: "https://raw.githubusercontent.com/mustache/spec/master/specs/\(name).json")!
-        try testSpec(url: url, ignoring: ignoring)
+    func testSpec(name: String, ignoring: [String] = []) async throws {
+        let url = URL(
+            string: "https://raw.githubusercontent.com/mustache/spec/master/specs/\(name).json")!
+        try await testSpec(url: url, ignoring: ignoring)
     }
 
-    func testSpec(url: URL, ignoring: [String] = []) throws {
+    func testSpec(url: URL, ignoring: [String] = []) async throws {
+        #if compiler(>=6.0)
+        let (data, _) = try await URLSession.shared.data(from: url)
+        #else
         let data = try Data(contentsOf: url)
+        #endif
         let spec = try JSONDecoder().decode(Spec.self, from: data)
 
         let date = Date()
@@ -124,13 +133,18 @@ final class MustacheSpecTests: XCTestCase {
         print(-date.timeIntervalSinceNow)
     }
 
-    func testSpec(name: String, only: [String]) throws {
-        let url = URL(string: "https://raw.githubusercontent.com/mustache/spec/master/specs/\(name).json")!
-        try testSpec(url: url, only: only)
+    func testSpec(name: String, only: [String]) async throws {
+        let url = URL(
+            string: "https://raw.githubusercontent.com/mustache/spec/master/specs/\(name).json")!
+        try await testSpec(url: url, only: only)
     }
 
-    func testSpec(url: URL, only: [String]) throws {
+    func testSpec(url: URL, only: [String]) async throws {
+        #if compiler(>=6.0)
+        let (data, _) = try await URLSession.shared.data(from: url)
+        #else
         let data = try Data(contentsOf: url)
+        #endif
         let spec = try JSONDecoder().decode(Spec.self, from: data)
 
         let date = Date()
@@ -141,32 +155,32 @@ final class MustacheSpecTests: XCTestCase {
         print(-date.timeIntervalSinceNow)
     }
 
-    func testCommentsSpec() throws {
-        try self.testSpec(name: "comments")
+    func testCommentsSpec() async throws {
+        try await self.testSpec(name: "comments")
     }
 
-    func testDelimitersSpec() throws {
-        try self.testSpec(name: "delimiters")
+    func testDelimitersSpec() async throws {
+        try await self.testSpec(name: "delimiters")
     }
 
-    func testInterpolationSpec() throws {
-        try self.testSpec(name: "interpolation")
+    func testInterpolationSpec() async throws {
+        try await self.testSpec(name: "interpolation")
     }
 
-    func testInvertedSpec() throws {
-        try self.testSpec(name: "inverted")
+    func testInvertedSpec() async throws {
+        try await self.testSpec(name: "inverted")
     }
 
-    func testPartialsSpec() throws {
-        try self.testSpec(name: "partials")
+    func testPartialsSpec() async throws {
+        try await self.testSpec(name: "partials")
     }
 
-    func testSectionsSpec() throws {
-        try self.testSpec(name: "sections")
+    func testSectionsSpec() async throws {
+        try await self.testSpec(name: "sections")
     }
 
-    func testInheritanceSpec() throws {
-        try self.testSpec(
+    func testInheritanceSpec() async throws {
+        try await self.testSpec(
             name: "~inheritance",
             ignoring: [
                 "Intrinsic indentation",
