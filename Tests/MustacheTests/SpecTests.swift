@@ -17,7 +17,7 @@ import Mustache
 import XCTest
 
 #if os(Linux) || os(Windows)
-    import FoundationNetworking
+import FoundationNetworking
 #endif
 
 public struct AnyDecodable: Decodable {
@@ -50,7 +50,8 @@ extension AnyDecodable {
             self.init(dictionary.mapValues { $0.value })
         } else {
             throw DecodingError.dataCorruptedError(
-                in: container, debugDescription: "AnyDecodable value cannot be decoded")
+                in: container, debugDescription: "AnyDecodable value cannot be decoded"
+            )
         }
     }
 }
@@ -118,9 +119,9 @@ final class MustacheSpecTests: XCTestCase {
 
     func testSpec(url: URL, ignoring: [String] = []) async throws {
         #if compiler(>=6.0)
-            let (data, _) = try await URLSession.shared.data(from: url)
+        let (data, _) = try await URLSession.shared.data(from: url)
         #else
-            let data = try Data(contentsOf: url)
+        let data = try Data(contentsOf: url)
         #endif
         let spec = try JSONDecoder().decode(Spec.self, from: data)
 
@@ -140,9 +141,9 @@ final class MustacheSpecTests: XCTestCase {
 
     func testSpec(url: URL, only: [String]) async throws {
         #if compiler(>=6.0)
-            let (data, _) = try await URLSession.shared.data(from: url)
+        let (data, _) = try await URLSession.shared.data(from: url)
         #else
-            let data = try Data(contentsOf: url)
+        let data = try Data(contentsOf: url)
         #endif
         let spec = try JSONDecoder().decode(Spec.self, from: data)
 
