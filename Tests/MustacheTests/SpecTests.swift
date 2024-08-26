@@ -69,7 +69,7 @@ final class MustacheSpecTests: XCTestCase {
             let expected: String
 
             func run() throws {
-                // print("Test: \(self.name)")
+                print("Test: \(self.name)")
                 if let partials = self.partials {
                     let template = try MustacheTemplate(string: self.template)
                     var templates: [String: MustacheTemplate] = ["__test__": template]
@@ -190,12 +190,6 @@ final class MustacheSpecTests: XCTestCase {
     }
 
     func testDynamicNamesSpec() async throws {
-        try await self.testSpec(
-            name: "~dynamic-names",
-            ignoring: [
-                "Dynamic Names - Composed Dereferencing",
-                "Dynamic Names - Double Dereferencing",
-            ]
-        )
+        try await self.testSpec(name: "~dynamic-names")
     }
 }
