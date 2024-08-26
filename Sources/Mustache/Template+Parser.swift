@@ -265,12 +265,15 @@ extension MustacheTemplate {
                 // skip whitespace
                 parser.read(while: \.isWhitespace)
                 let sectionName = try parsePartialName(&parser, state: state)
-                let name = if sectionName.first == "*" {
-                    String(sectionName.dropFirst())
+                let name: String
+                let dynamic: Bool
+                if sectionName.first == "*" {
+                    dynamic = true
+                    name = String(sectionName.dropFirst())
                 } else {
-                    sectionName
+                    dynamic = false
+                    name = sectionName
                 }
-                let dynamic = (sectionName.first == "*")
                 if whiteSpaceBefore.count > 0 {
                     tokens.append(.text(String(whiteSpaceBefore)))
                 }
