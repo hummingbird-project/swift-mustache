@@ -246,13 +246,13 @@ extension MustacheTemplate {
                 if self.isStandalone(&parser, state: state) {
                     setNewLine = true
                     if dynamic {
-                        tokens.append(.dynamicNamePartial(name, indentation: String(whiteSpaceBefore)))
+                        tokens.append(.dynamicNamePartial(name, indentation: String(whiteSpaceBefore), inherits: nil))
                     } else {
                         tokens.append(.partial(name, indentation: String(whiteSpaceBefore), inherits: nil))
                     }
                 } else {
                     if dynamic {
-                        tokens.append(.dynamicNamePartial(name, indentation: nil))
+                        tokens.append(.dynamicNamePartial(name, indentation: nil, inherits: nil))
                     } else {
                         tokens.append(.partial(name, indentation: nil, inherits: nil))
                     }
@@ -262,14 +262,22 @@ extension MustacheTemplate {
             case "<":
                 // partial with inheritance
                 parser.unsafeAdvance()
-                let name = try parsePartialName(&parser, state: state)
+                // skip whitespace
+                parser.read(while: \.isWhitespace)
+                let sectionName = try parsePartialName(&parser, state: state)
+                let name = if sectionName.first == "*" {
+                    String(sectionName.dropFirst())
+                } else {
+                    sectionName
+                }
+                let dynamic = (sectionName.first == "*")
                 if whiteSpaceBefore.count > 0 {
                     tokens.append(.text(String(whiteSpaceBefore)))
                 }
                 if self.isStandalone(&parser, state: state) {
                     setNewLine = true
                 }
-                let sectionTokens = try parse(&parser, state: state.withInheritancePartial(name))
+                let sectionTokens = try parse(&parser, state: state.withInheritancePartial(sectionName))
                 var inherit: [String: MustacheTemplate] = [:]
                 // parse tokens in section to extract inherited sections
                 for token in sectionTokens {
@@ -282,7 +290,11 @@ extension MustacheTemplate {
                         throw Error.illegalTokenInsideInheritSection
                     }
                 }
-                tokens.append(.partial(name, indentation: String(whiteSpaceBefore), inherits: inherit))
+                if dynamic {
+                    tokens.append(.dynamicNamePartial(name, indentation: String(whiteSpaceBefore), inherits: inherit))
+                } else {
+                    tokens.append(.partial(name, indentation: String(whiteSpaceBefore), inherits: inherit))
+                }
                 whiteSpaceBefore = ""
 
             case "$":
@@ -493,7 +505,7 @@ extension MustacheTemplate {
         return state.newLine && self.hasLineFinished(&parser)
     }
 
-    private static let sectionNameCharsWithoutBrackets = Set<Character>("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.-_?")
-    private static let sectionNameChars = Set<Character>("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.-_?()")
+    private static let sectionNameCharsWithoutBrackets = Set<Character>("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.-_?*")
+    private static let sectionNameChars = Set<Character>("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.-_?()*")
     private static let partialNameChars = Set<Character>("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.-_()")
 }
