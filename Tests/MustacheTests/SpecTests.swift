@@ -63,7 +63,7 @@ final class MustacheSpecTests: XCTestCase {
         struct Test: Decodable {
             let name: String
             let desc: String
-            let data: AnyDecodable
+            var data: AnyDecodable
             let partials: [String: String]?
             let template: String
             let expected: String
@@ -150,6 +150,49 @@ final class MustacheSpecTests: XCTestCase {
         let date = Date()
         for test in spec.tests {
             guard only.contains(test.name) else { continue }
+            XCTAssertNoThrow(try test.run())
+        }
+        print(-date.timeIntervalSinceNow)
+    }
+
+    func testLambdaSpec() async throws {
+        var g = 0
+        let lambdaMap = [
+            "Interpolation": MustacheLambda { "world" },
+            "Interpolation - Expansion": MustacheLambda { "{{planet}}" },
+            "Interpolation - Alternate Delimiters": MustacheLambda { "|planet| => {{planet}}" },
+            "Interpolation - Multiple Calls": MustacheLambda { return MustacheLambda { g += 1; return g }},
+            "Escaping": MustacheLambda { ">" },
+            "Section": MustacheLambda { text in text == "{{x}}" ? "yes" : "no" },
+            "Section - Expansion": MustacheLambda { text in text + "{{planet}}" + text },
+            // Not going to bother implementing this requires pushing alternate delimiters through the context
+            // "Section - Alternate Delimiters": MustacheLambda { text in return text + "{{planet}} => |planet|" + text },
+            "Section - Multiple Calls": MustacheLambda { text in "__" + text + "__" },
+            "Inverted Section": MustacheLambda { false },
+        ]
+        let url = URL(string: "https://raw.githubusercontent.com/mustache/spec/master/specs/~lambdas.json")!
+        #if compiler(>=6.0)
+        let (data, _) = try await URLSession.shared.data(from: url)
+        #else
+        let data = try Data(contentsOf: url)
+        #endif
+        let spec = try JSONDecoder().decode(Spec.self, from: data)
+        // edit spec and replace lambda with Swift lambda
+        let editedSpecTests = spec.tests.compactMap { test -> Spec.Test? in
+            var test = test
+            var newTestData: [String: Any] = [:]
+            guard let dictionary = test.data.value as? [String: Any] else { return nil }
+            for values in dictionary {
+                newTestData[values.key] = values.value
+            }
+            guard let lambda = lambdaMap[test.name] else { return nil }
+            newTestData["lambda"] = lambda
+            test.data = .init(newTestData)
+            return test
+        }
+
+        let date = Date()
+        for test in editedSpecTests {
             XCTAssertNoThrow(try test.run())
         }
         print(-date.timeIntervalSinceNow)

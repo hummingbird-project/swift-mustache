@@ -100,6 +100,15 @@ extension Parser {
         return subString
     }
 
+    /// Read until we hit string index
+    /// - Parameter until: Read until position
+    /// - Returns: The string read from the buffer
+    mutating func read(until: String.Index) -> Substring {
+        let string = self.buffer[self.position..<until]
+        self.position = until
+        return string
+    }
+
     /// Read from buffer until we hit a character. Position after this is of the character we were checking for
     /// - Parameter until: Character to read until
     /// - Throws: .overflow if we hit the end of the buffer before reading character

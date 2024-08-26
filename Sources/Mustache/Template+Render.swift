@@ -54,6 +54,8 @@ extension MustacheTemplate {
                     return template.render(context: context)
                 } else if let renderable = child as? MustacheCustomRenderable {
                     return context.contentType.escapeText(renderable.renderText)
+                } else if let lambda = child as? MustacheLambda {
+                    return self.renderLambda(lambda, parameter: "", context: context)
                 } else {
                     return context.contentType.escapeText(String(describing: child))
                 }
@@ -63,6 +65,8 @@ extension MustacheTemplate {
             if let child = getChild(named: variable, transforms: transforms, context: context) {
                 if let renderable = child as? MustacheCustomRenderable {
                     return renderable.renderText
+                } else if let lambda = child as? MustacheLambda {
+                    return self.renderUnescapedLambda(lambda, parameter: "", context: context)
                 } else {
                     return String(describing: child)
                 }
@@ -70,6 +74,9 @@ extension MustacheTemplate {
 
         case .section(let variable, let transforms, let template):
             let child = self.getChild(named: variable, transforms: transforms, context: context)
+            if let lambda = child as? MustacheLambda {
+                return self.renderSectionLambda(lambda, parameter: template.text, context: context)
+            }
             return self.renderSection(child, with: template, context: context)
 
         case .invertedSection(let variable, let transforms, let template):
@@ -144,8 +151,6 @@ extension MustacheTemplate {
             return array.renderSection(with: template, context: context)
         case let bool as Bool:
             return bool ? template.render(context: context) : ""
-        case let lambda as MustacheLambda:
-            return lambda.run(context.stack.last!, template)
         case let null as MustacheCustomRenderable where null.isNull == true:
             return ""
         case .some(let value):
@@ -176,19 +181,75 @@ extension MustacheTemplate {
         }
     }
 
+    func renderLambda(_ lambda: MustacheLambda, parameter: String, context: MustacheContext) -> String {
+        guard let result = lambda(parameter) else { return "" }
+        if let string = result as? String {
+            do {
+                let newTemplate = try MustacheTemplate(string: context.contentType.escapeText(string))
+                return self.renderSection(context.stack.last, with: newTemplate, context: context)
+            } catch {
+                return ""
+            }
+        } else if let lambda = result as? MustacheLambda {
+            return self.renderLambda(lambda, parameter: parameter, context: context)
+        } else {
+            return context.contentType.escapeText(String(describing: result))
+        }
+    }
+
+    func renderUnescapedLambda(_ lambda: MustacheLambda, parameter: String, context: MustacheContext) -> String {
+        guard let result = lambda(parameter) else { return "" }
+        if let string = result as? String {
+            do {
+                let newTemplate = try MustacheTemplate(string: string)
+                return self.renderSection(context.stack.last, with: newTemplate, context: context)
+            } catch {
+                return ""
+            }
+        } else if let lambda = result as? MustacheLambda {
+            return self.renderLambda(lambda, parameter: parameter, context: context)
+        } else {
+            return String(describing: result)
+        }
+    }
+
+    func renderSectionLambda(_ lambda: MustacheLambda, parameter: String, context: MustacheContext) -> String {
+        guard let result = lambda(parameter) else { return "" }
+        if let string = result as? String {
+            do {
+                let newTemplate = try MustacheTemplate(string: string)
+                return self.renderSection(context.stack.last, with: newTemplate, context: context)
+            } catch {
+                return ""
+            }
+        } else if let lambda = result as? MustacheLambda {
+            return self.renderLambda(lambda, parameter: parameter, context: context)
+        } else {
+            return String(describing: result)
+        }
+    }
+
     /// Get child object from variable name
     func getChild(named name: String, transforms: [String], context: MustacheContext) -> Any? {
         func _getImmediateChild(named name: String, from object: Any) -> Any? {
-            if let customBox = object as? MustacheParent {
-                return customBox.child(named: name)
-            } else {
-                let mirror = Mirror(reflecting: object)
-                return mirror.getValue(forKey: name)
-            }
+            let object = {
+                if let customBox = object as? MustacheParent {
+                    return customBox.child(named: name)
+                } else {
+                    let mirror = Mirror(reflecting: object)
+                    return mirror.getValue(forKey: name)
+                }
+            }()
+            return object
         }
 
         func _getChild(named names: ArraySlice<String>, from object: Any) -> Any? {
             guard let name = names.first else { return object }
+            var object = object
+            if let lambda = object as? MustacheLambda {
+                guard let result = lambda("") else { return nil }
+                object = result
+            }
             guard let childObject = _getImmediateChild(named: name, from: object) else { return nil }
             let names2 = names.dropFirst()
             return _getChild(named: names2, from: childObject)

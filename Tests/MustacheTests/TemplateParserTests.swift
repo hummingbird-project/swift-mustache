@@ -28,12 +28,12 @@ final class TemplateParserTests: XCTestCase {
 
     func testSection() throws {
         let template = try MustacheTemplate(string: "test {{#section}}text{{/section}}")
-        XCTAssertEqual(template.tokens, [.text("test "), .section(name: "section", template: .init([.text("text")]))])
+        XCTAssertEqual(template.tokens, [.text("test "), .section(name: "section", template: .init([.text("text")], text: "text"))])
     }
 
     func testInvertedSection() throws {
         let template = try MustacheTemplate(string: "test {{^section}}text{{/section}}")
-        XCTAssertEqual(template.tokens, [.text("test "), .invertedSection(name: "section", template: .init([.text("text")]))])
+        XCTAssertEqual(template.tokens, [.text("test "), .invertedSection(name: "section", template: .init([.text("text")], text: "text"))])
     }
 
     func testComment() throws {

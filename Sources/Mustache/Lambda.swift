@@ -34,7 +34,7 @@
 ///
 public struct MustacheLambda {
     /// lambda callback
-    public typealias Callback = (Any, MustacheTemplate) -> String
+    public typealias Callback = (String) -> Any?
 
     let callback: Callback
 
@@ -44,7 +44,13 @@ public struct MustacheLambda {
         self.callback = cb
     }
 
-    internal func run(_ object: Any, _ template: MustacheTemplate) -> String {
-        return self.callback(object, template)
+    /// Initialize `MustacheLambda`
+    /// - Parameter cb: function to be called by lambda
+    public init(_ cb: @escaping () -> Any?) {
+        self.callback = { _ in cb() }
+    }
+
+    internal func callAsFunction(_ s: String) -> Any? {
+        return self.callback(s)
     }
 }
