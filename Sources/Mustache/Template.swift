@@ -68,6 +68,7 @@ public struct MustacheTemplate: Sendable {
         case blockDefinition(name: String, template: MustacheTemplate)
         case blockExpansion(name: String, default: MustacheTemplate, indentation: String?)
         case partial(String, indentation: String?, inherits: [String: MustacheTemplate]?)
+        case dynamicNamePartial(String, indentation: String?)
         case contentType(MustacheContentType)
     }
 

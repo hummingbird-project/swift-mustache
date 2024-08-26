@@ -188,4 +188,14 @@ final class MustacheSpecTests: XCTestCase {
             ]
         )
     }
+
+    func testDynamicNamesSpec() async throws {
+        try await self.testSpec(
+            name: "~dynamic-names",
+            ignoring: [
+                "Dynamic Names - Composed Dereferencing",
+                "Dynamic Names - Double Dereferencing",
+            ]
+        )
+    }
 }

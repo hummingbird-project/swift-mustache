@@ -232,15 +232,30 @@ extension MustacheTemplate {
             case ">":
                 // partial
                 parser.unsafeAdvance()
+                // skip whitespace
+                parser.read(while: \.isWhitespace)
+                var dynamic = false
+                if parser.current() == "*" {
+                    parser.unsafeAdvance()
+                    dynamic = true
+                }
                 let name = try parsePartialName(&parser, state: state)
                 if whiteSpaceBefore.count > 0 {
                     tokens.append(.text(String(whiteSpaceBefore)))
                 }
                 if self.isStandalone(&parser, state: state) {
                     setNewLine = true
-                    tokens.append(.partial(name, indentation: String(whiteSpaceBefore), inherits: nil))
+                    if dynamic {
+                        tokens.append(.dynamicNamePartial(name, indentation: String(whiteSpaceBefore)))
+                    } else {
+                        tokens.append(.partial(name, indentation: String(whiteSpaceBefore), inherits: nil))
+                    }
                 } else {
-                    tokens.append(.partial(name, indentation: nil, inherits: nil))
+                    if dynamic {
+                        tokens.append(.dynamicNamePartial(name, indentation: nil))
+                    } else {
+                        tokens.append(.partial(name, indentation: nil, inherits: nil))
+                    }
                 }
                 whiteSpaceBefore = ""
 
