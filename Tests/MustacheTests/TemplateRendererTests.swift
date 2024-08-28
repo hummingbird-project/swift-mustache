@@ -261,6 +261,119 @@ final class TemplateRendererTests: XCTestCase {
         """)
     }
 
+    /// test dynamic names
+    func testMustacheManualDynamicNames() throws {
+        var library = MustacheLibrary()
+        try library.register(
+            "Hello {{>*dynamic}}",
+            named: "main"
+        )
+        try library.register(
+            "everyone!",
+            named: "world"
+        )
+        let object = ["dynamic": "world"]
+        XCTAssertEqual(library.render(object, withTemplate: "main"), "Hello everyone!")
+    }
+
+    /// test block with defaults
+    func testMustacheManualBlocksWithDefaults() throws {
+        let template = try MustacheTemplate(string: """
+        <h1>{{$title}}The News of Today{{/title}}</h1>
+        {{$body}}
+        <p>Nothing special happened.</p>
+        {{/body}}
+
+        """)
+        XCTAssertEqual(template.render([]), """
+        <h1>The News of Today</h1>
+        <p>Nothing special happened.</p>
+
+        """)
+    }
+
+    func testMustacheManualParents() throws {
+        var library = MustacheLibrary()
+        try library.register(
+            """
+            {{<article}}
+            Never shown
+            {{$body}}
+                {{#headlines}}
+                <p>{{.}}</p>
+                {{/headlines}}
+            {{/body}}
+            {{/article}}
+
+            {{<article}}
+            {{$title}}Yesterday{{/title}}
+            {{/article}}
+
+            """,
+            named: "main"
+        )
+        try library.register(
+            """
+            <h1>{{$title}}The News of Today{{/title}}</h1>
+            {{$body}}
+            <p>Nothing special happened.</p>
+            {{/body}}
+
+            """,
+            named: "article"
+        )
+        let object = [
+            "headlines": [
+                "A pug's handler grew mustaches.",
+                "What an exciting day!",
+            ],
+        ]
+        XCTAssertEqual(
+            library.render(object, withTemplate: "main"),
+            """
+            <h1>The News of Today</h1>
+            <p>A pug&#39;s handler grew mustaches.</p>
+            <p>What an exciting day!</p>
+
+            <h1>Yesterday</h1>
+            <p>Nothing special happened.</p>
+
+            """
+        )
+    }
+
+    func testMustacheManualDynamicNameParents() throws {
+        var library = MustacheLibrary()
+        try library.register(
+            """
+            {{<*dynamic}}
+              {{$text}}Hello World!{{/text}}
+            {{/*dynamic}}
+
+            """,
+            named: "dynamic"
+        )
+        try library.register(
+            """
+            {{$text}}Here goes nothing.{{/text}}
+            """,
+            named: "normal"
+        )
+        try library.register(
+            """
+            <b>{{$text}}Here also goes nothing but it's bold.{{/text}}</b>
+            """,
+            named: "bold"
+        )
+        let object = ["dynamic": "bold"]
+        XCTAssertEqual(
+            library.render(object, withTemplate: "dynamic"),
+            """
+            <b>Hello World!</b>
+            """
+        )
+    }
+
     /// test MustacheCustomRenderable
     func testCustomRenderable() throws {
         let template = try MustacheTemplate(string: "{{.}}")

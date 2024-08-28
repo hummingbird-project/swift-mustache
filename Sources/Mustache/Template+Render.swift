@@ -101,6 +101,28 @@ extension MustacheTemplate {
                 return template.render(context: context.withPartial(indented: indentation, inheriting: overrides))
             }
 
+        case .dynamicNamePartial(let name, let indentation, let overrides):
+            let child = self.getChild(named: name, transforms: [], context: context)
+            guard let childName = child as? String else {
+                return ""
+            }
+            if var template = context.library?.getTemplate(named: childName) {
+                #if DEBUG
+                if context.reloadPartials {
+                    guard let filename = template.filename else {
+                        preconditionFailure("Can only use reload if template was generated from a file")
+                    }
+                    do {
+                        guard let partialTemplate = try MustacheTemplate(filename: filename) else { return "Cannot find template at \(filename)" }
+                        template = partialTemplate
+                    } catch {
+                        return "\(error)"
+                    }
+                }
+                #endif
+                return template.render(context: context.withPartial(indented: indentation, inheriting: overrides))
+            }
+
         case .contentType(let contentType):
             context = context.withContentType(contentType)
 
