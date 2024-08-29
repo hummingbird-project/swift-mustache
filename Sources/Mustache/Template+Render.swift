@@ -75,7 +75,7 @@ extension MustacheTemplate {
         case .section(let variable, let transforms, let template):
             let child = self.getChild(named: variable, transforms: transforms, context: context)
             if let lambda = child as? MustacheLambda {
-                return self.renderSectionLambda(lambda, parameter: template.text, context: context)
+                return self.renderUnescapedLambda(lambda, parameter: template.text, context: context)
             }
             return self.renderSection(child, with: template, context: context)
 
@@ -182,50 +182,42 @@ extension MustacheTemplate {
     }
 
     func renderLambda(_ lambda: MustacheLambda, parameter: String, context: MustacheContext) -> String {
-        guard let result = lambda(parameter) else { return "" }
-        if let string = result as? String {
-            do {
-                let newTemplate = try MustacheTemplate(string: context.contentType.escapeText(string))
-                return self.renderSection(context.stack.last, with: newTemplate, context: context)
-            } catch {
-                return ""
+        var lambda = lambda
+        while true {
+            guard let result = lambda(parameter) else { return "" }
+            if let string = result as? String {
+                do {
+                    let newTemplate = try MustacheTemplate(string: context.contentType.escapeText(string))
+                    return self.renderSection(context.stack.last, with: newTemplate, context: context)
+                } catch {
+                    return ""
+                }
+            } else if let lambda2 = result as? MustacheLambda {
+                lambda = lambda2
+                continue
+            } else {
+                return context.contentType.escapeText(String(describing: result))
             }
-        } else if let lambda = result as? MustacheLambda {
-            return self.renderLambda(lambda, parameter: parameter, context: context)
-        } else {
-            return context.contentType.escapeText(String(describing: result))
         }
     }
 
     func renderUnescapedLambda(_ lambda: MustacheLambda, parameter: String, context: MustacheContext) -> String {
-        guard let result = lambda(parameter) else { return "" }
-        if let string = result as? String {
-            do {
-                let newTemplate = try MustacheTemplate(string: string)
-                return self.renderSection(context.stack.last, with: newTemplate, context: context)
-            } catch {
-                return ""
+        var lambda = lambda
+        while true {
+            guard let result = lambda(parameter) else { return "" }
+            if let string = result as? String {
+                do {
+                    let newTemplate = try MustacheTemplate(string: string)
+                    return self.renderSection(context.stack.last, with: newTemplate, context: context)
+                } catch {
+                    return ""
+                }
+            } else if let lambda2 = result as? MustacheLambda {
+                lambda = lambda2
+                continue
+            } else {
+                return String(describing: result)
             }
-        } else if let lambda = result as? MustacheLambda {
-            return self.renderLambda(lambda, parameter: parameter, context: context)
-        } else {
-            return String(describing: result)
-        }
-    }
-
-    func renderSectionLambda(_ lambda: MustacheLambda, parameter: String, context: MustacheContext) -> String {
-        guard let result = lambda(parameter) else { return "" }
-        if let string = result as? String {
-            do {
-                let newTemplate = try MustacheTemplate(string: string)
-                return self.renderSection(context.stack.last, with: newTemplate, context: context)
-            } catch {
-                return ""
-            }
-        } else if let lambda = result as? MustacheLambda {
-            return self.renderLambda(lambda, parameter: parameter, context: context)
-        } else {
-            return String(describing: result)
         }
     }
 
