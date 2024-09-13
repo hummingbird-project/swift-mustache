@@ -28,8 +28,7 @@ public struct MustacheLibrary: Sendable {
     ///
     /// Each template is registered with the name of the file minus its extension. The search through
     /// the folder is recursive and templates in subfolders will be registered with the name `subfolder/template`.
-    /// - Parameter directory: Directory to look for mustache templates
-    /// - Parameter extension: Extension of files to look for
+    /// - Parameter templates: Dictionary of mustache templates
     public init(templates: [String: MustacheTemplate]) {
         self.templates = templates
     }
