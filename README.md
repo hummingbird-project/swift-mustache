@@ -6,8 +6,8 @@ Package for rendering Mustache templates. Mustache is a "logic-less" templating 
 
 Load your templates from the filesystem 
 ```swift
-import Mustache
-let library = MustacheLibrary("folder/my/templates/are/in")
+import HummingbirdMustache
+let library = try HBMustacheLibrary(directory: "folder/my/templates/are/in")
 ```
 This will look for all the files with the extension ".mustache" in the specified folder and subfolders and attempt to load them. Each file is registed with the name of the file (with subfolder, if inside a subfolder) minus the "mustache" extension.
 
