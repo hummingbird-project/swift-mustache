@@ -24,11 +24,10 @@ public struct MustacheLibrary: Sendable {
         self.templates = [:]
     }
 
-    /// Initialize library with contents of folder.
+    /// Initialize library with collection of templates.
     ///
-    /// Each template is registered with the name of the file minus its extension. The search through
-    /// the folder is recursive and templates in subfolders will be registered with the name `subfolder/template`.
-    /// - Parameter templates: Dictionary of mustache templates
+    /// Each template is mapped to a name which can then be used as the partial name.
+    /// - Parameter templates: Dictionary of mustache templates with a String key
     public init(templates: [String: MustacheTemplate]) {
         self.templates = templates
     }
