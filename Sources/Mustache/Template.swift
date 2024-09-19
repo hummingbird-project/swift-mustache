@@ -13,12 +13,14 @@
 //===----------------------------------------------------------------------===//
 
 /// Class holding Mustache template
-public struct MustacheTemplate: Sendable {
+public struct MustacheTemplate: Sendable, CustomStringConvertible {
     /// Initialize template
     /// - Parameter string: Template text
     /// - Throws: MustacheTemplate.Error
     public init(string: String) throws {
-        self.tokens = try Self.parse(string)
+        let template = try Self.parse(string)
+        self.tokens = template.tokens
+        self.text = string
         self.filename = nil
     }
 
@@ -54,12 +56,15 @@ public struct MustacheTemplate: Sendable {
         return self.render(context: .init(object, library: library))
     }
 
-    internal init(_ tokens: [Token]) {
+    internal init(_ tokens: [Token], text: String) {
         self.tokens = tokens
         self.filename = nil
+        self.text = text
     }
 
-    enum Token: Sendable {
+    public var description: String { self.text }
+
+    enum Token: Sendable /* , CustomStringConvertible */ {
         case text(String)
         case variable(name: String, transforms: [String] = [])
         case unescapedVariable(name: String, transforms: [String] = [])
@@ -73,5 +78,6 @@ public struct MustacheTemplate: Sendable {
     }
 
     var tokens: [Token]
+    let text: String
     let filename: String?
 }
