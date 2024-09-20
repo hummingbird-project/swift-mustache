@@ -15,8 +15,7 @@
 /// Lambda function. Can add this to object being rendered to filter contents of objects.
 ///
 /// See http://mustache.github.io/mustache.5.html for more details on
-/// mustache lambdas. Lambdas work slightly differently in HummingbirdMustache though
-/// as they are passed a template representing the contained text and not the raw text
+/// mustache lambdas.
 /// e.g
 /// ```
 /// struct Object {
