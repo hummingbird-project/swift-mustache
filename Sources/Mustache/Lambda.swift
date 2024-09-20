@@ -23,8 +23,8 @@
 ///     let name: String
 ///     let wrapped: MustacheLambda
 /// }
-/// let willy = Object(name: "Willy", wrapped: .init({ object, template in
-///     return "<b>\(template.render(object))</b>"
+/// let willy = Object(name: "Willy", wrapped: .init({ string in
+///     return "<b>\(string)</b>"
 /// }))
 /// let mustache = "{{#wrapped}}{{name}} is awesome.{{/wrapped}}"
 /// let template = try MustacheTemplate(string: mustache)
