@@ -32,15 +32,13 @@ jobs:
     - name: Upload to codecov.io
       uses: codecov/codecov-action@v5
       with:
-        file: info.lcov
+        files: info.lcov
   linux:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     strategy:
       matrix:
         image: ["swift:5.9", "swift:5.10", "swift:6.0"]
-        
-    
     container:
       image: ${{ matrix.image }}
     steps:
@@ -59,7 +57,7 @@ jobs:
     - name: Upload to codecov.io
       uses: codecov/codecov-action@v5
       with:
-        file: info.lcov
+        files: info.lcov
   windows:
     runs-on: windows-latest
     strategy:
