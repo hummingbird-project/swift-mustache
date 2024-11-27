@@ -12,8 +12,9 @@
 //
 //===----------------------------------------------------------------------===//
 
-@testable import Mustache
 import XCTest
+
+@testable import Mustache
 
 final class LibraryTests: XCTestCase {
     func testDirectoryLoad() async throws {
@@ -54,11 +55,13 @@ final class LibraryTests: XCTestCase {
         let mustache = Data("<test>{{#value}}<value>{{.}}</value>{{/value}}</test>".utf8)
         try mustache.write(to: URL(fileURLWithPath: "templates/test.mustache"))
         defer { XCTAssertNoThrow(try fs.removeItem(atPath: "templates/test.mustache")) }
-        let mustache2 = Data("""
-        {{#test}}
-        {{{name}}
-        {{/test2}}
-        """.utf8)
+        let mustache2 = Data(
+            """
+            {{#test}}
+            {{{name}}
+            {{/test2}}
+            """.utf8
+        )
         try mustache2.write(to: URL(fileURLWithPath: "templates/error.mustache"))
         defer { XCTAssertNoThrow(try fs.removeItem(atPath: "templates/error.mustache")) }
 

@@ -21,5 +21,5 @@ public protocol MustacheParent {
 /// Extend dictionary where the key is a string so that it uses the key values to access
 /// it values
 extension Dictionary: MustacheParent where Key == String {
-    public func child(named: String) -> Any? { return self[named] }
+    public func child(named: String) -> Any? { self[named] }
 }

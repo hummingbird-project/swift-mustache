@@ -12,8 +12,9 @@
 //
 //===----------------------------------------------------------------------===//
 
-@testable import Mustache
 import XCTest
+
+@testable import Mustache
 
 final class TemplateParserTests: XCTestCase {
     func testText() throws {

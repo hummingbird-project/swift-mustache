@@ -141,81 +141,103 @@ final class TemplateRendererTests: XCTestCase {
 
     /// variables
     func testMustacheManualVariables() throws {
-        let template = try MustacheTemplate(string: """
-        Hello {{name}}
-        You have just won {{value}} dollars!
-        {{#in_ca}}
-        Well, {{taxed_value}} dollars, after taxes.
-        {{/in_ca}}
-        """)
+        let template = try MustacheTemplate(
+            string: """
+                Hello {{name}}
+                You have just won {{value}} dollars!
+                {{#in_ca}}
+                Well, {{taxed_value}} dollars, after taxes.
+                {{/in_ca}}
+                """
+        )
         let object: [String: Any] = ["name": "Chris", "value": 10000, "taxed_value": 10000 - (10000 * 0.4), "in_ca": true]
-        XCTAssertEqual(template.render(object), """
-        Hello Chris
-        You have just won 10000 dollars!
-        Well, 6000.0 dollars, after taxes.
+        XCTAssertEqual(
+            template.render(object),
+            """
+            Hello Chris
+            You have just won 10000 dollars!
+            Well, 6000.0 dollars, after taxes.
 
-        """)
+            """
+        )
     }
 
     /// test escaped and unescaped text
     func testMustacheManualEscapedText() throws {
-        let template = try MustacheTemplate(string: """
-        *{{name}}
-        *{{age}}
-        *{{company}}
-        *{{{company}}}
-        """)
+        let template = try MustacheTemplate(
+            string: """
+                *{{name}}
+                *{{age}}
+                *{{company}}
+                *{{{company}}}
+                """
+        )
         let object: [String: Any] = ["name": "Chris", "company": "<b>GitHub</b>"]
-        XCTAssertEqual(template.render(object), """
-        *Chris
-        *
-        *&lt;b&gt;GitHub&lt;/b&gt;
-        *<b>GitHub</b>
-        """)
+        XCTAssertEqual(
+            template.render(object),
+            """
+            *Chris
+            *
+            *&lt;b&gt;GitHub&lt;/b&gt;
+            *<b>GitHub</b>
+            """
+        )
     }
 
     /// test dotted names
     func test_MustacheManualDottedNames() throws {
-        let template = try MustacheTemplate(string: """
-        * {{client.name}}
-        * {{age}}
-        * {{client.company.name}}
-        * {{{company.name}}}
-        """)
+        let template = try MustacheTemplate(
+            string: """
+                * {{client.name}}
+                * {{age}}
+                * {{client.company.name}}
+                * {{{company.name}}}
+                """
+        )
         let object: [String: Any] = [
             "client": (
                 name: "Chris & Friends",
                 age: 50
             ),
             "company": [
-                "name": "<b>GitHub</b>",
+                "name": "<b>GitHub</b>"
             ],
         ]
-        XCTAssertEqual(template.render(object), """
-        * Chris &amp; Friends
-        * 
-        * 
-        * <b>GitHub</b>
-        """)
+        XCTAssertEqual(
+            template.render(object),
+            """
+            * Chris &amp; Friends
+            * 
+            * 
+            * <b>GitHub</b>
+            """
+        )
     }
 
     /// test implicit operator
     func testMustacheManualImplicitOperator() throws {
-        let template = try MustacheTemplate(string: """
-        * {{.}}
-        """)
+        let template = try MustacheTemplate(
+            string: """
+                * {{.}}
+                """
+        )
         let object = "Hello!"
-        XCTAssertEqual(template.render(object), """
-        * Hello!
-        """)
+        XCTAssertEqual(
+            template.render(object),
+            """
+            * Hello!
+            """
+        )
     }
 
     /// test lambda
     func test_MustacheManualLambda() throws {
-        let template = try MustacheTemplate(string: """
-        * {{time.hour}}
-        * {{today}}
-        """)
+        let template = try MustacheTemplate(
+            string: """
+                * {{time.hour}}
+                * {{today}}
+                """
+        )
         let object: [String: Any] = [
             "year": 1970,
             "month": 1,
@@ -231,113 +253,151 @@ final class TemplateRendererTests: XCTestCase {
                 return "{{year}}-{{month}}-{{day}}"
             },
         ]
-        XCTAssertEqual(template.render(object), """
-        * 0
-        * 1970-1-1
-        """)
+        XCTAssertEqual(
+            template.render(object),
+            """
+            * 0
+            * 1970-1-1
+            """
+        )
     }
 
     /// test boolean
     func testMustacheManualSectionFalse() throws {
-        let template = try MustacheTemplate(string: """
-        Shown.
-        {{#person}}
-          Never shown!
-        {{/person}}
-        """)
+        let template = try MustacheTemplate(
+            string: """
+                Shown.
+                {{#person}}
+                  Never shown!
+                {{/person}}
+                """
+        )
         let object: [String: Any] = ["person": false]
-        XCTAssertEqual(template.render(object), """
-        Shown.
+        XCTAssertEqual(
+            template.render(object),
+            """
+            Shown.
 
-        """)
+            """
+        )
     }
 
     /// test non-empty lists
     func testMustacheManualSectionList() throws {
-        let template = try MustacheTemplate(string: """
-        {{#repo}}
-          <b>{{name}}</b>
-        {{/repo}}
-        """)
+        let template = try MustacheTemplate(
+            string: """
+                {{#repo}}
+                  <b>{{name}}</b>
+                {{/repo}}
+                """
+        )
         let object: [String: Any] = ["repo": [["name": "resque"], ["name": "hub"], ["name": "rip"]]]
-        XCTAssertEqual(template.render(object), """
-          <b>resque</b>
-          <b>hub</b>
-          <b>rip</b>
+        XCTAssertEqual(
+            template.render(object),
+            """
+              <b>resque</b>
+              <b>hub</b>
+              <b>rip</b>
 
-        """)
+            """
+        )
     }
 
     /// test non-empty lists
     func testMustacheManualSectionList2() throws {
-        let template = try MustacheTemplate(string: """
-        {{#repo}}
-          <b>{{.}}</b>
-        {{/repo}}
-        """)
+        let template = try MustacheTemplate(
+            string: """
+                {{#repo}}
+                  <b>{{.}}</b>
+                {{/repo}}
+                """
+        )
         let object: [String: Any] = ["repo": ["resque", "hub", "rip"]]
-        XCTAssertEqual(template.render(object), """
-          <b>resque</b>
-          <b>hub</b>
-          <b>rip</b>
+        XCTAssertEqual(
+            template.render(object),
+            """
+              <b>resque</b>
+              <b>hub</b>
+              <b>rip</b>
 
-        """)
+            """
+        )
     }
 
     /// test lambdas
     func testMustacheManualSectionLambda() throws {
-        let template = try MustacheTemplate(string: """
-        {{#wrapped}}{{name}} is awesome.{{/wrapped}}
-        """)
+        let template = try MustacheTemplate(
+            string: """
+                {{#wrapped}}{{name}} is awesome.{{/wrapped}}
+                """
+        )
         func wrapped(_ s: String) -> Any? {
-            return "<b>\(s)</b>"
+            "<b>\(s)</b>"
         }
         let object: [String: Any] = ["name": "Willy", "wrapped": MustacheLambda(wrapped)]
-        XCTAssertEqual(template.render(object), """
-        <b>Willy is awesome.</b>
-        """)
+        XCTAssertEqual(
+            template.render(object),
+            """
+            <b>Willy is awesome.</b>
+            """
+        )
     }
 
     /// test setting context object
     func testMustacheManualContextObject() throws {
-        let template = try MustacheTemplate(string: """
-        {{#person?}}
-          Hi {{name}}!
-        {{/person?}}
-        """)
+        let template = try MustacheTemplate(
+            string: """
+                {{#person?}}
+                  Hi {{name}}!
+                {{/person?}}
+                """
+        )
         let object: [String: Any] = ["person?": ["name": "Jon"]]
-        XCTAssertEqual(template.render(object), """
-          Hi Jon!
+        XCTAssertEqual(
+            template.render(object),
+            """
+              Hi Jon!
 
-        """)
+            """
+        )
     }
 
     /// test inverted sections
     func testMustacheManualInvertedSection() throws {
-        let template = try MustacheTemplate(string: """
-        {{#repo}}
-          <b>{{name}}</b>
-        {{/repo}}
-        {{^repo}}
-          No repos :(
-        {{/repo}}
-        """)
+        let template = try MustacheTemplate(
+            string: """
+                {{#repo}}
+                  <b>{{name}}</b>
+                {{/repo}}
+                {{^repo}}
+                  No repos :(
+                {{/repo}}
+                """
+        )
         let object: [String: Any] = ["repo": []]
-        XCTAssertEqual(template.render(object), """
-          No repos :(
+        XCTAssertEqual(
+            template.render(object),
+            """
+              No repos :(
 
-        """)
+            """
+        )
     }
 
     /// test comments
     func testMustacheManualComment() throws {
-        let template = try MustacheTemplate(string: """
-        <h1>Today{{! ignore me }}.</h1>
-        """)
+        let template = try MustacheTemplate(
+            string: """
+                <h1>Today{{! ignore me }}.</h1>
+                """
+        )
         let object: [String: Any] = ["repo": []]
-        XCTAssertEqual(template.render(object), """
-        <h1>Today.</h1>
-        """)
+        XCTAssertEqual(
+            template.render(object),
+            """
+            <h1>Today.</h1>
+            """
+        )
     }
 
     /// test dynamic names
@@ -357,18 +417,23 @@ final class TemplateRendererTests: XCTestCase {
 
     /// test block with defaults
     func testMustacheManualBlocksWithDefaults() throws {
-        let template = try MustacheTemplate(string: """
-        <h1>{{$title}}The News of Today{{/title}}</h1>
-        {{$body}}
-        <p>Nothing special happened.</p>
-        {{/body}}
+        let template = try MustacheTemplate(
+            string: """
+                <h1>{{$title}}The News of Today{{/title}}</h1>
+                {{$body}}
+                <p>Nothing special happened.</p>
+                {{/body}}
 
-        """)
-        XCTAssertEqual(template.render([]), """
-        <h1>The News of Today</h1>
-        <p>Nothing special happened.</p>
+                """
+        )
+        XCTAssertEqual(
+            template.render([]),
+            """
+            <h1>The News of Today</h1>
+            <p>Nothing special happened.</p>
 
-        """)
+            """
+        )
     }
 
     func testMustacheManualParents() throws {
@@ -405,7 +470,7 @@ final class TemplateRendererTests: XCTestCase {
             "headlines": [
                 "A pug's handler grew mustaches.",
                 "What an exciting day!",
-            ],
+            ]
         ]
         XCTAssertEqual(
             library.render(object, withTemplate: "main"),
@@ -474,11 +539,13 @@ final class TemplateRendererTests: XCTestCase {
     }
 
     func testPerformance() throws {
-        let template = try MustacheTemplate(string: """
-        {{#repo}}
-          <b>{{name}}</b>
-        {{/repo}}
-        """)
+        let template = try MustacheTemplate(
+            string: """
+                {{#repo}}
+                  <b>{{name}}</b>
+                {{/repo}}
+                """
+        )
         let object: [String: Any] = ["repo": [["name": "resque"], ["name": "hub"], ["name": "rip"]]]
         let date = Date()
         for _ in 1...10000 {

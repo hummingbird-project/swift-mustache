@@ -131,7 +131,7 @@ struct MustacheContext {
 
     /// return context with sequence info and sequence element added to stack
     func withContentType(_ contentType: MustacheContentType) -> MustacheContext {
-        return .init(
+        .init(
             stack: self.stack,
             sequenceContext: self.sequenceContext,
             indentation: self.indentation,

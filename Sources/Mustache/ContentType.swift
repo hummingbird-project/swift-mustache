@@ -21,14 +21,14 @@ public protocol MustacheContentType: Sendable {
 /// Text content type where no character is escaped
 struct TextContentType: MustacheContentType {
     func escapeText(_ text: String) -> String {
-        return text
+        text
     }
 }
 
 /// HTML content where text is escaped for HTML output
 struct HTMLContentType: MustacheContentType {
     func escapeText(_ text: String) -> String {
-        return text.htmlEscape()
+        text.htmlEscape()
     }
 }
 
@@ -39,7 +39,7 @@ struct HTMLContentType: MustacheContentType {
 /// with `MustacheContentTypes.register`.
 public enum MustacheContentTypes {
     static func get(_ name: String) -> MustacheContentType? {
-        return self.types[name]
+        self.types[name]
     }
 
     /// Register new content type

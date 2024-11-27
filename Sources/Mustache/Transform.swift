@@ -31,13 +31,13 @@ public protocol MustacheTransformable {
     func transform(_ name: String) -> Any?
 }
 
-public extension StringProtocol {
+extension StringProtocol {
     /// Transform String/Substring
     ///
     /// Transforms available are `capitalized`, `lowercased`, `uppercased` and `reversed`
     /// - Parameter name: transform name
     /// - Returns: Result
-    func transform(_ name: String) -> Any? {
+    public func transform(_ name: String) -> Any? {
         switch name {
         case "empty":
             return isEmpty
@@ -209,13 +209,13 @@ extension Dictionary: ComparableSequence where Key: Comparable {
     }
 }
 
-public extension FixedWidthInteger {
+extension FixedWidthInteger {
     /// Transform FixedWidthInteger
     ///
     /// Transforms available are `plusone`, `minusone`, `odd`, `even`
     /// - Parameter name: transform name
     /// - Returns: Result
-    func transform(_ name: String) -> Any? {
+    public func transform(_ name: String) -> Any? {
         switch name {
         case "equalzero":
             return self == 0
