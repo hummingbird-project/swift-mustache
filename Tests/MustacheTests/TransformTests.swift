@@ -17,177 +17,233 @@ import XCTest
 
 final class TransformTests: XCTestCase {
     func testLowercased() throws {
-        let template = try MustacheTemplate(string: """
-        {{ lowercased(name) }}
-        """)
+        let template = try MustacheTemplate(
+            string: """
+                {{ lowercased(name) }}
+                """
+        )
         let object: [String: Any] = ["name": "Test"]
         XCTAssertEqual(template.render(object), "test")
     }
 
     func testUppercased() throws {
-        let template = try MustacheTemplate(string: """
-        {{ uppercased(name) }}
-        """)
+        let template = try MustacheTemplate(
+            string: """
+                {{ uppercased(name) }}
+                """
+        )
         let object: [String: Any] = ["name": "Test"]
         XCTAssertEqual(template.render(object), "TEST")
     }
 
     func testNewline() throws {
-        let template = try MustacheTemplate(string: """
-        {{#repo}}
-        <b>{{name}}</b>
-        {{/repo}}
+        let template = try MustacheTemplate(
+            string: """
+                {{#repo}}
+                <b>{{name}}</b>
+                {{/repo}}
 
-        """)
+                """
+        )
         let object: [String: Any] = ["repo": [["name": "resque"], ["name": "hub"], ["name": "rip"]]]
-        XCTAssertEqual(template.render(object), """
-        <b>resque</b>
-        <b>hub</b>
-        <b>rip</b>
+        XCTAssertEqual(
+            template.render(object),
+            """
+            <b>resque</b>
+            <b>hub</b>
+            <b>rip</b>
 
-        """)
+            """
+        )
     }
 
     func testFirstLast() throws {
-        let template = try MustacheTemplate(string: """
-        {{#repo}}
-        <b>{{#first()}}first: {{/first()}}{{#last()}}last: {{/last()}}{{ name }}</b>
-        {{/repo}}
+        let template = try MustacheTemplate(
+            string: """
+                {{#repo}}
+                <b>{{#first()}}first: {{/first()}}{{#last()}}last: {{/last()}}{{ name }}</b>
+                {{/repo}}
 
-        """)
+                """
+        )
         let object: [String: Any] = ["repo": [["name": "resque"], ["name": "hub"], ["name": "rip"]]]
-        XCTAssertEqual(template.render(object), """
-        <b>first: resque</b>
-        <b>hub</b>
-        <b>last: rip</b>
+        XCTAssertEqual(
+            template.render(object),
+            """
+            <b>first: resque</b>
+            <b>hub</b>
+            <b>last: rip</b>
 
-        """)
+            """
+        )
     }
 
     func testIndex() throws {
-        let template = try MustacheTemplate(string: """
-        {{#repo}}
-        <b>{{#index()}}{{plusone(.)}}{{/index()}}) {{ name }}</b>
-        {{/repo}}
+        let template = try MustacheTemplate(
+            string: """
+                {{#repo}}
+                <b>{{#index()}}{{plusone(.)}}{{/index()}}) {{ name }}</b>
+                {{/repo}}
 
-        """)
+                """
+        )
         let object: [String: Any] = ["repo": [["name": "resque"], ["name": "hub"], ["name": "rip"]]]
-        XCTAssertEqual(template.render(object), """
-        <b>1) resque</b>
-        <b>2) hub</b>
-        <b>3) rip</b>
+        XCTAssertEqual(
+            template.render(object),
+            """
+            <b>1) resque</b>
+            <b>2) hub</b>
+            <b>3) rip</b>
 
-        """)
+            """
+        )
     }
 
     func testDoubleSequenceTransformWorks() throws {
-        let template = try MustacheTemplate(string: """
-        {{#repo}}
-        {{count(reversed(numbers))}}
-        {{/repo}}
+        let template = try MustacheTemplate(
+            string: """
+                {{#repo}}
+                {{count(reversed(numbers))}}
+                {{/repo}}
 
-        """)
+                """
+        )
         let object: [String: Any] = ["repo": ["numbers": [1, 2, 3]]]
-        XCTAssertEqual(template.render(object), """
-        3
+        XCTAssertEqual(
+            template.render(object),
+            """
+            3
 
-        """)
+            """
+        )
     }
 
     func testMultipleTransformWorks() throws {
-        let template = try MustacheTemplate(string: """
-        {{#repo}}
-        {{minusone(plusone(last(reversed(numbers))))}}
-        {{/repo}}
+        let template = try MustacheTemplate(
+            string: """
+                {{#repo}}
+                {{minusone(plusone(last(reversed(numbers))))}}
+                {{/repo}}
 
-        """)
+                """
+        )
         let object: [String: Any] = ["repo": ["numbers": [5, 4, 3]]]
-        XCTAssertEqual(template.render(object), """
-        5
+        XCTAssertEqual(
+            template.render(object),
+            """
+            5
 
-        """)
+            """
+        )
     }
 
     func testNestedTransformWorks() throws {
-        let template = try MustacheTemplate(string: """
-        {{#repo}}
-        {{#uppercased(string)}}{{reversed(.)}}{{/uppercased(string)}}
-        {{/repo}}
+        let template = try MustacheTemplate(
+            string: """
+                {{#repo}}
+                {{#uppercased(string)}}{{reversed(.)}}{{/uppercased(string)}}
+                {{/repo}}
 
-        """)
+                """
+        )
         let object: [String: Any] = ["repo": ["string": "a123a"]]
-        XCTAssertEqual(template.render(object), """
-        A321A
+        XCTAssertEqual(
+            template.render(object),
+            """
+            A321A
 
-        """)
+            """
+        )
     }
 
     func testEvenOdd() throws {
-        let template = try MustacheTemplate(string: """
-        {{#repo}}
-        <b>{{index()}}) {{#even()}}even {{/even()}}{{#odd()}}odd {{/odd()}}{{ name }}</b>
-        {{/repo}}
+        let template = try MustacheTemplate(
+            string: """
+                {{#repo}}
+                <b>{{index()}}) {{#even()}}even {{/even()}}{{#odd()}}odd {{/odd()}}{{ name }}</b>
+                {{/repo}}
 
-        """)
+                """
+        )
         let object: [String: Any] = ["repo": [["name": "resque"], ["name": "hub"], ["name": "rip"]]]
-        XCTAssertEqual(template.render(object), """
-        <b>0) even resque</b>
-        <b>1) odd hub</b>
-        <b>2) even rip</b>
+        XCTAssertEqual(
+            template.render(object),
+            """
+            <b>0) even resque</b>
+            <b>1) odd hub</b>
+            <b>2) even rip</b>
 
-        """)
+            """
+        )
     }
 
     func testReversed() throws {
-        let template = try MustacheTemplate(string: """
-        {{#reversed(repo)}}
-          <b>{{ name }}</b>
-        {{/reversed(repo)}}
+        let template = try MustacheTemplate(
+            string: """
+                {{#reversed(repo)}}
+                  <b>{{ name }}</b>
+                {{/reversed(repo)}}
 
-        """)
+                """
+        )
         let object: [String: Any] = ["repo": [["name": "resque"], ["name": "hub"], ["name": "rip"]]]
-        XCTAssertEqual(template.render(object), """
-          <b>rip</b>
-          <b>hub</b>
-          <b>resque</b>
+        XCTAssertEqual(
+            template.render(object),
+            """
+              <b>rip</b>
+              <b>hub</b>
+              <b>resque</b>
 
-        """)
+            """
+        )
     }
 
     func testArrayIndex() throws {
-        let template = try MustacheTemplate(string: """
-        {{#repo}}
-          <b>{{ index() }}) {{ name }}</b>
-        {{/repo}}
-        """)
+        let template = try MustacheTemplate(
+            string: """
+                {{#repo}}
+                  <b>{{ index() }}) {{ name }}</b>
+                {{/repo}}
+                """
+        )
         let object: [String: Any] = ["repo": [["name": "resque"], ["name": "hub"], ["name": "rip"]]]
-        XCTAssertEqual(template.render(object), """
-          <b>0) resque</b>
-          <b>1) hub</b>
-          <b>2) rip</b>
+        XCTAssertEqual(
+            template.render(object),
+            """
+              <b>0) resque</b>
+              <b>1) hub</b>
+              <b>2) rip</b>
 
-        """)
+            """
+        )
     }
 
     func testArraySorted() throws {
-        let template = try MustacheTemplate(string: """
-        {{#sorted(repo)}}
-          <b>{{ index() }}) {{ . }}</b>
-        {{/sorted(repo)}}
-        """)
+        let template = try MustacheTemplate(
+            string: """
+                {{#sorted(repo)}}
+                  <b>{{ index() }}) {{ . }}</b>
+                {{/sorted(repo)}}
+                """
+        )
         let object: [String: Any] = ["repo": ["resque", "hub", "rip"]]
-        XCTAssertEqual(template.render(object), """
-          <b>0) hub</b>
-          <b>1) resque</b>
-          <b>2) rip</b>
+        XCTAssertEqual(
+            template.render(object),
+            """
+              <b>0) hub</b>
+              <b>1) resque</b>
+              <b>2) rip</b>
 
-        """)
+            """
+        )
     }
 
     func testDictionaryEmpty() throws {
-        let template = try MustacheTemplate(string: """
-        {{#empty(array)}}Array{{/empty(array)}}{{#empty(dictionary)}}Dictionary{{/empty(dictionary)}}
-        """)
+        let template = try MustacheTemplate(
+            string: """
+                {{#empty(array)}}Array{{/empty(array)}}{{#empty(dictionary)}}Dictionary{{/empty(dictionary)}}
+                """
+        )
         let object: [String: Any] = ["array": [], "dictionary": [:]]
         XCTAssertEqual(template.render(object), "ArrayDictionary")
     }
@@ -199,18 +255,22 @@ final class TransformTests: XCTestCase {
     }
 
     func testDictionaryEnumerated() throws {
-        let template = try MustacheTemplate(string: """
-        {{#enumerated(.)}}<b>{{ key }} = {{ value }}</b>{{/enumerated(.)}}
-        """)
+        let template = try MustacheTemplate(
+            string: """
+                {{#enumerated(.)}}<b>{{ key }} = {{ value }}</b>{{/enumerated(.)}}
+                """
+        )
         let object: [String: Any] = ["one": 1, "two": 2]
         let result = template.render(object)
         XCTAssertTrue(result == "<b>one = 1</b><b>two = 2</b>" || result == "<b>two = 2</b><b>one = 1</b>")
     }
 
     func testDictionarySortedByKey() throws {
-        let template = try MustacheTemplate(string: """
-        {{#sorted(.)}}<b>{{ key }} = {{ value }}</b>{{/sorted(.)}}
-        """)
+        let template = try MustacheTemplate(
+            string: """
+                {{#sorted(.)}}<b>{{ key }} = {{ value }}</b>{{/sorted(.)}}
+                """
+        )
         let object: [String: Any] = ["one": 1, "two": 2, "three": 3]
         let result = template.render(object)
         XCTAssertEqual(result, "<b>one = 1</b><b>three = 3</b><b>two = 2</b>")

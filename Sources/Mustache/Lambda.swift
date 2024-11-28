@@ -50,6 +50,6 @@ public struct MustacheLambda {
     }
 
     internal func callAsFunction(_ s: String) -> Any? {
-        return self.callback(s)
+        self.callback(s)
     }
 }

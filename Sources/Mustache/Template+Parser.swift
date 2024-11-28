@@ -327,7 +327,8 @@ extension MustacheTemplate {
                     }
                     if self.isStandalone(&parser, state: state) {
                         setNewLine = true
-                    } else if whiteSpaceBefore.count > 0 {}
+                    } else if whiteSpaceBefore.count > 0 {
+                    }
                     let sectionTemplate = try parse(&parser, state: state.withSectionName(name, newLine: setNewLine))
                     tokens.append(.blockExpansion(name: name, default: sectionTemplate, indentation: String(whiteSpaceBefore)))
                     whiteSpaceBefore = ""
@@ -415,7 +416,7 @@ extension MustacheTemplate {
                     nameParser.unsafeAdvance()
                     // We need to have a `)` for each transform that we've parsed
                     guard nameParser.read(while: ")") + 1 == existing.count,
-                          nameParser.reachedEnd()
+                        nameParser.reachedEnd()
                     else {
                         throw Error.unfinishedName
                     }
@@ -512,7 +513,7 @@ extension MustacheTemplate {
     }
 
     static func isStandalone(_ parser: inout Parser, state: ParserState) -> Bool {
-        return state.newLine && self.hasLineFinished(&parser)
+        state.newLine && self.hasLineFinished(&parser)
     }
 
     private static let sectionNameCharsWithoutBrackets = Set<Character>("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.-_?*")

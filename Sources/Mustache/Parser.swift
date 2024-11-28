@@ -38,7 +38,7 @@ struct Parser {
         self.position = string.startIndex
     }
 
-    var buffer: String { return self._storage.buffer }
+    var buffer: String { self._storage.buffer }
     private(set) var position: String.Index
 }
 
@@ -59,7 +59,10 @@ extension Parser {
     /// - Returns: If current character was the one we expected
     mutating func read(_ char: Character) throws -> Bool {
         let c = try character()
-        guard c == char else { unsafeRetreat(); return false }
+        guard c == char else {
+            unsafeRetreat()
+            return false
+        }
         return true
     }
 
@@ -84,7 +87,10 @@ extension Parser {
     /// - Returns: If current character is in character set
     mutating func read(_ characterSet: Set<Character>) throws -> Bool {
         let c = try character()
-        guard characterSet.contains(c) else { unsafeRetreat(); return false }
+        guard characterSet.contains(c) else {
+            unsafeRetreat()
+            return false
+        }
         return true
     }
 
@@ -236,7 +242,7 @@ extension Parser {
     @discardableResult mutating func read(while: Character) -> Int {
         var count = 0
         while !self.reachedEnd(),
-              unsafeCurrent() == `while`
+            unsafeCurrent() == `while`
         {
             unsafeAdvance()
             count += 1
@@ -250,7 +256,7 @@ extension Parser {
     @discardableResult mutating func read(while keyPath: KeyPath<Character, Bool>) -> Substring {
         let startIndex = self.position
         while !self.reachedEnd(),
-              unsafeCurrent()[keyPath: keyPath]
+            unsafeCurrent()[keyPath: keyPath]
         {
             unsafeAdvance()
         }
@@ -263,7 +269,7 @@ extension Parser {
     @discardableResult mutating func read(while cb: (Character) -> Bool) -> Substring {
         let startIndex = self.position
         while !self.reachedEnd(),
-              cb(unsafeCurrent())
+            cb(unsafeCurrent())
         {
             unsafeAdvance()
         }
@@ -276,7 +282,7 @@ extension Parser {
     @discardableResult mutating func read(while characterSet: Set<Character>) -> Substring {
         let startIndex = self.position
         while !self.reachedEnd(),
-              characterSet.contains(unsafeCurrent())
+            characterSet.contains(unsafeCurrent())
         {
             unsafeAdvance()
         }
@@ -286,13 +292,13 @@ extension Parser {
     /// Return whether we have reached the end of the buffer
     /// - Returns: Have we reached the end
     func reachedEnd() -> Bool {
-        return self.position == self.buffer.endIndex
+        self.position == self.buffer.endIndex
     }
 
     /// Return whether we are at the start of the buffer
     /// - Returns: Are we are the start
     func atStart() -> Bool {
-        return self.position == self.buffer.startIndex
+        self.position == self.buffer.startIndex
     }
 }
 
@@ -378,7 +384,7 @@ extension Parser {
 // unsafe versions without checks
 extension Parser {
     func unsafeCurrent() -> Character {
-        return self.buffer[self.position]
+        self.buffer[self.position]
     }
 
     mutating func unsafeAdvance() {

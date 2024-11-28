@@ -50,7 +50,8 @@ extension AnyDecodable {
             self.init(dictionary.mapValues { $0.value })
         } else {
             throw DecodingError.dataCorruptedError(
-                in: container, debugDescription: "AnyDecodable value cannot be decoded"
+                in: container,
+                debugDescription: "AnyDecodable value cannot be decoded"
             )
         }
     }
@@ -102,7 +103,8 @@ final class MustacheSpecTests: XCTestCase {
                         \(result ?? "nil")
                         expected:
                         \(test.expected)
-                        """)
+                        """
+                    )
                 }
             }
         }
@@ -113,7 +115,8 @@ final class MustacheSpecTests: XCTestCase {
 
     func testSpec(name: String, ignoring: [String] = []) async throws {
         let url = URL(
-            string: "https://raw.githubusercontent.com/mustache/spec/master/specs/\(name).json")!
+            string: "https://raw.githubusercontent.com/mustache/spec/master/specs/\(name).json"
+        )!
         try await testSpec(url: url, ignoring: ignoring)
     }
 
@@ -135,7 +138,8 @@ final class MustacheSpecTests: XCTestCase {
 
     func testSpec(name: String, only: [String]) async throws {
         let url = URL(
-            string: "https://raw.githubusercontent.com/mustache/spec/master/specs/\(name).json")!
+            string: "https://raw.githubusercontent.com/mustache/spec/master/specs/\(name).json"
+        )!
         try await testSpec(url: url, only: only)
     }
 
@@ -161,7 +165,12 @@ final class MustacheSpecTests: XCTestCase {
             "Interpolation": MustacheLambda { "world" },
             "Interpolation - Expansion": MustacheLambda { "{{planet}}" },
             "Interpolation - Alternate Delimiters": MustacheLambda { "|planet| => {{planet}}" },
-            "Interpolation - Multiple Calls": MustacheLambda { return MustacheLambda { g += 1; return g }},
+            "Interpolation - Multiple Calls": MustacheLambda {
+                return MustacheLambda {
+                    g += 1
+                    return g
+                }
+            },
             "Escaping": MustacheLambda { ">" },
             "Section": MustacheLambda { text in text == "{{x}}" ? "yes" : "no" },
             "Section - Expansion": MustacheLambda { text in text + "{{planet}}" + text },
