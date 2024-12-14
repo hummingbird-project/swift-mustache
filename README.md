@@ -25,10 +25,10 @@ Swift-Mustache supports all standard Mustache tags and is fully compliant with t
 
 Swift-Mustache includes some features that are specific to its implementation. Please follow the links below to find out more.
 
-- [Lambda Implementation](https://docs.hummingbird.codes/2.0/documentation/hummingbird/lambdas)
-- [Transforms](https://docs.hummingbird.codes/2.0/documentation/hummingbird/transforms)
-- [Template Inheritance](https://docs.hummingbird.codes/2.0/documentation/hummingbird/templateinheritance)
-- [Pragmas](https://docs.hummingbird.codes/2.0/documentation/hummingbird/pragmas)
+- [Lambda Implementation](https://docs.hummingbird.codes/2.0/documentation/hummingbird/mustachefeatures#Lambdas)
+- [Transforms](https://docs.hummingbird.codes/2.0/documentation/hummingbird/mustachefeatures#Transforms)
+- [Template Inheritance](https://docs.hummingbird.codes/2.0/documentation/hummingbird/mustachefeatures#Template-inheritance-and-parents)
+- [Pragmas](https://docs.hummingbird.codes/2.0/documentation/hummingbird/mustachefeatures#PragmasConfiguration-variables)
 
 ## Documentation
 
