@@ -39,7 +39,7 @@ public struct MustacheLibrary: Sendable {
     /// - Parameter directory: Directory to look for mustache templates
     /// - Parameter extension: Extension of files to look for
     public init(directory: String, withExtension extension: String = "mustache") async throws {
-        self.templates = try await Self.loadTemplates(from: directory, withExtension: `extension`)
+        self.templates = try Self.loadTemplates(from: directory, withExtension: `extension`)
     }
 
     /// Register template under name
