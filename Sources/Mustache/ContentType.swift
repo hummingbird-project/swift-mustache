@@ -50,8 +50,14 @@ public enum MustacheContentTypes {
         self.types[name] = contentType
     }
 
-    static var types: [String: MustacheContentType] = [
+    private static let _types: [String: MustacheContentType] = [
         "HTML": HTMLContentType(),
         "TEXT": TextContentType(),
     ]
+
+    #if compiler(>=6)
+    nonisolated(unsafe) static var types: [String: MustacheContentType] = _types
+    #else
+    static var types: [String: MustacheContentType] = _types
+    #endif
 }
