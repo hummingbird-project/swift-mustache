@@ -13,5 +13,6 @@ let package = Package(
     targets: [
         .target(name: "Mustache", dependencies: []),
         .testTarget(name: "MustacheTests", dependencies: ["Mustache"]),
-    ]
+    ],
+    swiftLanguageModes: [.v5, .version("6")]
 )
