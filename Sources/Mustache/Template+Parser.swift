@@ -493,7 +493,9 @@ extension MustacheTemplate {
 
         switch variable {
         case "CONTENT_TYPE":
-            guard let contentType = MustacheContentTypes.get(String(value)) else { throw Error.unrecognisedConfigVariable }
+            guard let contentType = MustacheContentTypes.shared.get(String(value)) else {
+                throw Error.unrecognisedConfigVariable
+            }
             return .contentType(contentType)
         default:
             throw Error.unrecognisedConfigVariable
