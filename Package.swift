@@ -1,4 +1,4 @@
-// swift-tools-version:6.0
+// swift-tools-version:5.9
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -14,5 +14,5 @@ let package = Package(
         .target(name: "Mustache", dependencies: []),
         .testTarget(name: "MustacheTests", dependencies: ["Mustache"]),
     ],
-    swiftLanguageModes: [.v5, .version("6")]
+    swiftLanguageVersions: [.v5, .version("6")]
 )
