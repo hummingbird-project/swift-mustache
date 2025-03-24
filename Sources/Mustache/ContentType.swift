@@ -12,9 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-#if compiler(>=6.0)
 import Foundation
-#endif
 
 /// Protocol for content types
 public protocol MustacheContentType: Sendable {
@@ -42,14 +40,13 @@ struct HTMLContentType: MustacheContentType {
 /// the content type required. The default available types are `TEXT` and `HTML`. You can register your own
 /// with `MustacheContentTypes.register`.
 public enum MustacheContentTypes {
+
+    private static let lock = NSLock()
+
     static func get(_ name: String) -> MustacheContentType? {
-        #if compiler(>=6.0)
         lock.withLock {
             self.types[name]
         }
-        #else
-        self.types[name]
-        #endif
     }
 
     /// Register new content type
@@ -57,13 +54,9 @@ public enum MustacheContentTypes {
     ///   - contentType: Content type
     ///   - name: String to identify it
     public static func register(_ contentType: MustacheContentType, named name: String) {
-        #if compiler(>=6.0)
         lock.withLock {
             self.types[name] = contentType
         }
-        #else
-        self.types[name] = contentType
-        #endif
     }
 
     private static let _types: [String: MustacheContentType] = [
@@ -72,7 +65,6 @@ public enum MustacheContentTypes {
     ]
 
     #if compiler(>=6.0)
-    private static let lock = NSLock()
     nonisolated(unsafe) static var types: [String: MustacheContentType] = _types
     #else
     static var types: [String: MustacheContentType] = _types
