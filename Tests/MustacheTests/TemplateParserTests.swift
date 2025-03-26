@@ -65,11 +65,7 @@ extension MustacheTemplate {
     }
 }
 
-#if hasFeature(RetroactiveAttribute)
-extension MustacheTemplate: @retroactive Equatable {}
-#else
 extension MustacheTemplate: Equatable {}
-#endif
 
 extension MustacheTemplate.Token {
     public static func == (lhs: MustacheTemplate.Token, rhs: MustacheTemplate.Token) -> Bool {
@@ -92,8 +88,4 @@ extension MustacheTemplate.Token {
     }
 }
 
-#if hasFeature(RetroactiveAttribute)
-extension MustacheTemplate.Token: @retroactive Equatable {}
-#else
 extension MustacheTemplate.Token: Equatable {}
-#endif

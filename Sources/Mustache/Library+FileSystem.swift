@@ -16,7 +16,7 @@ import Foundation
 
 extension MustacheLibrary {
     /// Load templates from a folder
-    static func loadTemplates(from directory: String, withExtension extension: String = "mustache") async throws -> [String: MustacheTemplate] {
+    static func loadTemplates(from directory: String, withExtension extension: String = "mustache") throws -> [String: MustacheTemplate] {
         var directory = directory
         if !directory.hasSuffix("/") {
             directory += "/"

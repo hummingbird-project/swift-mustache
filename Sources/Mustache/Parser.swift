@@ -303,7 +303,7 @@ extension Parser {
 }
 
 /// context used in parser error
-public struct MustacheParserContext {
+public struct MustacheParserContext: Sendable {
     public let line: String
     public let lineNumber: Int
     public let columnNumber: Int

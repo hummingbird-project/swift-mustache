@@ -12,6 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
+import Foundation
+
 /// Protocol for content types
 public protocol MustacheContentType: Sendable {
     /// escape text for this content type eg for HTML replace "<" with "&lt;"
@@ -38,8 +40,13 @@ struct HTMLContentType: MustacheContentType {
 /// the content type required. The default available types are `TEXT` and `HTML`. You can register your own
 /// with `MustacheContentTypes.register`.
 public enum MustacheContentTypes {
+
+    private static let lock = NSLock()
+
     static func get(_ name: String) -> MustacheContentType? {
-        self.types[name]
+        lock.withLock {
+            self.types[name]
+        }
     }
 
     /// Register new content type
@@ -47,11 +54,19 @@ public enum MustacheContentTypes {
     ///   - contentType: Content type
     ///   - name: String to identify it
     public static func register(_ contentType: MustacheContentType, named name: String) {
-        self.types[name] = contentType
+        lock.withLock {
+            self.types[name] = contentType
+        }
     }
 
-    static var types: [String: MustacheContentType] = [
+    private static let _types: [String: MustacheContentType] = [
         "HTML": HTMLContentType(),
         "TEXT": TextContentType(),
     ]
+
+    #if compiler(>=6.0)
+    nonisolated(unsafe) static var types: [String: MustacheContentType] = _types
+    #else
+    static var types: [String: MustacheContentType] = _types
+    #endif
 }
