@@ -48,6 +48,24 @@ final class LibraryTests: XCTestCase {
         XCTAssertEqual(library.render(object, withTemplate: "test"), "<test><value>value1</value><value>value2</value></test>")
     }
 
+    func testPartialInSubfolder() async throws {
+        let fs = FileManager()
+        try? fs.createDirectory(atPath: "templates/subfolder", withIntermediateDirectories: true)
+        let mustache = Data("<test>{{#value}}<value>{{.}}</value>{{/value}}</test>".utf8)
+        try mustache.write(to: URL(fileURLWithPath: "templates/subfolder/test-partial.mustache"))
+        let mustache2 = Data("{{>subfolder/test-partial}}".utf8)
+        try mustache2.write(to: URL(fileURLWithPath: "templates/test.mustache"))
+        defer {
+            XCTAssertNoThrow(try fs.removeItem(atPath: "templates/subfolder/test-partial.mustache"))
+            XCTAssertNoThrow(try fs.removeItem(atPath: "templates/test.mustache"))
+            XCTAssertNoThrow(try fs.removeItem(atPath: "templates"))
+        }
+
+        let library = try await MustacheLibrary(directory: "./templates")
+        let object = ["value": ["value1", "value2"]]
+        XCTAssertEqual(library.render(object, withTemplate: "test"), "<test><value>value1</value><value>value2</value></test>")
+    }
+
     func testLibraryParserError() async throws {
         let fs = FileManager()
         try? fs.createDirectory(atPath: "templates", withIntermediateDirectories: false)
