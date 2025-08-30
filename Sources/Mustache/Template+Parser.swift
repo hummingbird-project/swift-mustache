@@ -441,7 +441,7 @@ extension MustacheTemplate {
     /// parse partial name
     static func parsePartialName(_ parser: inout Parser, state: ParserState) throws -> String {
         parser.read(while: \.isWhitespace)
-        let text = String(parser.read(while: self.sectionNameChars))
+        let text = String(parser.read(while: self.partialNameChars))
         parser.read(while: \.isWhitespace)
         guard try parser.read(string: state.endDelimiter) else { throw Error.unfinishedName }
         return text
@@ -518,5 +518,5 @@ extension MustacheTemplate {
 
     private static let sectionNameCharsWithoutBrackets = Set<Character>("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.-_?*")
     private static let sectionNameChars = Set<Character>("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.-_?()*")
-    private static let partialNameChars = Set<Character>("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.-_()")
+    private static let partialNameChars = Set<Character>("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.-_?()*/")
 }
