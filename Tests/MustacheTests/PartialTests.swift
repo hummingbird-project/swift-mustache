@@ -23,7 +23,7 @@ final class PartialTests: XCTestCase {
             string: """
                 <h2>Names</h2>
                 {{#names}}
-                    {{> user}}
+                    {{> user/bla}}
                 {{/names}}
                 """
         )
@@ -33,7 +33,7 @@ final class PartialTests: XCTestCase {
 
                 """
         )
-        let library = MustacheLibrary(templates: ["base": template, "user": template2])
+        let library = MustacheLibrary(templates: ["base": template, "user/bla": template2])
 
         let object: [String: Any] = ["names": ["john", "adam", "claire"]]
         XCTAssertEqual(
