@@ -297,16 +297,9 @@ extension MustacheTemplate {
 
         return child
     }
-}
-
-private protocol AnyOptional {
-    var anyWrapped: Any? { get }
-}
-extension Optional: AnyOptional {
-    var anyWrapped: Any? { self }
-}
-
-func unwrapIfAnyContainsOptional(_ value: Any) -> Any {
-    guard let opt = value as? AnyOptional else { return value }
-    return opt.anyWrapped ?? value   // nil? keep the original Optional.none
+    
+    private func unwrapIfAnyContainsOptional(_ value: Any) -> Any {
+        guard let opt = value as? AnyOptional else { return value }
+        return opt.anyWrapped ?? value   // nil? keep the original Optional.none
+    }
 }
