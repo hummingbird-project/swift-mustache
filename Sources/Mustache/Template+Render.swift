@@ -297,9 +297,9 @@ extension MustacheTemplate {
 
         return child
     }
-    
+
     private func unwrapIfAnyContainsOptional(_ value: Any) -> Any {
         guard let opt = value as? AnyOptional else { return value }
-        return opt.anyWrapped ?? value   // nil? keep the original Optional.none
+        return opt.anyWrapped ?? value  // nil? keep the original Optional.none
     }
 }
