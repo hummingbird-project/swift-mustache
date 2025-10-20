@@ -57,7 +57,7 @@ extension MustacheTemplate {
                 } else if let lambda = child as? MustacheLambda {
                     return self.renderLambda(lambda, parameter: "", context: context)
                 } else {
-                    return context.contentType.escapeText(String(describing: child))
+                    return context.contentType.escapeText(String(describing: unwrapIfAnyContainsOptional(child)))
                 }
             }
 
@@ -68,7 +68,7 @@ extension MustacheTemplate {
                 } else if let lambda = child as? MustacheLambda {
                     return self.renderUnescapedLambda(lambda, parameter: "", context: context)
                 } else {
-                    return String(describing: child)
+                    return String(describing: unwrapIfAnyContainsOptional(child))
                 }
             }
 
@@ -196,7 +196,7 @@ extension MustacheTemplate {
                 lambda = lambda2
                 continue
             } else {
-                return context.contentType.escapeText(String(describing: result))
+                return context.contentType.escapeText(String(describing: unwrapIfAnyContainsOptional(result)))
             }
         }
     }
@@ -216,7 +216,7 @@ extension MustacheTemplate {
                 lambda = lambda2
                 continue
             } else {
-                return String(describing: result)
+                return String(describing: unwrapIfAnyContainsOptional(result))
             }
         }
     }
@@ -297,4 +297,16 @@ extension MustacheTemplate {
 
         return child
     }
+}
+
+private protocol AnyOptional {
+    var anyWrapped: Any? { get }
+}
+extension Optional: AnyOptional {
+    var anyWrapped: Any? { self }
+}
+
+func unwrapIfAnyContainsOptional(_ value: Any) -> Any {
+    guard let opt = value as? AnyOptional else { return value }
+    return opt.anyWrapped ?? value   // nil? keep the original Optional.none
 }

@@ -537,6 +537,15 @@ final class TemplateRendererTests: XCTestCase {
         XCTAssertEqual(template2.render(testObject), "")
         XCTAssertEqual(template2.render(nullObject), "null")
     }
+    
+    func testTypeErasedOptionalContext() throws {
+        let object = ["name" : "Test" as Any?]
+        
+        let template = try MustacheTemplate(string: "{{name}}")
+        let result = template.render(object)
+        
+        XCTAssertEqual(result, "Test")
+    }
 
     func testPerformance() throws {
         let template = try MustacheTemplate(
