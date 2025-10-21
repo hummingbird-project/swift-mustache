@@ -243,14 +243,14 @@ final class TemplateRendererTests: XCTestCase {
             "month": 1,
             "day": 1,
             "time": MustacheLambda { _ in
-                return (
+                (
                     hour: 0,
                     minute: 0,
                     second: 0
                 )
             },
             "today": MustacheLambda { _ in
-                return "{{year}}-{{month}}-{{day}}"
+                "{{year}}-{{month}}-{{day}}"
             },
         ]
         XCTAssertEqual(
