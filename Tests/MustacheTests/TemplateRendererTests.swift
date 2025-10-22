@@ -243,14 +243,14 @@ final class TemplateRendererTests: XCTestCase {
             "month": 1,
             "day": 1,
             "time": MustacheLambda { _ in
-                return (
+                (
                     hour: 0,
                     minute: 0,
                     second: 0
                 )
             },
             "today": MustacheLambda { _ in
-                return "{{year}}-{{month}}-{{day}}"
+                "{{year}}-{{month}}-{{day}}"
             },
         ]
         XCTAssertEqual(
@@ -536,6 +536,15 @@ final class TemplateRendererTests: XCTestCase {
         XCTAssertEqual(template1.render(nullObject), "")
         XCTAssertEqual(template2.render(testObject), "")
         XCTAssertEqual(template2.render(nullObject), "null")
+    }
+
+    func testTypeErasedOptionalContext() throws {
+        let object = ["name": "Test" as Any?]
+
+        let template = try MustacheTemplate(string: "{{name}}")
+        let result = template.render(object)
+
+        XCTAssertEqual(result, "Test")
     }
 
     func testPerformance() throws {

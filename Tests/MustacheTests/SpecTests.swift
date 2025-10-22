@@ -166,7 +166,7 @@ final class MustacheSpecTests: XCTestCase {
             "Interpolation - Expansion": MustacheLambda { "{{planet}}" },
             "Interpolation - Alternate Delimiters": MustacheLambda { "|planet| => {{planet}}" },
             "Interpolation - Multiple Calls": MustacheLambda {
-                return MustacheLambda {
+                MustacheLambda {
                     g += 1
                     return g
                 }
