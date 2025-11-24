@@ -19,7 +19,7 @@ jobs:
     timeout-minutes: 15
     steps:
     - name: Checkout
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
     - name: SPM tests
       run: swift test --enable-code-coverage
     - name: Convert coverage files
@@ -44,7 +44,7 @@ jobs:
       image: ${{ matrix.image }}
     steps:
     - name: Checkout
-      uses: actions/checkout@v5
+      uses: actions/checkout@v6
     - name: Test
       run: |
         swift test --enable-code-coverage
@@ -70,5 +70,5 @@ jobs:
         with:
           branch: swift-${{ matrix.swift-version }}-release
           tag: ${{ matrix.swift-version }}-RELEASE
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - run: swift test
