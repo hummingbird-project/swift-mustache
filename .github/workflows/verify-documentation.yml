@@ -5,7 +5,7 @@ on:
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}-verifydocs
   cancel-in-progress: true
-  
+
 jobs:
   linux:
     runs-on: ubuntu-latest
@@ -32,4 +32,4 @@ jobs:
         cd documentation
         swift package edit ${GITHUB_REPOSITORY#*/} --path ../package
         ./scripts/build-docc.sh -e
-      
+
