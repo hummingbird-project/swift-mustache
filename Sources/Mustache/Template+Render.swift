@@ -218,15 +218,23 @@ extension MustacheTemplate {
     /// Get child object from variable name
     func getChild(named name: String, transforms: [String], context: MustacheContext) -> Any? {
         func _getImmediateChild(named name: String, from object: Any) -> Any? {
-            let object = {
+            let child = {
+                let object: Any? =
+                    if let custom = object as? MustacheCustomRepresentation {
+                        custom.representation
+                    } else {
+                        object
+                    }
                 if let customBox = object as? MustacheParent {
                     return customBox.child(named: name)
-                } else {
+                } else if let object {
                     let mirror = Mirror(reflecting: object)
                     return mirror.getValue(forKey: name)
+                } else {
+                    return nil
                 }
             }()
-            return object
+            return child
         }
 
         func _getChild(named names: ArraySlice<String>, from object: Any) -> Any? {
@@ -257,7 +265,7 @@ extension MustacheTemplate {
         // the name is split by "." and we use mirror to get the correct child object. If we cannot find
         // the root object we look up the context stack until we can find one with a matching name. The
         // stack climbing can be disabled by prefixing the variable name with a "."
-        let child: Any?
+        var child: Any?
         if name == "." {
             child = context.stack.last!
         } else if name == "", !transforms.isEmpty {
@@ -268,6 +276,10 @@ extension MustacheTemplate {
         } else {
             let nameSplit = name.split(separator: ".").map { String($0) }
             child = _getChildInStack(named: nameSplit[...], from: context.stack)
+        }
+
+        if let custom = child as? MustacheCustomRepresentation {
+            child = custom.representation
         }
 
         // skip transforms if child is already nil
@@ -288,7 +300,6 @@ extension MustacheTemplate {
             // return nil if transform is unsuccessful or has returned nil
             return nil
         }
-
         return child
     }
 
