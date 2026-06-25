@@ -218,15 +218,23 @@ extension MustacheTemplate {
     /// Get child object from variable name
     func getChild(named name: String, transforms: [String], context: MustacheContext) -> Any? {
         func _getImmediateChild(named name: String, from object: Any) -> Any? {
-            let object = {
+            let child = {
+                let object: Any? =
+                    if let custom = object as? MustacheCustomRepresentation {
+                        custom.representation
+                    } else {
+                        object
+                    }
                 if let customBox = object as? MustacheParent {
                     return customBox.child(named: name)
-                } else {
+                } else if let object {
                     let mirror = Mirror(reflecting: object)
                     return mirror.getValue(forKey: name)
+                } else {
+                    return nil
                 }
             }()
-            return object
+            return child
         }
 
         func _getChild(named names: ArraySlice<String>, from object: Any) -> Any? {

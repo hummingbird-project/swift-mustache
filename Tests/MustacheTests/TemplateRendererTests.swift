@@ -567,6 +567,20 @@ final class TemplateRendererTests: XCTestCase {
         XCTAssertEqual(template2.render(none), "empty")
     }
 
+    func testCustomMapRepresentation() throws {
+        struct Object: MustacheCustomRepresentation {
+            let map: [String: String]
+            var representation: Any? { self.map }
+        }
+        let template = try MustacheTemplate(string: "{{name}}")
+        let object = Object(map: ["name": "John"])
+        XCTAssertEqual(template.render(object), "John")
+
+        let template2 = try MustacheTemplate(string: "{{person.name}}")
+        let object2 = ["person": Object(map: ["name": "John"])]
+        XCTAssertEqual(template2.render(object2), "John")
+    }
+
     func testTypeErasedOptionalContext() throws {
         let object = ["name": "Test" as Any?]
 
