@@ -289,6 +289,9 @@ extension MustacheTemplate {
             return nil
         }
 
+        if let custom = child as? MustacheCustomRepresentation {
+            return custom.representation
+        }
         return child
     }
 

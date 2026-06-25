@@ -24,9 +24,16 @@ extension MustacheCustomRenderable {
     var isNull: Bool { false }
 }
 
-/// Extend NSNull to conform to `MustacheCustomRenderable` to avoid outputting `<null>` and returning
+/// Provide a custom representation of an object.
+///
+/// This allows for representation selection at runtime.
+public protocol MustacheCustomRepresentation {
+    /// How object would like to be represented in mustache context
+    var representation: Any? { get }
+}
+
+/// Extend NSNull to conform to `MustacheCustomRepresentation` to avoid outputting `<null>` and returning
 /// a valid response for `isNull`
-extension NSNull: MustacheCustomRenderable {
-    public var renderText: String { "" }
-    public var isNull: Bool { true }
+extension NSNull: MustacheCustomRepresentation {
+    public var representation: Any? { nil }
 }

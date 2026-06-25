@@ -532,6 +532,41 @@ final class TemplateRendererTests: XCTestCase {
         XCTAssertEqual(template2.render(nullObject), "null")
     }
 
+    func testCustomRepresentation() throws {
+        enum Object: MustacheCustomRepresentation {
+            case string(String)
+            case array([String])
+            case none
+
+            var representation: Any? {
+                switch self {
+                case .string(let string): string
+                case .array(let array): array
+                case .none: nil
+                }
+            }
+        }
+        let template = try MustacheTemplate(string: "{{.}}")
+        let template1 = try MustacheTemplate(string: "{{#.}}{{.}}{{/.}}")
+        let template2 = try MustacheTemplate(string: "{{^.}}empty{{/.}}")
+        let string = Object.string("test")
+        let array = Object.array(["test1", "test2"])
+        let emptyArray = Object.array([])
+        let none = Object.none
+        XCTAssertEqual(template.render(string), "test")
+        XCTAssertEqual(template.render(array), "[&quot;test1&quot;, &quot;test2&quot;]")
+        XCTAssertEqual(template.render(emptyArray), "[]")
+        XCTAssertEqual(template.render(none), "")
+        XCTAssertEqual(template1.render(string), "test")
+        XCTAssertEqual(template1.render(array), "test1test2")
+        XCTAssertEqual(template1.render(emptyArray), "")
+        XCTAssertEqual(template1.render(none), "")
+        XCTAssertEqual(template2.render(string), "")
+        XCTAssertEqual(template2.render(array), "")
+        XCTAssertEqual(template2.render(emptyArray), "empty")
+        XCTAssertEqual(template2.render(none), "empty")
+    }
+
     func testTypeErasedOptionalContext() throws {
         let object = ["name": "Test" as Any?]
 
