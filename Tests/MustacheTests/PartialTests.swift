@@ -237,4 +237,33 @@ final class PartialTests: XCTestCase {
             """
         )
     }
+
+    func testInheritanceInsideTransformSection() throws {
+        var library = MustacheLibrary()
+        try library.register(
+            """
+            <h1>{{$title}}{{/title}}</h1>
+            <p>{{$caption}}{{/caption}}</p>
+            """,
+            named: "section-header"
+        )
+        try library.register(
+            """
+            {{^empty(items)}}
+            {{<section-header}}
+            {{$caption}}Exclusive partners{{/caption}}
+            {{$title}}Cornerstone Relationships{{/title}}
+            {{/section-header}}
+            {{/empty(items)}}
+            """,
+            named: "template"
+        )
+        XCTAssertEqual(
+            library.render(["items": ["Content"]], withTemplate: "template"),
+            """
+            <h1>Cornerstone Relationships</h1>
+            <p>Exclusive partners</p>
+            """
+        )
+    }
 }
