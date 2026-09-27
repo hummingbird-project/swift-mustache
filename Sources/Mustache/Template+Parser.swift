@@ -87,6 +87,7 @@ extension MustacheTemplate {
         func withInheritancePartial(_ name: String) -> ParserState {
             var newValue = self
             newValue.sectionName = name
+            newValue.sectionTransforms = []
             newValue.flags.insert([.newLine, .isPartialDefinition, .isPartialDefinitionTopLevel])
             return newValue
         }

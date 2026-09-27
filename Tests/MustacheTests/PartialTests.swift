@@ -237,4 +237,51 @@ final class PartialTests: XCTestCase {
             """
         )
     }
+
+    func testInheritanceNestedInTransformedSection() throws {
+        var library = MustacheLibrary()
+        try library.register(
+            """
+            <div>{{$caption}}{{/caption}} {{$title}}{{/title}}</div>
+            """,
+            named: "section-header"
+        )
+        try library.register(
+            """
+            {{^empty(items)}}
+            {{<section-header}}
+            {{$caption}}Foo{{/caption}}
+            {{$title}}Bar{{/title}}
+            {{/section-header}}
+            {{/empty(items)}}
+            """,
+            named: "page"
+        )
+
+        XCTAssertEqual(
+            library.render(["items": ["image"]], withTemplate: "page"),
+            "<div>Foo Bar</div>"
+        )
+    }
+
+    func testInheritanceWithQualifiedName() throws {
+        var library = MustacheLibrary()
+        try library.register(
+            "<div>{{$title}}{{/title}}</div>",
+            named: "module.section-header"
+        )
+        try library.register(
+            """
+            {{< module.section-header}}
+            {{$title}}Foo{{/title}}
+            {{/module.section-header}}
+            """,
+            named: "page"
+        )
+
+        XCTAssertEqual(
+            library.render([:], withTemplate: "page"),
+            "<div>Foo</div>"
+        )
+    }
 }
